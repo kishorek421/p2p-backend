@@ -41,10 +41,15 @@ import {
 import CustomSelect from "@/components/CustomSelect";
 import { ApiResponseModel, DropdownModel, ErrorModel } from "@/models/common";
 import { CustomerLeadDetailsModel } from "@/models/customers";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { Button, ButtonText } from "@/components/ui/button";
 
 const RegistrationScreen = () => {
+
+  const { customerLeadId } = useLocalSearchParams();
+
+  console.log(customerLeadId === "null");
+  
   // options
   // configurations
   const [typesOfOrg, setTypesOfOrg] = useState<ConfigurationModel[]>([]);
@@ -256,6 +261,7 @@ const RegistrationScreen = () => {
     customerLeadDetailsModel.stateId = selectedState?.value;
     customerLeadDetailsModel.countryId = selectedCountry?.value;
     customerLeadDetailsModel.isCustomerLead = isLead;
+    customerLeadDetailsModel.customerLeadId = customerLeadDetailsModel.id;
 
     console.log(customerLeadDetailsModel);
 
@@ -284,7 +290,7 @@ const RegistrationScreen = () => {
         console.log(response.data.data);
       })
       .catch((e) => {
-        // console.error(e.response);
+        console.error(e.response?.data);
         let errors = e.response?.data?.errors;
         if (errors) {
           console.error("errors -> ", errors);
@@ -355,7 +361,9 @@ const RegistrationScreen = () => {
         <ScrollView>
           <Box className="p-4 mt-3">
             <VStack>
-              <Text className="text-2xl font-bold">Launch your experience</Text>
+              <Text className="text-2xl font-bold">
+                Launch your experience 🚀
+              </Text>
               <Text className="color-gray-400 text-sm mt-1">
                 Let's explore more about you
               </Text>

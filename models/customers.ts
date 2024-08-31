@@ -49,6 +49,7 @@ export interface CustomerLeadDetailsModel {
   areaId?: string;
   onBoardingStatusDetails?: ConfigurationModel;
   isCustomerLead?: boolean;
+  customerLeadId?: string;
 }
 
 export interface CustomerDetailsModel {

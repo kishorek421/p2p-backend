@@ -62,7 +62,7 @@ const LoginScreen = () => {
             <Text className="mt-2 text-center text-sm">
               Don't have a account?{" "}
               <Link
-                href="/registration"
+                href="/registration/null"
                 className="color-secondary-950 font-bold underline"
               >
                 Register Now

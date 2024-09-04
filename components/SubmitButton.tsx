@@ -13,7 +13,7 @@ const SubmitButton = ({ isLoading, onPress, btnText }: SubmitButtonProps) => {
       onPress={onPress}
       disabled={isLoading}
     >
-      <ButtonText >{btnText}</ButtonText>
+      <ButtonText>{btnText}</ButtonText>
       {isLoading && <ButtonSpinner className="ms-2 text-white" />}
     </Button>
   );

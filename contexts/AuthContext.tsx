@@ -1,9 +1,8 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
-import api from "../services/api";
 import { useRouter } from "expo-router";
 import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
-import { GET_CUSTOMER_LEAD_DETAILS, LOGIN } from "@/constants/api_endpoints";
-import { getItem, removeItem, setItem } from "@/utils/secure_store";
+import { getItem, removeItem } from "@/utils/secure_store";
+import { ThemeProvider } from "@react-navigation/native";
 
 export const AuthContext = createContext({});
 
@@ -20,33 +19,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const loadUser = async () => {
       const token = await getItem(AUTH_TOKEN_KEY);
       if (token) {
-        try {
-          const response = await api.get(GET_CUSTOMER_LEAD_DETAILS); // Replace with your own endpoint
-          setUser(response.data);
-        } catch (error) {
-          console.error("Failed to fetch user:", error);
-        }
+        // try {
+        //   const response = await api.get(GET_CUSTOMER_LEAD_DETAILS); // Replace with your own endpoint
+        //   setUser(response.data);
+        // } catch (error) {
+        //   console.error("Failed to fetch user:", error);
+        // }
+        router.replace({ pathname: "/(root)/home" });
       } else {
         logout();
       }
       setLoading(false);
     };
 
-    // loadUser();
+    loadUser();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    try {
-      const response = await api.post(LOGIN, { email, password });
-      await setItem(AUTH_TOKEN_KEY, response.data.token);
-      setUser(response.data.user);
-      // Redirect to the home screen after login
-      router.replace({ pathname: "./home" });
-    } catch (error) {
-      console.error("Login failed:", error);
-      throw error;
-    }
-  };
+  // const login = async (email: string, password: string) => {
+  //   try {
+  //     const response = await api.post(LOGIN, { email, password });
+  //     await setItem(AUTH_TOKEN_KEY, response.data.token);
+  //     setUser(response.data.user);
+  //     // Redirect to the home screen after login
+  //     router.replace({ pathname: "./home" });
+  //   } catch (error) {
+  //     console.error("Login failed:", error);
+  //     throw error;
+  //   }
+  // };
 
   const logout = async () => {
     await removeItem(AUTH_TOKEN_KEY);
@@ -56,8 +56,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, loading, logout }}>
+      <ThemeProvider
+        value={{
+          dark: false,
+          colors: {
+            primary: "#009c68",
+            background: "#f2f2f2",
+            card: "#fff",
+            text: "#000",
+            border: "",
+            notification: "",
+          },
+        }}
+      >
+        {children}
+      </ThemeProvider>
     </AuthContext.Provider>
   );
 };

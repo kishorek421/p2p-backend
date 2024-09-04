@@ -25,11 +25,7 @@ const ContentLayout = ({
       <Text className="color-gray-500 mt-1 text-sm">
         How can we assist you today?
       </Text>
-      <Card
-        size="md"
-        variant="elevated"
-        className="mt-8 pb-0 ps-4 rounded-2xl "
-      >
+      <Card size="md" variant="elevated" className="mt-8 pb-0 ps-4 rounded-2xl">
         <HStack>
           <VStack className="w-44 justify-evenly">
             <VStack>

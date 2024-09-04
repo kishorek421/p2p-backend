@@ -10,7 +10,7 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { ConfigurationModel } from "@/models/configurations";
 import api from "@/services/api";
 import {
@@ -43,13 +43,14 @@ import { ApiResponseModel, DropdownModel, ErrorModel } from "@/models/common";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Button, ButtonText } from "@/components/ui/button";
+import ImagePickerComponent from "@/components/ImagePickerComponent";
+import { Image } from "react-native";
+import Icon from "react-native-vector-icons/AntDesign";
+import { getFileName } from "@/utils/helper";
 
 const RegistrationScreen = () => {
-
   const { customerLeadId } = useLocalSearchParams();
 
-  console.log(customerLeadId === "null");
-  
   // options
   // configurations
   const [typesOfOrg, setTypesOfOrg] = useState<ConfigurationModel[]>([]);
@@ -89,6 +90,12 @@ const RegistrationScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const [errors, setErrors] = useState<ErrorModel[]>([]);
+
+  const bottomSheetRef = useRef(null);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const [assetImage, setAssetImage] = useState("");
 
   useEffect(() => {
     const loadTypesOfOrg = () => {
@@ -250,9 +257,18 @@ const RegistrationScreen = () => {
     loadCustomerLeadDetails();
   }, [router]);
 
+  const toggleImagePicker = () => {
+    setIsModalVisible(!isModalVisible);
+    if (!isModalVisible) {
+      bottomSheetRef.current?.show();
+    } else {
+      bottomSheetRef.current?.hide();
+    }
+  };
+
   const updateCustomerLeadDetails = () => {
     setIsLoading(true);
-    customerLeadDetailsModel.typeOfOrgId = selectedTypeOfOrg.id;
+    customerLeadDetailsModel.type_of_org = selectedTypeOfOrg.id;
     customerLeadDetailsModel.categoryOfOrgId = selectedCategoryOfOrg.id;
     customerLeadDetailsModel.sizeOfOrgId = selectedSizeOfOrg.id;
     customerLeadDetailsModel.pincodeId = selectedPincode?.value;
@@ -276,6 +292,13 @@ const RegistrationScreen = () => {
         formData.append(key as string, value as any); // Type assertion here
       }
     });
+
+    formData.append(
+      "orgImageFile",
+      new File([assetImage], getFileName(assetImage, true), {
+        type: "image/jpg",
+      }),
+    );
 
     setErrors([]);
 
@@ -492,6 +515,64 @@ const RegistrationScreen = () => {
                 Organization Details
               </Text>
               <VStack className="gap-4 mt-3">
+                <FormControl
+                  isInvalid={isFormFieldInValid("orgImage").length > 0}
+                >
+                  <FormControlLabel className="mb-1">
+                    <FormControlLabelText>
+                      Organization Image
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <ImagePickerComponent
+                    onImagePicked={(uri: string) => {
+                      setAssetImage(uri);
+                    }}
+                    setIsModalVisible={setIsModalVisible}
+                    bottomSheetRef={bottomSheetRef}
+                  />
+                  {assetImage ? (
+                    <View>
+                      <Image
+                        source={{ uri: assetImage }}
+                        className="w-full h-36 rounded-xl absolute"
+                      />
+                      <View className="w-full flex justify-center items-center gap-4 h-36 bg-black/40 rounded-xl">
+                        <Button
+                          className="bg-secondary-950 w-36"
+                          onPress={() => toggleImagePicker()}
+                        >
+                          <ButtonText>Choose</ButtonText>
+                          <Icon
+                            name="upload"
+                            className="ms-2"
+                            color="white"
+                            size={18}
+                          />
+                        </Button>
+                      </View>
+                    </View>
+                  ) : (
+                    <View className="w-full flex justify-center items-center gap-4 h-36 bg-white rounded-xl">
+                      <Button
+                        className="bg-secondary-950 w-36"
+                        onPress={() => toggleImagePicker()}
+                      >
+                        <ButtonText>Choose</ButtonText>
+                        <Icon
+                          name="upload"
+                          className="ms-2"
+                          color="white"
+                          size={18}
+                        />
+                      </Button>
+                    </View>
+                  )}
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {isFormFieldInValid("orgImage")}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
                 <FormControl
                   isInvalid={isFormFieldInValid("orgName").length > 0}
                 >

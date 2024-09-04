@@ -41,7 +41,8 @@ export interface CustomerLeadDetailsModel {
   areaDetails?: AreaListItemModel;
   categoryOfOrgId?: string;
   sizeOfOrgId?: string;
-  typeOfOrgId?: string;
+  // typeOfOrgId?: string;
+  type_of_org?: string;
   cityId?: string;
   stateId?: string;
   countryId?: string;

@@ -19,20 +19,19 @@ import {
 } from "@/components/ui/form-control";
 import CustomSelect from "@/components/CustomSelect";
 import { DropdownModel, ErrorModel } from "@/models/common";
-import { isFormFieldInValid } from "@/utils/helper";
+import { getFileName, isFormFieldInValid } from "@/utils/helper";
 import { useLocalSearchParams } from "expo-router";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
-import { Modalize } from "react-native-modalize";
-import { Image, Text, View } from "react-native";
+import { Text } from "react-native";
 import { Button, ButtonText } from "@/components/ui/button";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import AntIcon from "react-native-vector-icons/AntDesign";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { RaiseTicketRequestModel } from "@/models/tickets";
 import api from "@/services/api";
-import SingleImagePickerComponent from "@/components/SingleImagePickerComponent";
 import { HStack } from "@/components/ui/hstack";
 import SubmitButton from "@/components/SubmitButton";
+import ImagePickerComponent from "@/components/ImagePickerComponent";
 
 const RaiseTicketScreen = () => {
   const [assetsInUse, setAssetsInUse] = useState<AssetInUseListItemModel[]>([]);
@@ -114,16 +113,6 @@ const RaiseTicketScreen = () => {
     }
   };
 
-  const getFileName = (uri: string, isFullName = false) => {
-    const splits = uri.split("/");
-    const fileName = splits[splits.length - 1];
-    return isFullName
-      ? fileName
-      : fileName.length > 17
-        ? fileName.substring(17) + "..."
-        : fileName;
-  };
-
   const raiseTicket = () => {
     raiseTicketModel.assetInUse = selectedAssetInUse?.value;
     raiseTicketModel.issueType = selectedIssueType?.value;
@@ -156,7 +145,7 @@ const RaiseTicketScreen = () => {
       .then((response) => {
         const uploadedAssetImages = response.data.data;
         console.log("uploadedAssetImages", uploadedAssetImages);
-        
+
         if (uploadedAssetImages) {
           let ticketData = {
             assetInUseId: selectedAssetInUse?.value,
@@ -363,7 +352,7 @@ const RaiseTicketScreen = () => {
           isLoading={isLoading}
         />
       </VStack>
-      <SingleImagePickerComponent
+      <ImagePickerComponent
         onImagePicked={(uri) => {
           setAssetImages((prevState) => [...prevState, uri]);
         }}

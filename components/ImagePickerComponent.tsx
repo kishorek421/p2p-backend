@@ -10,13 +10,13 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import BottomSheet from "./BottomSheet";
 
-type SingleImagePickerComponentProps = {
+type ImagePickerComponentProps = {
   onImagePicked: (uri: string) => void;
   setIsModalVisible: any;
   bottomSheetRef: any;
 };
 
-const SingleImagePickerComponent: React.FC<SingleImagePickerComponentProps> = ({
+const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   onImagePicked,
   setIsModalVisible,
   bottomSheetRef,
@@ -123,4 +123,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SingleImagePickerComponent;
+export default ImagePickerComponent;

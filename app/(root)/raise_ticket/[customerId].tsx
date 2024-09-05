@@ -20,7 +20,7 @@ import {
 import CustomSelect from "@/components/CustomSelect";
 import { DropdownModel, ErrorModel } from "@/models/common";
 import { getFileName, isFormFieldInValid } from "@/utils/helper";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useNavigation } from "expo-router";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { Text } from "react-native";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -54,7 +54,15 @@ const RaiseTicketScreen = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  const navigation = useNavigation();
+
   useEffect(() => {
+    navigation.setOptions({
+      headerLeftContainerStyle: {
+        paddingStart: 10,
+      },
+    });
+
     const loadAssetsInUse = () => {
       let params = `customerId=${customerId}`;
       api
@@ -79,7 +87,7 @@ const RaiseTicketScreen = () => {
 
     loadAssetsInUse();
     loadIssueTypes();
-  }, []);
+  }, [navigation]);
 
   const setSelectedDropdown = (type: string, e: any) => {
     switch (type) {

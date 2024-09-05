@@ -135,7 +135,7 @@ const LoginScreen = () => {
               onPress={login}
             />
             <Text className="mt-2 text-center text-sm">
-              Don't have a account?{" "}
+              Don't have a account?
               <Link
                 href="/registration/null"
                 className="color-secondary-950 font-bold underline"

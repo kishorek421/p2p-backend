@@ -2,10 +2,21 @@ import RecentTicketHistoryLayout from "@/components/home/RecentTicketHistoryLayo
 import { VStack } from "@/components/ui/vstack";
 import { Button, ButtonText } from "@/components/ui/button";
 import Icon from "react-native-vector-icons/AntDesign";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useEffect } from "react";
 
 const TicketsHistoryScreen = () => {
   const { customerId } = useLocalSearchParams();
+
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerLeftContainerStyle: {
+        paddingStart: 10,
+      },
+    });
+  }, [navigation]);
 
   return (
     <VStack>

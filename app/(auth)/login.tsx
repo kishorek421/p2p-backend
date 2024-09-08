@@ -12,13 +12,16 @@ import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { LOGIN } from "@/constants/api_endpoints";
+import { GET_CUSTOMER_LEAD_DETAILS, LOGIN } from "@/constants/api_endpoints";
 import api from "@/services/api";
-import { ErrorModel } from "@/models/common";
+import { ApiResponseModel, ErrorModel } from "@/models/common";
 import { isFormFieldInValid } from "@/utils/helper";
 import SubmitButton from "@/components/SubmitButton";
 import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/storage_keys";
 import { setItem } from "@/utils/secure_store";
+import Toast from "react-native-toast-message";
+import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
+import { CustomerLeadDetailsModel } from "@/models/customers";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -43,15 +46,43 @@ const LoginScreen = () => {
     api
       .post(LOGIN, data)
       .then(async (response) => {
-        console.log(response.data.data);
-        let data = response.data.data;
-        if (data) {
-          await setItem(AUTH_TOKEN_KEY, data.token);
-          await setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+        let loginData = response.data.data;
+        console.log("loginData ", loginData);
 
-          router.replace({ pathname: "/(root)/home" });
+        await setItem(AUTH_TOKEN_KEY, loginData.token);
+        await setItem(REFRESH_TOKEN_KEY, loginData.refreshToken);
+        
+        if (loginData) {
+          try {
+            let leadResponse = await api.get<
+              ApiResponseModel<CustomerLeadDetailsModel>
+            >(GET_CUSTOMER_LEAD_DETAILS);
+            let data = leadResponse.data.data ?? {};
+            console.log("customerData", data);
+            
+            if (data && data.id) {
+
+
+              let leadStatus = data.onBoardingStatusDetails?.key;
+
+              if (leadStatus === CUSTOMER_LEAD_ACTIVE) {
+                router.replace({ pathname: "/home" });
+              } else {
+                router.replace({
+                  pathname: "/(auth)/registration/[customerLeadId]",
+                  params: { customerLeadId: data.id },
+                });
+              }
+
+              setIsLoading(false);
+            }
+          } catch (e) {
+            console.error(e);
+            setIsLoading(false);
+          }
+        } else {
+          setIsLoading(false);
         }
-        setIsLoading(false);
       })
       .catch((e) => {
         console.error(e);
@@ -135,7 +166,7 @@ const LoginScreen = () => {
               onPress={login}
             />
             <Text className="mt-2 text-center text-sm">
-              Don't have a account?
+              Don't have a account?{" "}
               <Link
                 href="/registration/null"
                 className="color-secondary-950 font-bold underline"

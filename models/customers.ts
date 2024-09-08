@@ -39,10 +39,13 @@ export interface CustomerLeadDetailsModel {
   countryDetails?: CountryListItemModel;
   pincodeDetails?: PincodeListItemModel;
   areaDetails?: AreaListItemModel;
-  categoryOfOrgId?: string;
-  sizeOfOrgId?: string;
+  // categoryOfOrgId?: string;
+  categoryOfOrg?: string;
+  sizeOfOrg?: string;
+  // sizeOfOrgId?: string;
+  typeOfOrg?: string;
   // typeOfOrgId?: string;
-  type_of_org?: string;
+  // type_of_org?: string;
   cityId?: string;
   stateId?: string;
   countryId?: string;

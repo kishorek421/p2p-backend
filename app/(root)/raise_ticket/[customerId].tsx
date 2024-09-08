@@ -20,7 +20,7 @@ import {
 import CustomSelect from "@/components/CustomSelect";
 import { DropdownModel, ErrorModel } from "@/models/common";
 import { getFileName, isFormFieldInValid } from "@/utils/helper";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { Text } from "react-native";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -32,6 +32,7 @@ import api from "@/services/api";
 import { HStack } from "@/components/ui/hstack";
 import SubmitButton from "@/components/SubmitButton";
 import ImagePickerComponent from "@/components/ImagePickerComponent";
+import Toast from "react-native-toast-message";
 
 const RaiseTicketScreen = () => {
   const [assetsInUse, setAssetsInUse] = useState<AssetInUseListItemModel[]>([]);
@@ -167,6 +168,11 @@ const RaiseTicketScreen = () => {
             .then((response) => {
               console.log(response.data.data);
               setIsLoading(false);
+              Toast.show({
+                type: "success",
+                text1: "Ticket Created Sucessfully",
+              });
+              router.back();
             })
             .catch((e) => {
               // console.error(e.response);

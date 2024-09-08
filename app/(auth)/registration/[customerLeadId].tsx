@@ -47,6 +47,7 @@ import ImagePickerComponent from "@/components/ImagePickerComponent";
 import { Image } from "react-native";
 import Icon from "react-native-vector-icons/AntDesign";
 import { getFileName } from "@/utils/helper";
+import Toast from "react-native-toast-message";
 
 const RegistrationScreen = () => {
   const { customerLeadId } = useLocalSearchParams();
@@ -268,9 +269,9 @@ const RegistrationScreen = () => {
 
   const updateCustomerLeadDetails = () => {
     setIsLoading(true);
-    customerLeadDetailsModel.type_of_org = selectedTypeOfOrg.id;
-    customerLeadDetailsModel.categoryOfOrgId = selectedCategoryOfOrg.id;
-    customerLeadDetailsModel.sizeOfOrgId = selectedSizeOfOrg.id;
+    customerLeadDetailsModel.typeOfOrg = selectedTypeOfOrg.id;
+    customerLeadDetailsModel.categoryOfOrg = selectedCategoryOfOrg.id;
+    customerLeadDetailsModel.sizeOfOrg = selectedSizeOfOrg.id;
     customerLeadDetailsModel.pincodeId = selectedPincode?.value;
     customerLeadDetailsModel.areaId = selectedArea?.value;
     customerLeadDetailsModel.cityId = selectedCity?.value;
@@ -311,6 +312,13 @@ const RegistrationScreen = () => {
       .then((response) => {
         // router.push({pathname: ""});
         console.log(response.data.data);
+        Toast.show({
+          type: "success",
+          text1: "Check your email",
+          text2: "Crendential have been sent to your email",
+        });
+        setIsLoading(false);
+        router.replace("/(auth)/login");
       })
       .catch((e) => {
         console.error(e.response?.data);

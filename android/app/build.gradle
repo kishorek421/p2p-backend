@@ -121,7 +121,7 @@ android {
         applicationId 'com.go_desk_workplace.go_desk_workplace'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 3
+        versionCode 1
         versionName "1.0.0"
     }
     signingConfigs {

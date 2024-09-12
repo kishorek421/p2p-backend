@@ -17,6 +17,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const loadUser = async () => {
+      // router.replace({ pathname: "/route/map_view_screen" });
       const token = await getItem(AUTH_TOKEN_KEY);
       if (token) {
         // try {

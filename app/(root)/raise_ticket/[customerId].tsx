@@ -88,7 +88,7 @@ const RaiseTicketScreen = () => {
 
     loadAssetsInUse();
     loadIssueTypes();
-  }, [navigation]);
+  }, [customerId, navigation]);
 
   const setSelectedDropdown = (type: string, e: any) => {
     switch (type) {
@@ -137,11 +137,13 @@ const RaiseTicketScreen = () => {
         formData.append(
           "assetImages",
           new File([assetImage], getFileName(assetImage, true), {
-            type: "image/*",
+            type: "image/jpeg",
           }),
         );
       }
     }
+
+    console.log("formData", formData);
 
     setErrors([]);
 
@@ -162,6 +164,8 @@ const RaiseTicketScreen = () => {
             description: raiseTicketModel.description,
             assetImages: uploadedAssetImages,
           };
+
+          console.log("ticketData", ticketData);
 
           api
             .post(CREATE_TICKET, ticketData)

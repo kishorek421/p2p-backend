@@ -24,10 +24,10 @@ export const GET_COUNTRIES =
 
 // tickets
 export const CREATE_TICKET = "/tickets/create";
-export const GET_TICKET_DETAILS = "tickets/view";
 export const GET_TICKETS_BY_STATUS_KEY =
   "tickets/customers/getTicketsByStatusKey";
 export const TICKET_UPLOADS = "/tickets/upload";
+export const GET_TICKET_DETAILS = "/tickets/getTicketById";
 
 // assets
 export const GET_ASSETS_IN_USE =

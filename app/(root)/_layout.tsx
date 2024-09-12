@@ -1,5 +1,4 @@
-import { Stack, useNavigation } from "expo-router";
-import React, { useEffect } from "react";
+import React from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { Drawer } from "expo-router/drawer";
 
@@ -53,6 +52,10 @@ const Layout = () => {
         <Drawer.Screen
           name="raise_ticket/[customerId]"
           options={{ title: "Raise Ticket" }}
+        />
+        <Drawer.Screen
+          name="ticket_history_details/[ticketId]"
+          options={{ title: "Ticket Details", drawerItemStyle: { height: 0 } }}
         />
       </Drawer>
     </GestureHandlerRootView>

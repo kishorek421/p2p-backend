@@ -48,6 +48,7 @@ import { Image } from "react-native";
 import Icon from "react-native-vector-icons/AntDesign";
 import { getFileName } from "@/utils/helper";
 import Toast from "react-native-toast-message";
+import LoadingBar from "@/components/LoadingBar";
 
 const RegistrationScreen = () => {
   const { customerLeadId } = useLocalSearchParams();
@@ -385,9 +386,7 @@ const RegistrationScreen = () => {
   return (
     <SafeAreaView>
       {isLoading ? (
-        <View className="h-full flex justify-center">
-          <ActivityIndicator size="large" />
-        </View>
+        <LoadingBar />
       ) : (
         <ScrollView>
           <Box className="p-4 mt-3">

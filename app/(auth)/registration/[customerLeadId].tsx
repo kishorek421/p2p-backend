@@ -389,7 +389,7 @@ const RegistrationScreen = () => {
         <LoadingBar />
       ) : (
         <ScrollView>
-          <Box className="p-4 mt-3">
+          <Box className="p-4">
             <VStack>
               <Text className="text-2xl font-bold">
                 Launch your experience 🚀

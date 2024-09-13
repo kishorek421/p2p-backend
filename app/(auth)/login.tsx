@@ -51,7 +51,7 @@ const LoginScreen = () => {
 
         await setItem(AUTH_TOKEN_KEY, loginData.token);
         await setItem(REFRESH_TOKEN_KEY, loginData.refreshToken);
-        
+
         if (loginData) {
           try {
             let leadResponse = await api.get<
@@ -59,10 +59,8 @@ const LoginScreen = () => {
             >(GET_CUSTOMER_LEAD_DETAILS);
             let data = leadResponse.data.data ?? {};
             console.log("customerData", data);
-            
+
             if (data && data.id) {
-
-
               let leadStatus = data.onBoardingStatusDetails?.key;
 
               if (leadStatus === CUSTOMER_LEAD_ACTIVE) {

@@ -7,7 +7,7 @@ const Layout = () => {
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen
         name="registration/[customerLeadId]"
-        options={{ headerShown: false }}
+        // options={{ headerShown: false }}
       />
     </Stack>
   );

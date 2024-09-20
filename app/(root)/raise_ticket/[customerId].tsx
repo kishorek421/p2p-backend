@@ -134,11 +134,19 @@ const RaiseTicketScreen = () => {
       console.log(assetImages);
       for (let i = 0; i < assetImages.length; i++) {
         const assetImage = assetImages[i];
+        // formData.append(
+        //   "assetImages",
+        //   new File([assetImage], getFileName(assetImage, true), {
+        //     type: "image/jpeg",
+        //   }),
+        // );
+
+        // --@ts-ignore --
         formData.append("assetImages", {
           uri: assetImage,
           type: "image/jpeg",
           name: getFileName(assetImage, true),
-        });
+        } as any);
       }
     }
 

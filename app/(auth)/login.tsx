@@ -19,7 +19,6 @@ import { isFormFieldInValid } from "@/utils/helper";
 import SubmitButton from "@/components/SubmitButton";
 import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/storage_keys";
 import { setItem } from "@/utils/secure_store";
-import Toast from "react-native-toast-message";
 import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 

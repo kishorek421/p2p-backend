@@ -11,7 +11,7 @@ import { Input, InputField } from "@/components/ui/input";
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import { Link, useRouter } from "expo-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { GET_CUSTOMER_LEAD_DETAILS, LOGIN } from "@/constants/api_endpoints";
 import api from "@/services/api";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
@@ -21,6 +21,7 @@ import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/storage_keys";
 import { setItem } from "@/utils/secure_store";
 import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
 import { CustomerLeadDetailsModel } from "@/models/customers";
+import LottieView from "lottie-react-native";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -29,6 +30,8 @@ const LoginScreen = () => {
   const [errors, setErrors] = useState<ErrorModel[]>([]);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const animationRef = useRef<LottieView>(null);
 
   const router = useRouter();
 
@@ -95,12 +98,21 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView>
-      <Box className="p-4 mt-3">
-        <VStack>
+      <VStack>
+        <LottieView
+          ref={animationRef}
+          source={require("../../assets/lottie/login.json")}
+          autoPlay
+          loop
+          style={{
+            height: 250,
+          }}
+        />
+        <VStack className="mt-8 p-4">
           <Text className="text-2xl font-bold">
             Welcome <Text className="color-primary-950">Back! 👋</Text>
           </Text>
-          <Text className="color-gray-400 text-sm mt-1">
+          <Text className="color-gray-400 text-sm">
             Log in to continue where you left off
           </Text>
           <VStack className="gap-4 mt-8">
@@ -173,7 +185,7 @@ const LoginScreen = () => {
             </Text>
           </VStack>
         </VStack>
-      </Box>
+      </VStack>
     </SafeAreaView>
   );
 };

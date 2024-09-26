@@ -441,7 +441,7 @@ const RegistrationScreen = () => {
       {isLoading ? (
         <LoadingBar />
       ) : (
-        <ScrollView>
+        <ScrollView automaticallyAdjustKeyboardInsets={true}>
           <Box className="p-4">
             <VStack>
               <Text className="text-2xl font-bold">
@@ -978,7 +978,7 @@ const RegistrationScreen = () => {
               {/*  <Text className="text-white font-medium">Save</Text>*/}
               {/*</Pressable>*/}
               <Button
-                className="bg-primary-950 mt-8 "
+                className="bg-primary-950 mt-8 mb-8"
                 onPress={updateCustomerLeadDetails}
               >
                 <ButtonText>Save</ButtonText>

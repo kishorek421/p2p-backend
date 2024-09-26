@@ -37,6 +37,8 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(root)" options={{ headerShown: false }} />
           <Stack.Screen name="+not-found" />
+          <Stack.Screen name="devices/my_devices" />
+          <Stack.Screen name="devices/device_details/[deviceId]" />
         </Stack>
         <Toast />
       </AuthProvider>

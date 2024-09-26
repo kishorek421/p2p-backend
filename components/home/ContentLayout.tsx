@@ -5,9 +5,10 @@ import { HStack } from "@/components/ui/hstack";
 import React from "react";
 import { Button, ButtonText } from "@/components/ui/button";
 import Icon from "react-native-vector-icons/AntDesign";
-import RecentTicketHistoryLayout from "@/components/home/RecentTicketHistoryLayout";
+import RecentTicketHistoryLayout from "@/components/common/RecentTicketHistoryLayout";
 import { router } from "expo-router";
 import { CustomerDetailsModel } from "@/models/customers";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 const ContentLayout = ({
   customerDetails,
@@ -60,8 +61,16 @@ const ContentLayout = ({
           />
         </HStack>
       </Card>
+      <VStack className="mt-8">
+        <Text className="text-[18px] font-bold">Quick Actions</Text>
+        <TouchableOpacity className="mt-2" onPress={() => {
+          router.push("/devices/my_devices");
+        }}>
+          <Text>My Devices</Text>
+        </TouchableOpacity>
+      </VStack>
       <HStack className="justify-between mt-10">
-        <Text className="text-[14px] font-bold">Latest Tickets</Text>
+        <Text className="text-[18px] font-bold">Latest Tickets</Text>
         <TouchableWithoutFeedback
           onPress={() =>
             router.push({
@@ -72,7 +81,7 @@ const ContentLayout = ({
             })
           }
         >
-          <Text className="text-sm underline color-primary-950 font-medium">
+          <Text className="text-md underline color-primary-950 font-medium">
             View All
           </Text>
         </TouchableWithoutFeedback>

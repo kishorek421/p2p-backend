@@ -33,3 +33,5 @@ export const GET_TICKET_DETAILS = "/tickets/getTicketById";
 export const GET_ASSETS_IN_USE =
   "/assets/assetsInUse/getCustomerAssetsInUseListBySerialNoSearch";
 export const GET_ISSUE_TYPES = "/assets/assetIssueType/getIssueTypesList";
+export const GET_ASSET_MASTERS_LIST = "/assets/assetMaster/getAssetMastersList";
+export const GET_ASSET_DETAILS = "/assets/assetMaster/getAssetMasterDetailsById";

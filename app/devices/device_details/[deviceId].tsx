@@ -42,6 +42,7 @@ const DeviceDetailsScreen = () => {
         }
     }
     return (
+        
         <View className='p-4' >
             <Card className='p-3'>
                 <View>

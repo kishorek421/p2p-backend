@@ -62,3 +62,4 @@ export interface BranchDetailsModel {
   createdAt?: string;
   createdBy?: string;
 }
+

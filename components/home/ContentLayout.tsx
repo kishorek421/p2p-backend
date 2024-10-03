@@ -6,9 +6,9 @@ import React from "react";
 import { Button, ButtonText } from "@/components/ui/button";
 import Icon from "react-native-vector-icons/AntDesign";
 import RecentTicketHistoryLayout from "@/components/common/RecentTicketHistoryLayout";
-import { router } from "expo-router";
 import { CustomerDetailsModel } from "@/models/customers";
 import { TouchableOpacity } from "react-native-gesture-handler";
+import { router } from "expo-router";
 
 const ContentLayout = ({
   customerDetails,
@@ -64,11 +64,35 @@ const ContentLayout = ({
       <VStack className="mt-8">
         <Text className="text-[18px] font-bold">Quick Actions</Text>
         <TouchableOpacity className="mt-2" onPress={() => {
-          router.push("/devices/my_devices");
+          router.push("/devices/devices_list");
         }}>
           <Text>My Devices</Text>
         </TouchableOpacity>
+        <TouchableOpacity className ="mt-2" onPress={()=>{
+          router.push({
+            pathname: "/employees/employees_list",
+          });
+
+        }}>
+          <Text>Employees</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity className ="mt-2" onPress={()=>{
+          router.push({
+            pathname: "/employees/employee_details/[employeeId]",
+            params: {
+              employeeId: "123",
+            }
+          });
+
+        }}>
+          <Text>Employee_Id</Text>
+        </TouchableOpacity>
+
+
+        
       </VStack>
+      
       <HStack className="justify-between mt-10">
         <Text className="text-[18px] font-bold">Latest Tickets</Text>
         <TouchableWithoutFeedback

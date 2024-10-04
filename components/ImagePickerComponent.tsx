@@ -16,34 +16,105 @@ type ImagePickerComponentProps = {
   bottomSheetRef: any;
 };
 
+enum PickerPermissions {
+  CAMERA,
+  MEDIA,
+}
+
 const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   onImagePicked,
   setIsModalVisible,
   bottomSheetRef,
 }) => {
-  const requestPermissions = async () => {
-    if (Platform.OS !== "web") {
-      const { status: cameraStatus } =
-        await ImagePicker.requestCameraPermissionsAsync();
-      const { status: mediaLibraryStatus } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
+  const [mediaLibraryPermissionStatus, requestMediaLibraryPermission] =
+    ImagePicker.useMediaLibraryPermissions();
+  const [cameraPermissionStatus, requestCameraPermission] =
+    ImagePicker.useCameraPermissions();
 
-      if (cameraStatus !== "granted" || mediaLibraryStatus !== "granted") {
-        alert(
-          "Sorry, we need camera and media library permissions to make this work!",
-        );
-        return false;
+  const requestPermissions = async (pickerPermissions: PickerPermissions) => {
+    if (Platform.OS !== "web") {
+      switch (pickerPermissions) {
+        case PickerPermissions.CAMERA:
+          console.log("cameraPermissionStatus", cameraPermissionStatus);
+          // accessPrivileges - 'all' | 'limited' | 'none'
+          if (cameraPermissionStatus?.granted) {
+            return true;
+          } else if (
+            cameraPermissionStatus?.status ===
+            ImagePicker.PermissionStatus.DENIED
+          ) {
+            if (cameraPermissionStatus?.canAskAgain) {
+              const permissionResponse = await requestCameraPermission();
+              if (permissionResponse.granted) {
+                return true;
+              }
+            }
+            alert(
+              "Sorry, we need a camera permission to access to your camera to capture your organization’s image and photos of damaged assets for reporting purposes.",
+            );
+            return false;
+          } else if (
+            cameraPermissionStatus?.status ===
+            ImagePicker.PermissionStatus.UNDETERMINED
+          ) {
+            const permissionResponse = await requestCameraPermission();
+            if (permissionResponse.granted) {
+              return true;
+            }
+            alert(
+              "Sorry, we need a media library permission to access to your photos to upload your organization’s image and damaged asset images for reporting purposes.",
+            );
+            return false;
+          }
+        case PickerPermissions.MEDIA:
+          // accessPrivileges - 'all' | 'limited' | 'none'
+          if (mediaLibraryPermissionStatus?.granted) {
+            return true;
+          } else if (
+            mediaLibraryPermissionStatus?.accessPrivileges === "none" ||
+            mediaLibraryPermissionStatus?.status ===
+              ImagePicker.PermissionStatus.DENIED
+          ) {
+            if (mediaLibraryPermissionStatus?.canAskAgain) {
+              const permissionResponse = await requestMediaLibraryPermission();
+              if (permissionResponse.granted) {
+                return true;
+              }
+            }
+            alert(
+              "Sorry, we need a media library permissions to access to your photos to upload your organization’s image and damaged asset images for reporting purposes.",
+            );
+            return false;
+          } else if (
+            mediaLibraryPermissionStatus?.status ===
+            ImagePicker.PermissionStatus.UNDETERMINED
+          ) {
+            const permissionResponse = await requestMediaLibraryPermission();
+            if (permissionResponse.granted) {
+              return true;
+            }
+            alert(
+              "Sorry, we need a media library permissions to access to your photos to upload your organization’s image and damaged asset images for reporting purposes.",
+            );
+            return false;
+          }
       }
     }
-    return true;
+    alert(
+      "Sorry, we need a camera and media library permissions to access to your photos or to capture the photo to upload your organization’s image and damaged asset images for reporting purposes.",
+    );
+    return false;
   };
 
   const pickImage = async () => {
-    const permissionsGranted = await requestPermissions();
+    console.log("pickImage");
+    const permissionsGranted = await requestPermissions(
+      PickerPermissions.MEDIA,
+    );
     if (!permissionsGranted) return;
 
     let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
@@ -57,7 +128,9 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   };
 
   const takePhoto = async () => {
-    const permissionsGranted = await requestPermissions();
+    const permissionsGranted = await requestPermissions(
+      PickerPermissions.CAMERA,
+    );
     if (!permissionsGranted) return;
 
     let result = await ImagePicker.launchCameraAsync({

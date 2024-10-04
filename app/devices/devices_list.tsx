@@ -1,16 +1,9 @@
-import { View, Text, FlatList, Image, TouchableHighlight, TouchableOpacity } from 'react-native'
+import { FlatList } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { Button, ButtonText } from '@/components/ui/button'
 import api from '@/services/api';
 import { GET_ASSET_MASTERS_LIST } from '@/constants/api_endpoints';
 import { AssetMasterListItemModel } from '@/models/assets';
-import { Card } from '@/components/ui/card';
-import { HStack } from '@/components/ui/hstack';
-import { VStack } from '@/components/ui/vstack';
-import Feather from '@expo/vector-icons/Feather';
-import { router } from 'expo-router';
 import DevicesListItemLayout from '@/components/devices/devices_list_item_layout';
-
 
 const DevicesList = () => {
 
@@ -26,8 +19,6 @@ const DevicesList = () => {
       setMyDevicesList(response.data?.data?.content ?? []);
     })
   }
-
- 
 
   // normal function
   // function func_name() {return;}

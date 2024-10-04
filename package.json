@@ -30,6 +30,7 @@
     "@gluestack-ui/textarea": "^0.1.23",
     "@gluestack-ui/toast": "^1.0.7",
     "@legendapp/motion": "^2.4.0",
+    "@react-native-community/datetimepicker": "^8.2.0",
     "@react-navigation/drawer": "^6.7.2",
     "@react-navigation/native": "^6.0.2",
     "axios": "^1.7.4",

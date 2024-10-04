@@ -1,4 +1,4 @@
-import RecentTicketHistoryLayout from "@/components/home/RecentTicketHistoryLayout";
+import RecentTicketHistoryLayout from "@/components/common/RecentTicketHistoryLayout";
 import { VStack } from "@/components/ui/vstack";
 import { Button, ButtonText } from "@/components/ui/button";
 import Icon from "react-native-vector-icons/AntDesign";

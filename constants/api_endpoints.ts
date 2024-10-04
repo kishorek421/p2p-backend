@@ -10,6 +10,7 @@ export const GET_CONFIGURATIONS_BY_CATEGORY =
 // customer lead
 export const GET_CUSTOMER_LEAD_DETAILS = "/customers/leads/view";
 
+
 // customer
 export const CREATE_CUSTOMER = "/customers/create";
 export const GET_CUSTOMER_DETAILS = "/customers/view";
@@ -43,3 +44,13 @@ export const GET_TICKET_DETAILS = "/tickets/getTicketById";
 export const GET_ASSETS_IN_USE =
   "/assets/assetsInUse/getCustomerAssetsInUseListBySerialNoSearch";
 export const GET_ISSUE_TYPES = "/assets/assetIssueType/getIssueTypesList";
+export const GET_ASSET_MASTERS_LIST = "/assets/assetMaster/getAssetMastersList";
+export const GET_ASSET_DETAILS = "/assets/assetMaster/getAssetMasterDetailsById";
+export const CREATE_ASSET = "/assets/assetMaster/getAssetMastersList";
+export const GET_ASSET_TYPES ="/assets/assetType/getAssetTypesList";
+export const GET_ASSET_MODELS ="/assets/assetModel/getAssetModelsList";
+export const GET_LICENSED_TYPES ="/configurations/getConfigurationsForDropdown";
+export const GET_IMPACTS ="/configurations/getConfigurationsForDropdown";
+
+// employees
+export const GET_EMPLOYEES_LIST = "/employees/activeEmployee/list";

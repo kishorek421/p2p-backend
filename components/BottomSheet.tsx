@@ -24,7 +24,8 @@ const BottomSheet = forwardRef(
 
     const panResponder = useRef(
       PanResponder.create({
-        onMoveShouldSetPanResponder: () => true,
+        onStartShouldSetPanResponder: () => false, // Prevent from setting it on touch start
+        onMoveShouldSetPanResponder: (_, gestureState) => gestureState.dy !== 0, // Only respond to vertical movements
         onPanResponderMove: (event, gestureState) => {
           const newHeight = maxHeight - gestureState.dy;
           if (newHeight < screenHeight && newHeight > 0) {
@@ -77,7 +78,7 @@ const BottomSheet = forwardRef(
 
     return (
       <Modal
-        transparent
+        transparent={true}
         visible={visible}
         animationType="fade"
         onRequestClose={hide}
@@ -85,6 +86,7 @@ const BottomSheet = forwardRef(
         <TouchableWithoutFeedback onPress={hide}>
           <View style={styles.overlay}>
             <Animated.View
+              pointerEvents="box-none"
               {...panResponder.panHandlers}
               style={[
                 styles.bottomSheet,
@@ -118,6 +120,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 5,
+    color: "red",
   },
   handle: {
     width: 60,

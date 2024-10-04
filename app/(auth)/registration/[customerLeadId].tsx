@@ -1,4 +1,11 @@
-import { Dimensions, Platform, ScrollView, Text, View } from "react-native";
+import {
+  Dimensions,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import {
@@ -391,12 +398,20 @@ const RegistrationScreen = () => {
       }
     });
 
-    formData.append(
-      "orgImageFile",
-      new File([assetImage], getFileName(assetImage, true), {
+    if (assetImage) {
+      // formData.append(
+      //   "orgImageFile",
+      //   new File([assetImage], getFileName(assetImage, true), {
+      //     type: "image/jpg",
+      //   }),
+      // );
+      // --@ts-ignore --
+      formData.append("orgImageFile", {
+        uri: assetImage,
         type: "image/jpg",
-      }),
-    );
+        name: getFileName(assetImage, true),
+      } as any);
+    }
 
     setErrors([]);
 
@@ -418,7 +433,7 @@ const RegistrationScreen = () => {
         router.replace("/(auth)/login");
       })
       .catch((e) => {
-        console.error(e.response?.data);
+        console.error("e ->", e);
         let errors = e.response?.data?.errors;
         if (errors) {
           console.error("errors -> ", errors);

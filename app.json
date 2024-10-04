@@ -19,7 +19,8 @@
       },
       "package": "com.go_desk_workplace.go_desk_workplace",
       "permissions": [
-        "android.permission.RECORD_AUDIO"
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -31,13 +32,24 @@
       "expo-router",
       "expo-secure-store",
       "expo-asset",
-      "expo-image-picker"
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow access to your photos to upload your organization’s image and damaged asset images for reporting purposes.",
+          "cameraPermission": "Allow access to your camera to capture your organization’s image and photos of damaged assets for reporting purposes."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
     },
     "ios": {
       "bundleIdentifier": "com.godesk.godeskworkplace"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "2e179dc8-43fd-4ea1-ae65-a5addf9ec14a"
+      }
     }
   }
 }

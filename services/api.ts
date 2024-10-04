@@ -28,7 +28,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.log(error.response?.data);
+    console.log(error);
     return Promise.reject(error);
   },
 );
@@ -39,6 +39,7 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
+    console.log("error -> ", error);
     if (error.response && error.response.status === 401) {
       console.error("Unauthorized, logging out...");
     }

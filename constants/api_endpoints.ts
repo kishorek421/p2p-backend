@@ -17,11 +17,21 @@ export const GET_CUSTOMER_DETAILS = "/customers/view";
 
 // geolocations
 export const GET_PINCODES = "/geolocations/pincodes/getAllPincodesForDropdown";
+export const GET_PINCODES_LIST_BY_PINCODE_SEARCH =
+  "/geolocations/pincodes/getPincodesListByPincodeSearch";
 export const GET_AREAS = "/geolocations/areas/getAllAreasForDropdown";
+export const GET_AREAS_LIST_BY_NAME_SEARCH =
+  "/geolocations/areas/getAreasListByNameSearch";
 export const GET_CITIES = "/geolocations/cities/getAllCitiesForDropdown";
+export const GET_CITIES_LIST_BY_NAME_SEARCH =
+  "/geolocations/cities/getCitiesListByNameSearch";
 export const GET_STATES = "/geolocations/states/getAllStatesForDropdown";
+export const GET_STATES_LIST_BY_NAME_SEARCH =
+  "/geolocations/states/getStatesListByNameSearch";
 export const GET_COUNTRIES =
   "/geolocations/countries/getAllCountriesForDropdown";
+export const GET_COUNTRIES_LIST_BY_NAME_SEARCH =
+  "/geolocations/countries/getCountriesListByNameSearch";
 
 // tickets
 export const CREATE_TICKET = "/tickets/create";

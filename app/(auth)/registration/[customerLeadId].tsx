@@ -1,5 +1,4 @@
-import { SafeAreaView } from "react-native-safe-area-context";
-import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { Dimensions, Platform, ScrollView, Text, View } from "react-native";
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import {
@@ -10,18 +9,18 @@ import {
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ConfigurationModel } from "@/models/configurations";
 import api from "@/services/api";
 import {
   CREATE_CUSTOMER,
-  GET_AREAS,
-  GET_CITIES,
+  GET_AREAS_LIST_BY_NAME_SEARCH,
+  GET_CITIES_LIST_BY_NAME_SEARCH,
   GET_CONFIGURATIONS_BY_CATEGORY,
-  GET_COUNTRIES,
+  GET_COUNTRIES_LIST_BY_NAME_SEARCH,
   GET_CUSTOMER_LEAD_DETAILS,
-  GET_PINCODES,
-  GET_STATES,
+  GET_PINCODES_LIST_BY_PINCODE_SEARCH,
+  GET_STATES_LIST_BY_NAME_SEARCH,
 } from "@/constants/api_endpoints";
 import {
   CATEGORY_OF_ORG,
@@ -39,7 +38,7 @@ import {
   StateListItemModel,
 } from "@/models/geolocations";
 import CustomSelect from "@/components/CustomSelect";
-import { ApiResponseModel, DropdownModel, ErrorModel } from "@/models/common";
+import { ApiResponseModel, ErrorModel } from "@/models/common";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -49,6 +48,13 @@ import Icon from "react-native-vector-icons/AntDesign";
 import { getFileName } from "@/utils/helper";
 import Toast from "react-native-toast-message";
 import LoadingBar from "@/components/LoadingBar";
+import {
+  AutocompleteDropdown,
+  AutocompleteDropdownItem,
+} from "react-native-autocomplete-dropdown";
+import Feather from "react-native-vector-icons/Feather";
+import { GeoLocationType } from "@/enums/enums";
+import CustomeTypehead from "@/components/CustomeTypehead";
 
 const RegistrationScreen = () => {
   const { customerLeadId } = useLocalSearchParams();
@@ -61,11 +67,11 @@ const RegistrationScreen = () => {
   );
   const [sizesOfOrg, setSizesOfOrg] = useState<ConfigurationModel[]>([]);
   // geolocations
-  const [pincodes, setPincodes] = useState<PincodeListItemModel[]>([]);
-  const [areas, setAreas] = useState<AreaListItemModel[]>([]);
-  const [cities, setCities] = useState<CityListItemModel[]>([]);
-  const [states, setStates] = useState<StateListItemModel[]>([]);
-  const [countries, setCountries] = useState<CountryListItemModel[]>([]);
+  const [pincodes, setPincodes] = useState<AutocompleteDropdownItem[]>([]);
+  const [areas, setAreas] = useState<AutocompleteDropdownItem[]>([]);
+  const [cities, setCities] = useState<AutocompleteDropdownItem[]>([]);
+  const [states, setStates] = useState<AutocompleteDropdownItem[]>([]);
+  const [countries, setCountries] = useState<AutocompleteDropdownItem[]>([]);
 
   // selected options
   // configurations
@@ -76,11 +82,14 @@ const RegistrationScreen = () => {
   const [selectedSizeOfOrg, setSelectedSizeOfOrg] =
     useState<ConfigurationModel>({});
   // geolocations
-  const [selectedPincode, setSelectedPincode] = useState<DropdownModel>();
-  const [selectedArea, setSelectedArea] = useState<DropdownModel>();
-  const [selectedCity, setSelectedCity] = useState<DropdownModel>();
-  const [selectedState, setSelectedState] = useState<DropdownModel>();
-  const [selectedCountry, setSelectedCountry] = useState<DropdownModel>();
+  const [selectedPincode, setSelectedPincode] =
+    useState<AutocompleteDropdownItem>();
+  const [selectedArea, setSelectedArea] = useState<AutocompleteDropdownItem>();
+  const [selectedCity, setSelectedCity] = useState<AutocompleteDropdownItem>();
+  const [selectedState, setSelectedState] =
+    useState<AutocompleteDropdownItem>();
+  const [selectedCountry, setSelectedCountry] =
+    useState<AutocompleteDropdownItem>();
 
   const [customerLeadDetailsModel, setCustomerLeadDetailsModel] =
     useState<CustomerLeadDetailsModel>({});
@@ -98,6 +107,148 @@ const RegistrationScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [assetImage, setAssetImage] = useState("");
+
+  const [autoCompleteLoading, setAutoCompleteLoading] = useState(false);
+
+  const getGeoLocationSuggestionsUrl = (type: GeoLocationType) => {
+    switch (type) {
+      case GeoLocationType.PINCODE:
+        return GET_PINCODES_LIST_BY_PINCODE_SEARCH;
+      case GeoLocationType.AREA:
+        return GET_AREAS_LIST_BY_NAME_SEARCH;
+      case GeoLocationType.CITY:
+        return GET_CITIES_LIST_BY_NAME_SEARCH;
+      case GeoLocationType.STATE:
+        return GET_STATES_LIST_BY_NAME_SEARCH;
+      case GeoLocationType.COUNTRY:
+        return GET_COUNTRIES_LIST_BY_NAME_SEARCH;
+      default:
+        return "";
+    }
+  };
+
+  const getSuggestions = useCallback(
+    async (q: string, type: GeoLocationType) => {
+      console.log("getSuggestions", q);
+      if (typeof q !== "string" || q.length < 3) {
+        onClearPress(type);
+        return;
+      }
+      setAutoCompleteLoading(true);
+
+      api
+        .get(getGeoLocationSuggestionsUrl(type) + `?q=${q}`)
+        .then((response) => {
+          console.log("suggesgtions", response.data.data);
+          setGeolocationSuggestions(type, response.data?.data ?? []);
+          setAutoCompleteLoading(false);
+        })
+        .catch((e) => {
+          console.error(e);
+          setAutoCompleteLoading(false);
+        });
+
+      setAutoCompleteLoading(false);
+    },
+    [],
+  );
+
+  const onClearPress = useCallback((type: GeoLocationType) => {
+    switch (type) {
+      case GeoLocationType.PINCODE:
+        setPincodes([]);
+        break;
+      case GeoLocationType.AREA:
+        setAreas([]);
+        break;
+      case GeoLocationType.CITY:
+        setCities([]);
+        break;
+      case GeoLocationType.STATE:
+        setStates([]);
+        break;
+      case GeoLocationType.COUNTRY:
+        setCountries([]);
+        break;
+    }
+  }, []);
+
+  const setGeolocationSuggestions = (
+    type: GeoLocationType,
+    suggestionsList: any,
+  ) => {
+    switch (type) {
+      case GeoLocationType.PINCODE:
+        setPincodes(
+          suggestionsList.map((item: PincodeListItemModel) => {
+            const id = item.id;
+            const title = item.pincode;
+            if (id && title) {
+              return {
+                id: id,
+                title: title.toString(),
+              };
+            }
+          }),
+        );
+        break;
+      case GeoLocationType.AREA:
+        setAreas(
+          suggestionsList.map((item: AreaListItemModel) => {
+            const id = item.id;
+            const title = item.areaName;
+            if (id && title) {
+              return {
+                id: id,
+                title: title,
+              };
+            }
+          }),
+        );
+        break;
+      case GeoLocationType.CITY:
+        setCities(
+          suggestionsList.map((item: CityListItemModel) => {
+            const id = item.id;
+            const title = item.cityName;
+            if (id && title) {
+              return {
+                id: id,
+                title: title,
+              };
+            }
+          }),
+        );
+        break;
+      case GeoLocationType.STATE:
+        setStates(
+          suggestionsList.map((item: StateListItemModel) => {
+            const id = item.id;
+            const title = item.stateName;
+            if (id && title) {
+              return {
+                id: id,
+                title: title,
+              };
+            }
+          }),
+        );
+        break;
+      case GeoLocationType.COUNTRY:
+        setCountries(
+          suggestionsList.map((item: CountryListItemModel) => {
+            const id = item.id;
+            const title = item.countryName;
+            if (id && title) {
+              return {
+                id: id,
+                title: title,
+              };
+            }
+          }),
+        );
+    }
+  };
 
   useEffect(() => {
     const loadTypesOfOrg = () => {
@@ -142,57 +293,6 @@ const RegistrationScreen = () => {
           console.error(e);
         });
     };
-    // geolocations
-    const loadPincodes = () => {
-      api
-        .get(GET_PINCODES)
-        .then((response) => {
-          setPincodes(response.data?.data ?? []);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    };
-    const loadAreas = () => {
-      api
-        .get(GET_AREAS)
-        .then((response) => {
-          setAreas(response.data?.data ?? []);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    };
-    const loadCities = () => {
-      api
-        .get(GET_CITIES)
-        .then((response) => {
-          setCities(response.data?.data ?? []);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    };
-    const loadStates = () => {
-      api
-        .get(GET_STATES)
-        .then((response) => {
-          setStates(response.data?.data ?? []);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    };
-    const loadCountries = () => {
-      api
-        .get(GET_COUNTRIES)
-        .then((response) => {
-          setCountries(response.data?.data ?? []);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    };
 
     // customer lead details
     const loadCustomerLeadDetails = () => {
@@ -217,24 +317,24 @@ const RegistrationScreen = () => {
             setSelectedSizeOfOrg(data.sizeOfOrgDetails ?? {});
 
             setSelectedPincode({
-              label: data.pincodeDetails?.pincode,
-              value: data.pincodeDetails?.id,
+              title: (data.pincodeDetails?.pincode ?? "").toString(),
+              id: data.pincodeDetails?.id ?? "",
             });
             setSelectedArea({
-              label: data.areaDetails?.areaName,
-              value: data.areaDetails?.id,
+              title: data.areaDetails?.areaName ?? "",
+              id: data.areaDetails?.id ?? "",
             });
             setSelectedCity({
-              label: data.cityDetails?.cityName,
-              value: data.cityDetails?.id,
+              title: data.cityDetails?.cityName ?? "",
+              id: data.cityDetails?.id ?? "",
             });
             setSelectedState({
-              label: data.stateDetails?.stateName,
-              value: data.stateDetails?.id,
+              title: data.stateDetails?.stateName ?? "",
+              id: data.stateDetails?.id ?? "",
             });
             setSelectedCountry({
-              label: data.countryDetails?.countryName,
-              value: data.countryDetails?.id,
+              title: data.countryDetails?.countryName ?? "",
+              id: data.countryDetails?.id ?? "",
             });
             setIsLoading(false);
           }
@@ -249,12 +349,6 @@ const RegistrationScreen = () => {
     loadTypesOfOrg();
     loadCategoriesOfOrg();
     loadSizesOfOrg();
-    // geolocations
-    loadPincodes();
-    loadAreas();
-    loadCities();
-    loadStates();
-    loadCountries();
     // load customer lead details
     loadCustomerLeadDetails();
   }, [router]);
@@ -273,11 +367,11 @@ const RegistrationScreen = () => {
     customerLeadDetailsModel.typeOfOrg = selectedTypeOfOrg.id;
     customerLeadDetailsModel.categoryOfOrg = selectedCategoryOfOrg.id;
     customerLeadDetailsModel.sizeOfOrg = selectedSizeOfOrg.id;
-    customerLeadDetailsModel.pincodeId = selectedPincode?.value;
-    customerLeadDetailsModel.areaId = selectedArea?.value;
-    customerLeadDetailsModel.cityId = selectedCity?.value;
-    customerLeadDetailsModel.stateId = selectedState?.value;
-    customerLeadDetailsModel.countryId = selectedCountry?.value;
+    customerLeadDetailsModel.pincodeId = selectedPincode?.id ?? "";
+    customerLeadDetailsModel.areaId = selectedArea?.id ?? "";
+    customerLeadDetailsModel.cityId = selectedCity?.id ?? "";
+    customerLeadDetailsModel.stateId = selectedState?.id ?? "";
+    customerLeadDetailsModel.countryId = selectedCountry?.id ?? "";
     customerLeadDetailsModel.isCustomerLead = isLead;
     customerLeadDetailsModel.customerLeadId = customerLeadDetailsModel.id;
 
@@ -342,53 +436,12 @@ const RegistrationScreen = () => {
     return msg;
   };
 
-  const setSelectedGeolocations = (type: string, e: any) => {
-    console.log("e", e);
-    switch (type) {
-      case "pincode":
-        let selectedPincode = pincodes.find((pincode) => pincode.id === e);
-        setSelectedPincode({
-          label: selectedPincode?.pincode?.toString(),
-          value: selectedPincode?.id,
-        });
-        break;
-      case "area":
-        let selectedArea = areas.find((area) => area.id === e);
-        setSelectedArea({
-          label: selectedArea?.areaName,
-          value: selectedArea?.id,
-        });
-        break;
-      case "city":
-        let selectedCity = cities.find((city) => city.id === e);
-        setSelectedCity({
-          label: selectedCity?.cityName,
-          value: selectedCity?.id,
-        });
-        break;
-      case "state":
-        let selectedState = states.find((state) => state.id === e);
-        setSelectedState({
-          label: selectedState?.stateName,
-          value: selectedState?.id,
-        });
-        break;
-      case "country":
-        let selectedCountry = countries.find((country) => country.id === e);
-        setSelectedCountry({
-          label: selectedCountry?.countryName,
-          value: selectedCountry?.id,
-        });
-        break;
-    }
-  };
-
   return (
-    <SafeAreaView>
+    <View>
       {isLoading ? (
         <LoadingBar />
       ) : (
-        <ScrollView>
+        <ScrollView automaticallyAdjustKeyboardInsets={true}>
           <Box className="p-4">
             <VStack>
               <Text className="text-2xl font-bold">
@@ -791,15 +844,15 @@ const RegistrationScreen = () => {
                   <FormControlLabel className="mb-1">
                     <FormControlLabelText>Pincode</FormControlLabelText>
                   </FormControlLabel>
-                  <CustomSelect
-                    options={pincodes.map((pincode) => ({
-                      label: pincode.pincode?.toString(),
-                      value: pincode.id,
-                    }))}
-                    placeholder="Select pincode"
+                  <CustomeTypehead
+                    type={GeoLocationType.PINCODE}
+                    onClearPress={onClearPress}
                     selectedValue={selectedPincode}
-                    type="pincode"
-                    onChange={setSelectedGeolocations}
+                    suggestions={pincodes}
+                    getSuggestions={getSuggestions}
+                    setSelectedValue={setSelectedPincode}
+                    loading={autoCompleteLoading}
+                    placeholder="Select pincode"
                   />
                   <FormControlError>
                     <FormControlErrorText>
@@ -807,7 +860,7 @@ const RegistrationScreen = () => {
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
-                <FormControl
+                {/* <FormControl
                   isInvalid={isFormFieldInValid("areaId").length > 0}
                 >
                   <FormControlLabel className="mb-1">
@@ -828,6 +881,28 @@ const RegistrationScreen = () => {
                       {isFormFieldInValid("areaId")}
                     </FormControlErrorText>
                   </FormControlError>
+                </FormControl> */}
+                <FormControl
+                  isInvalid={isFormFieldInValid("areaId").length > 0}
+                >
+                  <FormControlLabel className="mb-1">
+                    <FormControlLabelText>Area</FormControlLabelText>
+                  </FormControlLabel>
+                  <CustomeTypehead
+                    type={GeoLocationType.AREA}
+                    onClearPress={onClearPress}
+                    selectedValue={selectedArea}
+                    suggestions={areas}
+                    getSuggestions={getSuggestions}
+                    setSelectedValue={setSelectedArea}
+                    loading={autoCompleteLoading}
+                    placeholder="Select area"
+                  />
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {isFormFieldInValid("areaId")}
+                    </FormControlErrorText>
+                  </FormControlError>
                 </FormControl>
                 <FormControl
                   isInvalid={isFormFieldInValid("cityId").length > 0}
@@ -835,15 +910,15 @@ const RegistrationScreen = () => {
                   <FormControlLabel className="mb-1">
                     <FormControlLabelText>City</FormControlLabelText>
                   </FormControlLabel>
-                  <CustomSelect
-                    options={cities.map((city) => ({
-                      label: city.cityName?.toString(),
-                      value: city.id,
-                    }))}
-                    placeholder="Select city"
+                  <CustomeTypehead
+                    type={GeoLocationType.CITY}
+                    onClearPress={onClearPress}
                     selectedValue={selectedCity}
-                    type="city"
-                    onChange={setSelectedGeolocations}
+                    suggestions={cities}
+                    getSuggestions={getSuggestions}
+                    setSelectedValue={setSelectedCity}
+                    loading={autoCompleteLoading}
+                    placeholder="Select city"
                   />
                   <FormControlError>
                     <FormControlErrorText>
@@ -857,15 +932,15 @@ const RegistrationScreen = () => {
                   <FormControlLabel className="mb-1">
                     <FormControlLabelText>States</FormControlLabelText>
                   </FormControlLabel>
-                  <CustomSelect
-                    options={states.map((state) => ({
-                      label: state.stateName?.toString(),
-                      value: state.id,
-                    }))}
-                    placeholder="Select state"
+                  <CustomeTypehead
+                    type={GeoLocationType.STATE}
+                    onClearPress={onClearPress}
                     selectedValue={selectedState}
-                    type="state"
-                    onChange={setSelectedGeolocations}
+                    suggestions={states}
+                    getSuggestions={getSuggestions}
+                    setSelectedValue={setSelectedState}
+                    loading={autoCompleteLoading}
+                    placeholder="Select state"
                   />
                   <FormControlError>
                     <FormControlErrorText>
@@ -879,15 +954,15 @@ const RegistrationScreen = () => {
                   <FormControlLabel className="mb-1">
                     <FormControlLabelText>Country</FormControlLabelText>
                   </FormControlLabel>
-                  <CustomSelect
-                    options={countries.map((country) => ({
-                      label: country.countryName?.toString(),
-                      value: country.id,
-                    }))}
-                    placeholder="Select country"
+                  <CustomeTypehead
+                    type={GeoLocationType.COUNTRY}
+                    onClearPress={onClearPress}
                     selectedValue={selectedCountry}
-                    type="country"
-                    onChange={setSelectedGeolocations}
+                    suggestions={countries}
+                    getSuggestions={getSuggestions}
+                    setSelectedValue={setSelectedCountry}
+                    loading={autoCompleteLoading}
+                    placeholder="Select city"
                   />
                   <FormControlError>
                     <FormControlErrorText>
@@ -903,7 +978,7 @@ const RegistrationScreen = () => {
               {/*  <Text className="text-white font-medium">Save</Text>*/}
               {/*</Pressable>*/}
               <Button
-                className="bg-primary-950 mt-8 "
+                className="bg-primary-950 mt-8 mb-8"
                 onPress={updateCustomerLeadDetails}
               >
                 <ButtonText>Save</ButtonText>
@@ -912,7 +987,7 @@ const RegistrationScreen = () => {
           </Box>
         </ScrollView>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -7,6 +7,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import Toast from "react-native-toast-message";
+import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
@@ -28,25 +29,27 @@ export default function RootLayout() {
 
   return (
     <GluestackUIProvider mode="light">
-      <AuthProvider>
-        <Stack>
-          <Stack.Screen
-            name="index"
-            options={{ headerShown: false, title: "Home" }}
-          />
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(root)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" />
-          {/* devices */}
+      <AutocompleteDropdownContextProvider>
+        <AuthProvider>
+          <Stack>
+            <Stack.Screen
+              name="index"
+              options={{ headerShown: false, title: "Home" }}
+            />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="(root)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" />
+                      {/* devices */}
           <Stack.Screen name="devices/devices_list" />
           <Stack.Screen name="devices/device_details/[deviceId]" />
           <Stack.Screen name="devices/create_device"/>
           {/* employees */}
           <Stack.Screen name="employees/employees_list" />
           <Stack.Screen name="employees/employee_details/[employeeId]" />
-        </Stack>
-        <Toast />
-      </AuthProvider>
+          </Stack>
+          <Toast />
+        </AuthProvider>
+      </AutocompleteDropdownContextProvider>
     </GluestackUIProvider>
   );
 }

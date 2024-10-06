@@ -44,7 +44,10 @@
       "typedRoutes": true
     },
     "ios": {
-      "bundleIdentifier": "com.godesk.godeskworkplace"
+      "bundleIdentifier": "com.godesk.godeskworkplace",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Allow access to your camera to capture your organization’s image and photos of damaged assets for reporting purposes"
+      }
     },
     "extra": {
       "eas": {

@@ -110,7 +110,7 @@ const LoginScreen = () => {
         />
         <VStack className="mt-8 p-4">
           <Text className="text-2xl font-bold">
-            Welcome <Text className="color-primary-950">Back! 👋</Text>
+            Welcome <Text className="color-primary-950"> </Text>
           </Text>
           <Text className="color-gray-400 text-sm">
             Log in to continue where you left off

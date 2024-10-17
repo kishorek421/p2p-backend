@@ -1,0 +1,23 @@
+version: '3'
+services:
+  mongo:
+    image: mongo:latest
+    container_name: p2p-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./p2p
+    container_name: p2p
+    ports:
+      - "5001:5000"
+    depends_on:
+      - mongo
+
+volumes:
+  mongo-data:

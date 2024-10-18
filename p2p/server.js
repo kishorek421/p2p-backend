@@ -30,6 +30,10 @@ app.get('/', (req, res) => {
     res.send('WebRTC Signaling Server');
 });
 
+wss.on('connection', (ws) => {
+    console.log('New client connected');
+});
+
 server.listen(5000, () => {
     console.log('Signaling Server is listening on port 5000');
 });

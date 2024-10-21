@@ -32,7 +32,7 @@ const ContentLayout = ({
     {
       label: " Users",
       icon: "user",
-      path: "/users/users_list"
+      path: "/users/user_list"
     },
      
   ];

@@ -7,7 +7,10 @@ const Layout = () => {
       <Stack.Screen name="login" options={{ headerShown: false }} />
       <Stack.Screen
         name="registration/[customerLeadId]"
-        options={{ headerTitle: "Registration", headerBackTitle: "Login" }}
+        options={{
+          headerTitle: "Register Organization",
+          headerBackTitle: "Login",
+        }}
       />
     </Stack>
   );

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TicketListItemModel } from "@/models/tickets";
 import TicketListItemLayout from "@/components/tickets/TicketListItemLayout";
-import { FlatList } from "react-native";
+import { FlatList, View, Text } from "react-native";
 import api from "@/services/api";
 import { GET_TICKETS_BY_STATUS_KEY } from "@/constants/api_endpoints";
 
@@ -47,7 +47,17 @@ const RecentTicketHistoryLayout = ({ placing }: { placing: string }) => {
       });
   };
 
-  return (
+  return recentTickets.length === 0 ? (
+    <View
+      className={`mt-4 bg-gray-200 flex justify-center items-center rounded-lg h-36 ${
+        placing === "home" ? "mx-0" : "mx-6"
+      }`}
+    >
+      <Text className="text-gray-500 text-sm text-center">
+        No Recent Tickets Found
+      </Text>
+    </View>
+  ) : (
     <FlatList
       data={recentTickets}
       renderItem={({ item }) => (

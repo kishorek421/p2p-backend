@@ -23,7 +23,7 @@ const ContentLayout = ({
         </Text>
       </Text>
       <Text className="color-gray-500 mt-1 text-sm">
-        How can we assist you today?
+        Ensure quick resolutions for your team’s IT issues.
       </Text>
       <Card size="md" variant="elevated" className="mt-8 pb-0 ps-4 rounded-2xl">
         <HStack>

@@ -1,3 +1,4 @@
+import { OrgDepartmentMappingDetailsModel, OrgDesignationMappingDetailsModel } from "./org";
 export interface CreateUserModel
 {
     firstName?: string;
@@ -12,5 +13,12 @@ export interface CreateUserModel
 
 export interface UserDetailsModel
 {
-    
+    id?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    dateOfJoining?: string;
+    designationDetails?: OrgDesignationMappingDetailsModel;
+    departmentDetails?: OrgDepartmentMappingDetailsModel;
+
 }

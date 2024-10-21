@@ -50,6 +50,8 @@ export default function RootLayout() {
           {/* users */}
           <Stack.Screen name ="users/create_user"/>
           <Stack.Screen name ="users/users_list"/>
+          <Stack.Screen name ="users/user_details/[userId]"/>
+
           </Stack>
           <Toast />
         </AuthProvider>

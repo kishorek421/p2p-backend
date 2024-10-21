@@ -1,24 +1,36 @@
-import { View, Text, ScrollView, Touchable, TouchableOpacity } from 'react-native'
-import React, { useCallback, useState } from 'react'
-import { TextInput } from 'react-native-gesture-handler'
-import { FormControl, FormControlError, FormControlErrorText, FormControlLabel, FormControlLabelText } from '@/components/ui/form-control'
-import { Input, InputField } from '@/components/ui/input'
-import { Button, ButtonText } from '@/components/ui/button'
-import CustomeTypehead from '@/components/CustomeTypehead'
-import { GeoLocationType, OrgDropdownType } from '@/enums/enums'
-import { isFormFieldInValid } from '@/utils/helper'
-import { OrgDepartmentMappingDetailsModel, OrgDesignationMappingDetailsModel, OrgDetailsModel } from '@/models/org'
-import { AutocompleteDropdownItem } from 'react-native-autocomplete-dropdown'
-import api from '@/services/api'
-import { GET_DEPARTMENT_DROPDOWN, GET_ORG_DROPDOWN, GET_DESIGNATION_DROPDOWN, CREATE_CUSTOMER, CREATE_USER } from '@/constants/api_endpoints'
-import { CreateUserModel } from '@/models/users'
-import { router } from 'expo-router'
-import Toast from 'react-native-toast-message'
+import { View, ScrollView } from "react-native";
+import React, { useCallback, useState } from "react";
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorText,
+  FormControlLabel,
+  FormControlLabelText,
+} from "@/components/ui/form-control";
+import { Input, InputField } from "@/components/ui/input";
+import { Button, ButtonText } from "@/components/ui/button";
+import CustomeTypehead from "@/components/CustomeTypehead";
+import { OrgDropdownType } from "@/enums/enums";
+import { isFormFieldInValid } from "@/utils/helper";
+import {
+  OrgDepartmentMappingDetailsModel,
+  OrgDesignationMappingDetailsModel,
+  OrgDetailsModel,
+} from "@/models/org";
+import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
+import api from "@/services/api";
+import {
+  GET_DEPARTMENT_DROPDOWN,
+  GET_ORG_DROPDOWN,
+  GET_DESIGNATION_DROPDOWN,
+  CREATE_USER,
+} from "@/constants/api_endpoints";
+import { CreateUserModel } from "@/models/users";
+import { router } from "expo-router";
+import Toast from "react-native-toast-message";
 
 const CreateUser = () => {
-
   // const [userModel , setUserModel]= useState<CreateUserModel>({});
-
 
   const [fNValue, setFNValue] = useState("");
   const [lNValue, setLNValue] = useState("");
@@ -33,7 +45,8 @@ const CreateUser = () => {
   const [selectedDept, setSelectedDept] = useState<AutocompleteDropdownItem>();
 
   const [designs, setDesigns] = useState<AutocompleteDropdownItem[]>([]);
-  const [selectedDesign, setSelectedDesign] = useState<AutocompleteDropdownItem>();
+  const [selectedDesign, setSelectedDesign] =
+    useState<AutocompleteDropdownItem>();
 
   const [autoCompleteLoading, setAutoCompleteLoading] = useState(false);
 
@@ -52,8 +65,6 @@ const CreateUser = () => {
         break;
     }
   }, []);
-
-
 
   const getDropdownSuggestionsUrl = (type: OrgDropdownType) => {
     switch (type) {
@@ -79,7 +90,7 @@ const CreateUser = () => {
 
       const url = getDropdownSuggestionsUrl(type) + `?name=${q}`;
       console.log("url", url);
-      
+
       api
         .get(url)
         .then((response) => {
@@ -158,7 +169,6 @@ const CreateUser = () => {
       designationId: selectedDesign?.id,
     };
 
-    
     setErrors([]);
 
     api
@@ -168,11 +178,12 @@ const CreateUser = () => {
         console.log(response.data.data);
         Toast.show({
           type: "success",
-          text1: "Check your email",
-          text2: "Crendential have been sent to your email",
+          text1: "User created successfully",
+          // text2: "Crendential have been sent to your email",
         });
         setIsLoading(false);
-        router.replace("/(auth)/login");
+        router.push({ pathname: "/users/users_list" });
+        // router.replace("/(auth)/login");
       })
       .catch((e) => {
         console.error(e.response?.data);
@@ -183,30 +194,27 @@ const CreateUser = () => {
         }
         setIsLoading(false);
       });
-
-  }
+  };
 
   return (
     <ScrollView automaticallyAdjustKeyboardInsets={true}>
-      <View className='px-6 mt-2 mb-4 '>
+      <View className="px-6 mt-2 mb-4 ">
         <FormControl
           isInvalid={isFormFieldInValid("firstName", errors).length > 0}
         >
           <FormControlLabel className="mb-1 p-1 mt-4 ">
             <FormControlLabelText>First Name</FormControlLabelText>
           </FormControlLabel>
-          <Input variant='outline' size='md' >
+          <Input variant="outline" size="md">
             <InputField
-              placeholder='Enter here'
+              placeholder="Enter here"
               value={fNValue}
-              onChangeText={
-                (text) => {
-                  const alphabeticRegex = /^[a-zA-Z\s]*$/;
-                  if (alphabeticRegex.test(text)) {
-                    setFNValue(text);
-                  }
+              onChangeText={(text) => {
+                const alphabeticRegex = /^[a-zA-Z\s]*$/;
+                if (alphabeticRegex.test(text)) {
+                  setFNValue(text);
                 }
-              }
+              }}
             />
           </Input>
           <FormControlError>
@@ -220,52 +228,45 @@ const CreateUser = () => {
           <FormControlLabel className="mb-1 p-1 mt-4 ">
             <FormControlLabelText>Last Name</FormControlLabelText>
           </FormControlLabel>
-          <Input variant='outline' size='md' >
+          <Input variant="outline" size="md">
             <InputField
-              placeholder='Enter here '
+              placeholder="Enter here "
               value={lNValue}
-              onChangeText={
-                (text) => {
-                  const alphabeticRegex = /^[a-zA-Z\s]*$/;
-                  if (alphabeticRegex.test(text)) {
-                    setLNValue(text);
-                  }
+              onChangeText={(text) => {
+                const alphabeticRegex = /^[a-zA-Z\s]*$/;
+                if (alphabeticRegex.test(text)) {
+                  setLNValue(text);
                 }
-              }
+              }}
             />
           </Input>
-
         </FormControl>
-
 
         <FormControl>
           <FormControlLabel className="mb-1 p-1 mt-4 ">
             <FormControlLabelText>Mobile Number</FormControlLabelText>
           </FormControlLabel>
-          <Input variant='outline' size='md' >
+          <Input variant="outline" size="md">
             <InputField
-              placeholder='Enter here '
+              placeholder="Enter here "
               keyboardType="numeric"
               value={mNumber}
-              onChangeText={
-                (text) => {
-                  const numRegex = /^[0-9]*$/;
-                  if (numRegex.test(text)) {
-                    setMNumber(text);
-                  }
+              onChangeText={(text) => {
+                const numRegex = /^[0-9]*$/;
+                if (numRegex.test(text)) {
+                  setMNumber(text);
                 }
-              }
+              }}
             />
           </Input>
-
         </FormControl>
         <FormControl>
           <FormControlLabel className="mb-1 p-1 mt-4 ">
             <FormControlLabelText>Email Id</FormControlLabelText>
           </FormControlLabel>
-          <Input variant='outline' size='md' >
+          <Input variant="outline" size="md">
             <InputField
-              placeholder='customer@gmail.com'
+              placeholder="customer@gmail.com"
               onChangeText={(text) => {
                 setEmailValue(text);
               }}
@@ -294,9 +295,7 @@ const CreateUser = () => {
             <InputField />
           </Input> */}
 
-        <FormControl
-          isInvalid={isFormFieldInValid("orgId", errors).length > 0}
-        >
+        <FormControl isInvalid={isFormFieldInValid("orgId", errors).length > 0}>
           <FormControlLabel className="mb-1 mt-4 p-1">
             <FormControlLabelText>Organization</FormControlLabelText>
           </FormControlLabel>
@@ -363,18 +362,17 @@ const CreateUser = () => {
           </FormControlError>
         </FormControl>
 
-        <View className='p-1 mt-6 mb-1'>
-          <Button className='bg-primary-950 rounded-lg h-12 shadow-sm'
-           onPress={createUser}
-           
+        <View className="p-1 mt-6 mb-1">
+          <Button
+            className="bg-primary-950 rounded-lg h-12 shadow-sm"
+            onPress={createUser}
           >
-          <ButtonText className='text-white'>Submit</ButtonText>
+            <ButtonText className="text-white">Submit</ButtonText>
           </Button>
         </View>
-      </View >
+      </View>
     </ScrollView>
+  );
+};
 
-  )
-}
-
-export default CreateUser
+export default CreateUser;

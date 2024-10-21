@@ -49,6 +49,7 @@ import { getFileName } from "@/utils/helper";
 import Toast from "react-native-toast-message";
 import LoadingBar from "@/components/LoadingBar";
 import {
+  
   AutocompleteDropdown,
   AutocompleteDropdownItem,
 } from "react-native-autocomplete-dropdown";
@@ -98,7 +99,8 @@ const RegistrationScreen = () => {
 
   const [isLead, setIsLead] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = 
+  useState(true);
 
   const [errors, setErrors] = useState<ErrorModel[]>([]);
 
@@ -462,6 +464,7 @@ const RegistrationScreen = () => {
                     <InputField
                       placeholder="Enter here"
                       defaultValue={customerLeadDetailsModel?.firstName ?? ""}
+                    
                       onChangeText={(e) => {
                         if (customerLeadDetailsModel) {
                           customerLeadDetailsModel.firstName = e;
@@ -506,6 +509,7 @@ const RegistrationScreen = () => {
                     <InputField
                       placeholder="customer@business.com"
                       defaultValue={customerLeadDetailsModel?.email ?? ""}
+                      keyboardType="email-address"
                       onChangeText={(e) => {
                         if (customerLeadDetailsModel) {
                           customerLeadDetailsModel.email = e;
@@ -529,6 +533,7 @@ const RegistrationScreen = () => {
                     <InputField
                       placeholder="Enter here"
                       defaultValue={customerLeadDetailsModel?.mobile ?? ""}
+                      keyboardType="numeric"
                       onChangeText={(e) => {
                         if (customerLeadDetailsModel) {
                           customerLeadDetailsModel.mobile = e;
@@ -557,9 +562,11 @@ const RegistrationScreen = () => {
                       defaultValue={
                         customerLeadDetailsModel?.alternateMobile ?? ""
                       }
+                      keyboardType="numeric"
                       onChangeText={(e) => {
                         if (customerLeadDetailsModel) {
                           customerLeadDetailsModel.alternateMobile = e;
+                          
                         }
                       }}
                     />

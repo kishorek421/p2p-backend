@@ -39,13 +39,16 @@ export default function RootLayout() {
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(root)" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
-                      {/* devices */}
-          <Stack.Screen name="devices/devices_list" />
-          <Stack.Screen name="devices/device_details/[deviceId]" />
-          <Stack.Screen name="devices/create_device"/>
-          {/* employees */}
-          <Stack.Screen name="employees/employees_list" />
-          <Stack.Screen name="employees/employee_details/[employeeId]" />
+            {/* devices */}
+            <Stack.Screen name="devices/devices_list" />
+            <Stack.Screen name="devices/device_details/[deviceId]" />
+            <Stack.Screen name="devices/create_device" />
+            {/* employees */}
+            <Stack.Screen name="employees/employees_list" />
+            <Stack.Screen name="employees/employee_details/[employeeId]" />
+            {/* users */}
+            <Stack.Screen name="users/create_user" />
+            <Stack.Screen name="users/users_list" />
           </Stack>
           <Toast />
         </AuthProvider>

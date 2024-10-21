@@ -5,3 +5,7 @@ export enum GeoLocationType {
   STATE,
   COUNTRY,
 }
+
+export enum OrgDropdownType {
+  ORGANIZATION, DEPARTMENT, DESIGNATION,
+}

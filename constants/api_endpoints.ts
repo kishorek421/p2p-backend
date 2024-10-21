@@ -54,3 +54,13 @@ export const GET_IMPACTS ="/configurations/getConfigurationsForDropdown";
 
 // employees
 export const GET_EMPLOYEES_LIST = "/employees/activeEmployee/list";
+
+// orgs
+export const GET_ORG_DROPDOWN = "/organisation/getOrganisationDropdown";
+export const GET_DEPARTMENT_DROPDOWN = "/organisation/department/getDepartmentByNameAndOrgId";
+export const GET_DESIGNATION_DROPDOWN = "/organisation/designation/getDesignationListByIds";
+// "/organisation/designation/getDesignationListByName"; 
+
+// users
+export const CREATE_USER = "/users/create";
+export const GET_USER_LIST ="/users/list";

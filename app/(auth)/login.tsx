@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text } from "react-native";
+import { Linking, Pressable, Text, View } from "react-native";
 import {
   FormControl,
   FormControlError,
@@ -98,24 +98,15 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView>
-      <VStack>
-        <LottieView
-          ref={animationRef}
-          source={require("../../assets/lottie/login.json")}
-          autoPlay
-          loop
-          style={{
-            height: 250,
-          }}
-        />
-        <VStack className="mt-8 p-4">
-          <Text className="text-2xl font-bold">
-            Welcome <Text className="color-primary-950"> </Text>
+      <View className="h-full flex justify-between pb-14">
+        <VStack className="mt-2 p-4 h-full">
+          <Text className="text-2xl font-bold text-primary-950">
+            Welcome 👋
           </Text>
-          <Text className="color-gray-400 text-sm">
-            Log in to continue where you left off
+          <Text className="color-gray-400 text-md mt-1 pe-4 leading-6">
+            Log in to manage your organization's IT issues seamlessly
           </Text>
-          <VStack className="gap-4 mt-8">
+          <VStack className="gap-4 mt-4">
             <FormControl
               isInvalid={isFormFieldInValid("email", errors).length > 0}
             >
@@ -185,7 +176,27 @@ const LoginScreen = () => {
             </Text>
           </VStack>
         </VStack>
-      </VStack>
+        <Text className=" text-sm text-center px-12 ">
+          By logging in, you agree to our{" "}
+          <Text
+            onPress={() => {
+              Linking.openURL("https://godesk.co.in/Privacy_Policy.html");
+            }}
+            className="text-primary-950 font-bold"
+          >
+            Terms & Conditions
+          </Text>{" "}
+          and{" "}
+          <Text
+            onPress={() => {
+              Linking.openURL("https://godesk.co.in/Privacy_Policy.html");
+            }}
+            className="font-bold text-primary-950"
+          >
+            Privacy Policy
+          </Text>
+        </Text>
+      </View>
     </SafeAreaView>
   );
 };

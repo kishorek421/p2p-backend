@@ -462,13 +462,16 @@ const RegistrationScreen = () => {
           <Box className="p-4">
             <VStack>
               <Text className="text-2xl font-bold">
-                Launch your experience 🚀
+                Register Your Organization 🚀
               </Text>
-              <Text className="color-gray-400 text-sm mt-1">
-                Let's explore more about you
+              <Text className="color-gray-500 text-sm mt-1">
+                Please provide the details below to register your organization.
+                As the POC (Point of Contact), you’ll be able to manage your
+                organization’s account, add users, and oversee the tickets
+                raised by your employees.
               </Text>
-              <Text className="font-bold text-lg mt-8">Profile Details</Text>
-              <VStack className="gap-4 mt-3">
+              {/* <Text className="font-bold text-lg mt-8">Profile Details</Text> */}
+              {/* <VStack className="gap-4 mt-3">
                 <FormControl
                   isInvalid={isFormFieldInValid("firstName").length > 0}
                 >
@@ -592,10 +595,10 @@ const RegistrationScreen = () => {
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
-              </VStack>
-              <Text className="font-bold text-lg mt-8">
+              </VStack> */}
+              {/* <Text className="font-bold text-lg mt-8">
                 Organization Details
-              </Text>
+              </Text> */}
               <VStack className="gap-4 mt-3">
                 <FormControl
                   isInvalid={isFormFieldInValid("orgImage").length > 0}
@@ -810,6 +813,124 @@ const RegistrationScreen = () => {
                   </FormControlError>
                 </FormControl>
                 <FormControl
+                  isInvalid={isFormFieldInValid("firstName").length > 0}
+                >
+                  <FormControlLabel className="mb-1">
+                    <FormControlLabelText>POC First Name</FormControlLabelText>
+                  </FormControlLabel>
+                  <Input variant="outline" size="md">
+                    <InputField
+                      placeholder="Enter here"
+                      defaultValue={customerLeadDetailsModel?.firstName ?? ""}
+                      onChangeText={(e) => {
+                        if (customerLeadDetailsModel) {
+                          customerLeadDetailsModel.firstName = e;
+                        }
+                      }}
+                    />
+                  </Input>
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {isFormFieldInValid("firstName")}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
+                <FormControl
+                  isInvalid={isFormFieldInValid("lastName").length > 0}
+                >
+                  <FormControlLabel className="mb-1">
+                    <FormControlLabelText>POC Last Name</FormControlLabelText>
+                  </FormControlLabel>
+                  <Input variant="outline" size="md">
+                    <InputField
+                      placeholder="Enter here"
+                      defaultValue={customerLeadDetailsModel?.lastName ?? ""}
+                      onChangeText={(e) => {
+                        if (customerLeadDetailsModel) {
+                          customerLeadDetailsModel.lastName = e;
+                        }
+                      }}
+                    />
+                  </Input>
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {isFormFieldInValid("lastName")}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
+                <FormControl isInvalid={isFormFieldInValid("email").length > 0}>
+                  <FormControlLabel className="mb-1">
+                    <FormControlLabelText>POC Email</FormControlLabelText>
+                  </FormControlLabel>
+                  <Input variant="outline" size="md">
+                    <InputField
+                      placeholder="customer@business.com"
+                      defaultValue={customerLeadDetailsModel?.email ?? ""}
+                      onChangeText={(e) => {
+                        if (customerLeadDetailsModel) {
+                          customerLeadDetailsModel.email = e;
+                        }
+                      }}
+                    />
+                  </Input>
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {isFormFieldInValid("email")}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
+                <FormControl
+                  isInvalid={isFormFieldInValid("mobile").length > 0}
+                >
+                  <FormControlLabel className="mb-1">
+                    <FormControlLabelText>POC Mobile No.</FormControlLabelText>
+                  </FormControlLabel>
+                  <Input variant="outline" size="md">
+                    <InputField
+                      placeholder="Enter here"
+                      defaultValue={customerLeadDetailsModel?.mobile ?? ""}
+                      onChangeText={(e) => {
+                        if (customerLeadDetailsModel) {
+                          customerLeadDetailsModel.mobile = e;
+                        }
+                      }}
+                    />
+                  </Input>
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {isFormFieldInValid("mobile")}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
+                <FormControl
+                  isRequired={true}
+                  isInvalid={isFormFieldInValid("alternateMobile").length > 0}
+                >
+                  <FormControlLabel className="mb-1">
+                    <FormControlLabelText>
+                      POC Alternate Mobile No.
+                    </FormControlLabelText>
+                  </FormControlLabel>
+                  <Input variant="outline" size="md">
+                    <InputField
+                      placeholder="Enter here"
+                      defaultValue={
+                        customerLeadDetailsModel?.alternateMobile ?? ""
+                      }
+                      onChangeText={(e) => {
+                        if (customerLeadDetailsModel) {
+                          customerLeadDetailsModel.alternateMobile = e;
+                        }
+                      }}
+                    />
+                  </Input>
+                  <FormControlError>
+                    <FormControlErrorText>
+                      {isFormFieldInValid("alternateMobile")}
+                    </FormControlErrorText>
+                  </FormControlError>
+                </FormControl>
+                <FormControl
                   isInvalid={isFormFieldInValid("description").length > 0}
                 >
                   <FormControlLabel className="mb-1">
@@ -841,7 +962,7 @@ const RegistrationScreen = () => {
                   isInvalid={isFormFieldInValid("address").length > 0}
                 >
                   <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Address Line 1</FormControlLabelText>
+                    <FormControlLabelText>Address</FormControlLabelText>
                   </FormControlLabel>
                   <Input variant="outline" size="md">
                     <InputField
@@ -1000,7 +1121,7 @@ const RegistrationScreen = () => {
               {/*  <Text className="text-white font-medium">Save</Text>*/}
               {/*</Pressable>*/}
               <Button
-                className="bg-primary-950 mt-8 mb-8"
+                className="bg-primary-950 mt-8 mb-8 h-12 rounded-lg shadow-sm"
                 onPress={updateCustomerLeadDetails}
               >
                 <ButtonText>Save</ButtonText>

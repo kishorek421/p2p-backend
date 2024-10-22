@@ -22,7 +22,7 @@ import { DropdownModel, ErrorModel } from "@/models/common";
 import { getFileName, isFormFieldInValid } from "@/utils/helper";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { Button, ButtonText } from "@/components/ui/button";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import AntIcon from "react-native-vector-icons/AntDesign";
@@ -227,6 +227,10 @@ const RaiseTicketScreen = () => {
   return (
     <GestureHandlerRootView>
       <VStack className="p-4 gap-4">
+        {/* <Text className="text-gray-800 ">
+          Facing issues with your laptop or PC? Let us know, and our expert
+          engineers will be there to resolve it.
+        </Text> */}
         <FormControl
           isInvalid={isFormFieldInValid("assetInUseId", errors).length > 0}
         >
@@ -376,6 +380,13 @@ const RaiseTicketScreen = () => {
           onPress={raiseTicket}
           isLoading={isLoading}
         />
+        <View className="mt-4">
+          <Text className="text-gray-600 text-semibold">Note:</Text>
+          <Text className="mt-1 text-gray-600">
+            Once submitted, our team will review your issue and send an engineer
+            to resolve it.
+          </Text>
+        </View>
       </VStack>
       <ImagePickerComponent
         onImagePicked={(uri) => {

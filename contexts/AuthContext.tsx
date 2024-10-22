@@ -54,7 +54,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setUser(null);
     // Redirect to the login screen after logout
     router.replace({ pathname: "/(auth)/login" });
-    // router.replace({ pathname: "/users/create_user" });
   };
 
   return (

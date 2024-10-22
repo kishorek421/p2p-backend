@@ -9,7 +9,7 @@ interface SubmitButtonProps {
 const SubmitButton = ({ isLoading, onPress, btnText }: SubmitButtonProps) => {
   return (
     <Button
-      className={`bg-primary-950 mt-6`}
+      className={`bg-primary-950 mt-6 h-12 shadow-sm rounded-lg`}
       onPress={onPress}
       disabled={isLoading}
     >

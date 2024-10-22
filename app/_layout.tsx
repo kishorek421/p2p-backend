@@ -38,6 +38,7 @@ export default function RootLayout() {
             />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(root)" options={{ headerShown: false }} />
+            <Stack.Screen name="welcome" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
             {/* devices */}
             <Stack.Screen name="devices/devices_list" />

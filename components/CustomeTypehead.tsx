@@ -1,5 +1,5 @@
 import { Text, Dimensions, Platform } from "react-native";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   AutocompleteDropdown,
   AutocompleteDropdownItem,
@@ -31,7 +31,11 @@ const CustomeTypehead = ({
 
   // const onOpenSuggestionsList = useCallback((isOpened: boolean) => {}, []);
 
-  console.log(suggestions);
+  // console.log(suggestions);
+
+  useEffect(() => {
+    console.log("selectedValue", selectedValue);
+  }, [selectedValue]);
 
   return (
     <AutocompleteDropdown

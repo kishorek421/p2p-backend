@@ -22,7 +22,7 @@ import { DropdownModel, ErrorModel } from "@/models/common";
 import { getFileName, isFormFieldInValid } from "@/utils/helper";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
-import { Text, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Button, ButtonText } from "@/components/ui/button";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import AntIcon from "react-native-vector-icons/AntDesign";
@@ -225,7 +225,7 @@ const RaiseTicketScreen = () => {
   };
 
   return (
-    <GestureHandlerRootView>
+    <ScrollView>
       <VStack className="p-4 gap-4">
         {/* <Text className="text-gray-800 ">
           Facing issues with your laptop or PC? Let us know, and our expert
@@ -303,24 +303,35 @@ const RaiseTicketScreen = () => {
             <Text className="text-gray-500">{assetImages.length}/3</Text>
           </HStack>
           {assetImages.map((uri, index) => (
-            <HStack
-              key={index}
-              className="bg-white p-3 rounded-md justify-between mt-2"
+            <TouchableOpacity
+              onPress={() => {
+                router.push({
+                  pathname: "/image_viewer/[uri]",
+                  params: {
+                    uri: uri,
+                  },
+                });
+              }}
             >
-              <Text className="font-medium">{getFileName(uri)}</Text>
-              <AntIcon
-                onPress={() => {
-                  setAssetImages((prevState) => {
-                    prevState.splice(index, 1);
-                    return [...prevState];
-                  });
-                }}
-                name="close"
-                className="ms-2"
-                color="black"
-                size={18}
-              />
-            </HStack>
+              <HStack
+                key={index}
+                className="bg-white p-3 rounded-md justify-between mt-2"
+              >
+                <Text className="font-medium">{getFileName(uri)}</Text>
+                <AntIcon
+                  onPress={() => {
+                    setAssetImages((prevState) => {
+                      prevState.splice(index, 1);
+                      return [...prevState];
+                    });
+                  }}
+                  name="close"
+                  className="ms-2"
+                  color="black"
+                  size={18}
+                />
+              </HStack>
+            </TouchableOpacity>
           ))}
           {assetImages.length < 3 && (
             <Button
@@ -395,7 +406,7 @@ const RaiseTicketScreen = () => {
         setIsModalVisible={setIsModalVisible}
         bottomSheetRef={bottomSheetRef}
       />
-    </GestureHandlerRootView>
+    </ScrollView>
   );
 };
 

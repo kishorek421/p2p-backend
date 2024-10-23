@@ -46,7 +46,7 @@ const TicketListItemLayout = ({
           <HStack className="justify-between mt-4">
             <Text>Issue Type:</Text>
             <Text className="  font-medium color-gray-600">
-              {ticketModel.issueTypeDetails?.value ?? "-"}
+              {ticketModel.issueTypeDetails?.name ?? "-"}
             </Text>
           </HStack>
           <Divider className="my-4" />

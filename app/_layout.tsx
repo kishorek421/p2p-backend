@@ -66,6 +66,13 @@ export default function RootLayout() {
               name="users/user_details/[userId]"
               options={{ headerTitle: "User Details" }}
             />
+            <Stack.Screen
+              name="image_viewer/[uri]"
+              options={{
+                presentation: "modal",
+                headerShown: false,
+              }}
+            />
           </Stack>
           <Toast />
         </AuthProvider>

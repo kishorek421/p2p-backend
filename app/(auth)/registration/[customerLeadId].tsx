@@ -1,4 +1,4 @@
-import { ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import {
@@ -11,6 +11,7 @@ import {
 import { Input, InputField } from "@/components/ui/input";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ConfigurationModel } from "@/models/configurations";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import api from "@/services/api";
 import {
   CREATE_CUSTOMER,
@@ -51,6 +52,8 @@ import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 import { GeoLocationType } from "@/enums/enums";
 import CustomeTypehead from "@/components/CustomeTypehead";
 import SubmitButton from "@/components/SubmitButton";
+import { getItem } from "expo-secure-store";
+import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
 
 const RegistrationScreen = () => {
   const { customerLeadId } = useLocalSearchParams();
@@ -102,7 +105,7 @@ const RegistrationScreen = () => {
 
   const [isModalVisible, setIsModalVisible] = useState(false);
 
-  const [assetImage, setAssetImage] = useState("");
+  const [assetImage, setAssetImage] = useState<string>("");
 
   const [autoCompleteLoading, setAutoCompleteLoading] = useState(false);
 
@@ -305,6 +308,10 @@ const RegistrationScreen = () => {
               router.replace({ pathname: "./home" });
             }
 
+            if (data.orgImage) {
+              setAssetImage(data.orgImage);
+            }
+
             setCustomerLeadDetailsModel(data);
             setIsLead(true);
 
@@ -312,22 +319,52 @@ const RegistrationScreen = () => {
             setSelectedCategoryOfOrg(data.categoryOfOrgDetails ?? {});
             setSelectedSizeOfOrg(data.sizeOfOrgDetails ?? {});
 
+            setPincodes([
+              {
+                title: (data.pincodeDetails?.pincode ?? "").toString(),
+                id: data.pincodeDetails?.id ?? "",
+              },
+            ]);
             setSelectedPincode({
               title: (data.pincodeDetails?.pincode ?? "").toString(),
               id: data.pincodeDetails?.id ?? "",
             });
+            setAreas([
+              {
+                title: data.areaDetails?.areaName ?? "",
+                id: data.areaDetails?.id ?? "",
+              },
+            ]);
             setSelectedArea({
               title: data.areaDetails?.areaName ?? "",
               id: data.areaDetails?.id ?? "",
             });
+            setCities([
+              {
+                title: data.cityDetails?.cityName ?? "",
+                id: data.cityDetails?.id ?? "",
+              },
+            ]);
             setSelectedCity({
               title: data.cityDetails?.cityName ?? "",
               id: data.cityDetails?.id ?? "",
             });
+            setStates([
+              {
+                title: data.stateDetails?.stateName ?? "",
+                id: data.stateDetails?.id ?? "",
+              },
+            ]);
             setSelectedState({
               title: data.stateDetails?.stateName ?? "",
               id: data.stateDetails?.id ?? "",
             });
+            setCountries([
+              {
+                title: data.countryDetails?.countryName ?? "",
+                id: data.countryDetails?.id ?? "",
+              },
+            ]);
             setSelectedCountry({
               title: data.countryDetails?.countryName ?? "",
               id: data.countryDetails?.id ?? "",
@@ -408,16 +445,27 @@ const RegistrationScreen = () => {
           "Content-Type": "multipart/form-data",
         },
       })
-      .then((response) => {
+      .then(async (response) => {
         // router.push({pathname: ""});
         console.log(response.data.data);
-        Toast.show({
-          type: "success",
-          text1: "Check your email",
-          text2: "Crendential have been sent to your email",
-        });
+        const token = getItem(AUTH_TOKEN_KEY);
+        if (token) {
+          router.replace("/(root)/home");
+          Toast.show({
+            type: "success",
+            text1: "Registration Completed",
+            text2: "Your organization registered successfully",
+          });
+        } else {
+          Toast.show({
+            type: "success",
+            text1: "Check your email",
+            text2: "Your login crendentials has sent to your email",
+          });
+          router.replace("/(auth)/login");
+        }
+
         setIsLoading(false);
-        router.replace("/(auth)/login");
       })
       .catch((e) => {
         console.error("e ->", e);
@@ -427,6 +475,11 @@ const RegistrationScreen = () => {
           setErrors(errors);
         }
         setIsLoading(false);
+        Toast.show({
+          type: "error",
+          text1: "Invalid inputs",
+          text2: "Enter a valid details to register your organization",
+        });
       });
   };
 
@@ -446,7 +499,7 @@ const RegistrationScreen = () => {
         <LoadingBar />
       ) : (
         <ScrollView automaticallyAdjustKeyboardInsets={true}>
-          <Box className="p-4">
+          <Box className="p-4 mb-8">
             <VStack>
               <Text className="text-2xl font-bold">
                 Register Your Organization 🚀
@@ -608,19 +661,19 @@ const RegistrationScreen = () => {
                         source={{ uri: assetImage }}
                         className="w-full h-36 rounded-xl absolute"
                       />
-                      <View className="w-full flex justify-center items-center gap-4 h-36 bg-black/40 rounded-xl">
-                        <Button
-                          className="bg-secondary-950 w-36"
-                          onPress={() => toggleImagePicker()}
+                      <View className="w-full flex items-end gap-4 h-36 shadow-soft-2  rounded-xl">
+                        <TouchableOpacity
+                          className="mt-2 me-2"
+                          onPress={() => {
+                            setAssetImage("");
+                          }}
                         >
-                          <ButtonText>Choose</ButtonText>
-                          <Icon
-                            name="upload"
-                            className="ms-2"
+                          <AntDesign
+                            name="closecircle"
+                            size={20}
                             color="white"
-                            size={18}
                           />
-                        </Button>
+                        </TouchableOpacity>
                       </View>
                     </View>
                   ) : (
@@ -681,6 +734,7 @@ const RegistrationScreen = () => {
                   <Input variant="outline" size="md">
                     <InputField
                       placeholder="Enter here"
+                      keyboardType="number-pad"
                       defaultValue={customerLeadDetailsModel?.orgMobile ?? ""}
                       onChangeText={(e) => {
                         if (customerLeadDetailsModel) {
@@ -852,6 +906,7 @@ const RegistrationScreen = () => {
                   <Input variant="outline" size="md">
                     <InputField
                       placeholder="customer@business.com"
+                      keyboardType="email-address"
                       defaultValue={customerLeadDetailsModel?.email ?? ""}
                       onChangeText={(e) => {
                         if (customerLeadDetailsModel) {
@@ -875,6 +930,7 @@ const RegistrationScreen = () => {
                   <Input variant="outline" size="md">
                     <InputField
                       placeholder="Enter here"
+                      keyboardType="number-pad"
                       defaultValue={customerLeadDetailsModel?.mobile ?? ""}
                       onChangeText={(e) => {
                         if (customerLeadDetailsModel) {
@@ -901,6 +957,7 @@ const RegistrationScreen = () => {
                   <Input variant="outline" size="md">
                     <InputField
                       placeholder="Enter here"
+                      keyboardType="number-pad"
                       defaultValue={
                         customerLeadDetailsModel?.alternateMobile ?? ""
                       }
@@ -1092,7 +1149,7 @@ const RegistrationScreen = () => {
                     getSuggestions={getSuggestions}
                     setSelectedValue={setSelectedCountry}
                     loading={autoCompleteLoading}
-                    placeholder="Select city"
+                    placeholder="Select country"
                   />
                   <FormControlError>
                     <FormControlErrorText>

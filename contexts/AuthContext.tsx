@@ -1,8 +1,14 @@
 import React, { createContext, useState, useEffect, ReactNode } from "react";
 import { useRouter } from "expo-router";
-import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
+import {
+  AUTH_TOKEN_KEY,
+  CUSTOMER_LEAD_ID,
+  IS_LEAD,
+  IS_WELCOMED,
+} from "@/constants/storage_keys";
 import { getItem, removeItem } from "@/utils/secure_store";
 import { ThemeProvider } from "@react-navigation/native";
+import { setItem } from "expo-secure-store";
 
 export const AuthContext = createContext({});
 
@@ -26,9 +32,32 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // } catch (error) {
         //   console.error("Failed to fetch user:", error);
         // }
-        router.replace({ pathname: "/(root)/home" });
+        const isLead = await getItem(IS_LEAD);
+        if (isLead === undefined) {
+          router.replace({ pathname: "/(auth)/login" });
+        } else if (isLead === "true") {
+          const customerLeadId = await getItem(CUSTOMER_LEAD_ID);
+          if (customerLeadId) {
+            router.replace({
+              pathname: "/(auth)/registration/[customerLeadId]",
+              params: {
+                customerLeadId: customerLeadId,
+              },
+            });
+          } else {
+            router.replace({ pathname: "/(auth)/login" });
+          }
+        } else {
+          router.replace({ pathname: "/(root)/home" });
+        }
       } else {
-        logout();
+        const isWelcomed = await getItem(IS_WELCOMED);
+        console.log("isWelcomed", isWelcomed);
+        if (isWelcomed === "true") {
+          router.replace({ pathname: "/(auth)/login" });
+        } else {
+          router.replace({ pathname: "/welcome" });
+        }
       }
       setLoading(false);
     };

@@ -74,7 +74,7 @@ const TicketDetails = () => {
           <VStack>
             <Text>Issue Type</Text>
             <Text className=" font-medium color-gray-600 mt-1">
-              {ticketModel.issueTypeDetails?.value ?? "-"}
+              {ticketModel.issueTypeDetails?.name ?? "-"}
             </Text>
           </VStack>
           <VStack>

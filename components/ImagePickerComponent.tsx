@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import BottomSheet from "./BottomSheet";
+import Entypo from "@expo/vector-icons/Entypo";
 
 type ImagePickerComponentProps = {
   onImagePicked: (uri: string) => void;
@@ -171,10 +172,16 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
     <BottomSheet initialHeight={200} ref={bottomSheetRef}>
       <View style={styles.modalContent}>
         <TouchableOpacity style={styles.option} onPress={pickImage}>
-          <Text style={styles.optionText}>Pick an Image from Gallery</Text>
+          <View className="flex-row w-full justify-center items-center">
+            <Entypo name="folder-images" size={20} color="black" />
+            <Text className="ms-2 text-lg">Pick an Image from Gallery</Text>
+          </View>
         </TouchableOpacity>
         <TouchableOpacity style={styles.option} onPress={takePhoto}>
-          <Text style={styles.optionText}>Take a Photo</Text>
+          <View className="flex-row w-full justify-center items-center">
+            <Entypo name="camera" size={20} color="black" />
+            <Text className="ms-2 text-lg">Take a Photo</Text>
+          </View>
         </TouchableOpacity>
       </View>
     </BottomSheet>

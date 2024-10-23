@@ -17,11 +17,17 @@ import api from "@/services/api";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
 import { isFormFieldInValid } from "@/utils/helper";
 import SubmitButton from "@/components/SubmitButton";
-import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/storage_keys";
+import {
+  AUTH_TOKEN_KEY,
+  CUSTOMER_LEAD_ID,
+  IS_LEAD,
+  REFRESH_TOKEN_KEY,
+} from "@/constants/storage_keys";
 import { setItem } from "@/utils/secure_store";
 import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import LottieView from "lottie-react-native";
+import Toast from "react-native-toast-message";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -65,9 +71,13 @@ const LoginScreen = () => {
             if (data && data.id) {
               let leadStatus = data.onBoardingStatusDetails?.key;
 
+              await setItem(CUSTOMER_LEAD_ID, data.id);
+
               if (leadStatus === CUSTOMER_LEAD_ACTIVE) {
+                await setItem(IS_LEAD, "false");
                 router.replace({ pathname: "/home" });
               } else {
+                await setItem(IS_LEAD, "true");
                 router.replace({
                   pathname: "/(auth)/registration/[customerLeadId]",
                   params: { customerLeadId: data.id },
@@ -93,6 +103,11 @@ const LoginScreen = () => {
           setErrors(errors);
         }
         setIsLoading(false);
+        Toast.show({
+          type: "error",
+          text1: "Invalid credentials",
+          text2: "Enter a valid email and password",
+        });
       });
   };
 
@@ -116,11 +131,13 @@ const LoginScreen = () => {
               <Input
                 variant="outline"
                 size="md"
+                
                 isDisabled={false}
                 isInvalid={false}
                 isReadOnly={false}
               >
                 <InputField
+                keyboardType="email-address"
                   placeholder="customer@business.com"
                   onChangeText={(e) => {
                     setEmail(e);
@@ -148,6 +165,7 @@ const LoginScreen = () => {
               >
                 <InputField
                   type="password"
+                  keyboardType="visible-password"
                   placeholder="•••••••••"
                   onChangeText={(e) => {
                     setPassword(e);

@@ -50,7 +50,7 @@ const RecentTicketHistoryLayout = ({ placing }: { placing: string }) => {
   return recentTickets.length === 0 ? (
     <View
       className={`mt-4 bg-gray-200 flex justify-center items-center rounded-lg h-36 ${
-        placing === "home" ? "mx-0" : "mx-6"
+        placing === "home" ? "mx-0" : "mx-4"
       }`}
     >
       <Text className="text-gray-500 text-sm text-center">

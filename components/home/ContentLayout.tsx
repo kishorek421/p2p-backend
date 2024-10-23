@@ -72,7 +72,7 @@ const ContentLayout = ({
                 })
               }
             >
-              <ButtonText>Let us know</ButtonText>
+              <ButtonText>Raise Ticket</ButtonText>
               <Icon
                 name="arrowright"
                 className="ms-3"
@@ -87,7 +87,7 @@ const ContentLayout = ({
           />
         </HStack>
       </Card>
-      <VStack className="mt-8">
+      {/* <VStack className="mt-8">
         <Text className="text-[18px] font-bold">Quick Actions</Text>
         <FlatList
           className="mt-2"
@@ -95,8 +95,6 @@ const ContentLayout = ({
           numColumns={3}
           renderItem={(item) => {
             const icon: any = item.item.icon;
-            // item.item.path
-
             return (
               <TouchableOpacity
                 onPress={() => {
@@ -122,37 +120,7 @@ const ContentLayout = ({
             );
           }}
         />
-
-        {/* <TouchableOpacity
-          className="mt-2"
-          onPress={() => {
-            router.push("/users/create_user");
-          }}
-        >
-          <View></View>
-          <Text>create_users</Text>
-        </TouchableOpacity> */}
-
-        {/* <TouchableOpacity className="mt-2" onPress={() => {
-          router.push({
-            pathname: "/employees/employees_list",
-          });
-        }}>
-
-          <Text>Employees</Text>
-        </TouchableOpacity>
-        <TouchableOpacity className="mt-2" onPress={() => {
-          router.push({
-            pathname: "/employees/employee_details/[employeeId]",
-            params: {
-              employeeId: "123",
-            }
-          });
-
-        }}>
-          <Text>Employee_Id</Text>
-        </TouchableOpacity>  */}
-      </VStack>
+      </VStack> */}
 
       <HStack className="justify-between mt-6">
         <Text className="text-[18px] font-bold">Latest Tickets</Text>

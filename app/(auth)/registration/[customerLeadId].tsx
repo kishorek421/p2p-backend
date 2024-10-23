@@ -1,11 +1,4 @@
-import {
-  Dimensions,
-  Platform,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import {
@@ -44,7 +37,6 @@ import {
   PincodeListItemModel,
   StateListItemModel,
 } from "@/models/geolocations";
-import CustomSelect from "@/components/CustomSelect";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -55,14 +47,10 @@ import Icon from "react-native-vector-icons/AntDesign";
 import { getFileName } from "@/utils/helper";
 import Toast from "react-native-toast-message";
 import LoadingBar from "@/components/LoadingBar";
-import {
-  
-  AutocompleteDropdown,
-  AutocompleteDropdownItem,
-} from "react-native-autocomplete-dropdown";
-import Feather from "react-native-vector-icons/Feather";
+import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 import { GeoLocationType } from "@/enums/enums";
 import CustomeTypehead from "@/components/CustomeTypehead";
+import SubmitButton from "@/components/SubmitButton";
 
 const RegistrationScreen = () => {
   const { customerLeadId } = useLocalSearchParams();
@@ -106,8 +94,7 @@ const RegistrationScreen = () => {
 
   const [isLead, setIsLead] = useState(false);
 
-  const [isLoading, setIsLoading] = 
-  useState(true);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [errors, setErrors] = useState<ErrorModel[]>([]);
 
@@ -1120,12 +1107,18 @@ const RegistrationScreen = () => {
               {/*>*/}
               {/*  <Text className="text-white font-medium">Save</Text>*/}
               {/*</Pressable>*/}
-              <Button
+              <SubmitButton
+                isLoading={isLoading}
+                onPress={updateCustomerLeadDetails}
+                btnText="Save"
+                className=""
+              />
+              {/* <Button
                 className="bg-primary-950 mt-8 mb-8 h-12 rounded-lg shadow-sm"
                 onPress={updateCustomerLeadDetails}
               >
                 <ButtonText>Save</ButtonText>
-              </Button>
+              </Button> */}
             </VStack>
           </Box>
         </ScrollView>

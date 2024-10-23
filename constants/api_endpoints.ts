@@ -10,7 +10,6 @@ export const GET_CONFIGURATIONS_BY_CATEGORY =
 // customer lead
 export const GET_CUSTOMER_LEAD_DETAILS = "/customers/leads/view";
 
-
 // customer
 export const CREATE_CUSTOMER = "/customers/create";
 export const GET_CUSTOMER_DETAILS = "/customers/view";
@@ -45,22 +44,28 @@ export const GET_ASSETS_IN_USE =
   "/assets/assetsInUse/getCustomerAssetsInUseListBySerialNoSearch";
 export const GET_ISSUE_TYPES = "/assets/assetIssueType/getIssueTypesList";
 export const GET_ASSET_MASTERS_LIST = "/assets/assetMaster/getAssetMastersList";
-export const GET_ASSET_DETAILS = "/assets/assetMaster/getAssetMasterDetailsById";
+export const GET_ASSETS_LIST_BY_USER_ID =
+  "assets/assetsInUse/getCustomerAssetsInUseListBySerialNoSearch";
+export const GET_ASSET_DETAILS =
+  "/assets/assetMaster/getAssetMasterDetailsById";
 export const CREATE_ASSET = "/assets/assetMaster/getAssetMastersList";
-export const GET_ASSET_TYPES ="/assets/assetType/getAssetTypesList";
-export const GET_ASSET_MODELS ="/assets/assetModel/getAssetModelsList";
-export const GET_LICENSED_TYPES ="/configurations/getConfigurationsForDropdown";
-export const GET_IMPACTS ="/configurations/getConfigurationsForDropdown";
+export const GET_ASSET_TYPES = "/assets/assetType/getAssetTypesList";
+export const GET_ASSET_MODELS = "/assets/assetModel/getAssetModelsList";
+export const GET_LICENSED_TYPES =
+  "/configurations/getConfigurationsForDropdown";
+export const GET_IMPACTS = "/configurations/getConfigurationsForDropdown";
 
 // employees
 export const GET_EMPLOYEES_LIST = "/employees/activeEmployee/list";
 
 // orgs
 export const GET_ORG_DROPDOWN = "/organisation/getOrganisationDropdown";
-export const GET_DEPARTMENT_DROPDOWN = "/organisation/department/getDepartmentByNameAndOrgId";
-export const GET_DESIGNATION_DROPDOWN = "/organisation/designation/getDesignationListByIds";
-// "/organisation/designation/getDesignationListByName"; 
+export const GET_DEPARTMENT_DROPDOWN =
+  "/organisation/department/getDepartmentByNameAndOrgId";
+export const GET_DESIGNATION_DROPDOWN =
+  "/organisation/designation/getDesignationListByIds";
 
 // users
 export const CREATE_USER = "/users/create";
-export const GET_USER_LIST ="/users/list";
+export const GET_USERS_LIST = "/users/list";
+export const GET_USER_DETAILS = "/users/view";

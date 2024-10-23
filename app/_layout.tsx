@@ -32,24 +32,40 @@ export default function RootLayout() {
       <AutocompleteDropdownContextProvider>
         <AuthProvider>
           <Stack>
-            <Stack.Screen
-              name="index"
-              options={{ headerShown: false, title: "Home" }}
-            />
+            <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
             <Stack.Screen name="(root)" options={{ headerShown: false }} />
             <Stack.Screen name="welcome" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
             {/* devices */}
-            <Stack.Screen name="devices/devices_list" />
-            <Stack.Screen name="devices/device_details/[deviceId]" />
-            <Stack.Screen name="devices/create_device" />
+            <Stack.Screen
+              name="devices/devices_list"
+              options={{ headerTitle: "All Devices", headerBackTitle: "Home" }}
+            />
+            <Stack.Screen
+              name="devices/device_details/[deviceId]"
+              options={{ headerTitle: "Device Details" }}
+            />
+            <Stack.Screen
+              name="devices/create_device"
+              options={{ headerTitle: "Create Device" }}
+            />
             {/* employees */}
             <Stack.Screen name="employees/employees_list" />
             <Stack.Screen name="employees/employee_details/[employeeId]" />
             {/* users */}
-            <Stack.Screen name="users/create_user" />
-            <Stack.Screen name="users/users_list" />
+            <Stack.Screen
+              name="users/create_user"
+              options={{ headerTitle: "Create User" }}
+            />
+            <Stack.Screen
+              name="users/users_list"
+              options={{ headerTitle: "All Users", headerBackTitle: "Home" }}
+            />
+            <Stack.Screen
+              name="users/user_details/[userId]"
+              options={{ headerTitle: "User Details" }}
+            />
           </Stack>
           <Toast />
         </AuthProvider>

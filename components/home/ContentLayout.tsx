@@ -1,4 +1,10 @@
-import { FlatList, FlatListComponent, Image, Text, TouchableWithoutFeedback, View } from "react-native";
+import {
+  FlatList,
+  Image,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Card } from "@/components/ui/card";
 import { HStack } from "@/components/ui/hstack";
@@ -10,17 +16,16 @@ import { CustomerDetailsModel } from "@/models/customers";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { router } from "expo-router";
 import { ServiceItemModel } from "@/models/ui/service_item_model";
-import AntDesign from '@expo/vector-icons/AntDesign';
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const ContentLayout = ({
   customerDetails,
 }: {
   customerDetails: CustomerDetailsModel;
 }) => {
-
   const serviceTabs: ServiceItemModel[] = [
     {
-      label: "My Devices",
+      label: "Devices",
       icon: "laptop",
       path: "/devices/devices_list",
     },
@@ -32,15 +37,14 @@ const ContentLayout = ({
     {
       label: " Users",
       icon: "user",
-      path: "/users/user_list"
+      path: "/users/users_list",
     },
-     
   ];
 
   return (
     <VStack className="mt-4">
       <Text className="text-2xl font-bold">
-        Hello
+        Hello{" "}
         <Text className="color-primary-950">
           {customerDetails.firstName ?? "-"} {customerDetails.lastName ?? ""} 👋
         </Text>
@@ -85,45 +89,49 @@ const ContentLayout = ({
       </Card>
       <VStack className="mt-8">
         <Text className="text-[18px] font-bold">Quick Actions</Text>
-
         <FlatList
-          className='mt-2'
+          className="mt-2"
           data={serviceTabs}
           numColumns={3}
-          renderItem={
-            (item) => {
-              const icon: any = item.item.icon;
-              // item.item.path
+          renderItem={(item) => {
+            const icon: any = item.item.icon;
+            // item.item.path
 
-              return (
-                <TouchableOpacity onPress={()=> {
-                  const path : any = item.item.path 
-                  if (path )
-                  {
-                    router.push({
-                      pathname : path
-                    })
+            return (
+              <TouchableOpacity
+                onPress={() => {
+                  const path: any = item.item.path;
+                  if (path) {
+                    router.push(path);
                   }
-                  
-                }}>
-                <View className='px-6 py-4 bg-white my-2 me-6 rounded-lg flex justify-center items-center gap-2 shadow-hard-5 w-36  '>
+                }}
+              >
+                <View className="px-6 py-4 bg-white my-2 me-6 rounded-lg flex justify-center items-center gap-2 w-36  ">
                   <View className=" w-12 h-12 p-2 bg-primary-100 rounded-full flex justify-center items-center ">
-                    <AntDesign name={icon ?? "question"} size={24} color="#39a676" />
+                    <AntDesign
+                      name={icon ?? "question"}
+                      size={24}
+                      color="#39a676"
+                    />
                   </View>
-                  <Text className='text-primary-900 font-semibold'>{item.item.label}</Text>
+                  <Text className="text-primary-900 font-semibold">
+                    {item.item.label}
+                  </Text>
                 </View>
-                </TouchableOpacity>
-              )
-            }
-          }
+              </TouchableOpacity>
+            );
+          }}
         />
 
-           <TouchableOpacity className="mt-2" onPress={() => {
-          router.push("/users/create_user");
-        }}>
+        {/* <TouchableOpacity
+          className="mt-2"
+          onPress={() => {
+            router.push("/users/create_user");
+          }}
+        >
           <View></View>
           <Text>create_users</Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {/* <TouchableOpacity className="mt-2" onPress={() => {
           router.push({

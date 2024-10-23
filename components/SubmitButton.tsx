@@ -4,6 +4,7 @@ interface SubmitButtonProps {
   isLoading: boolean;
   onPress: any;
   btnText: string;
+  className?: string;
 }
 
 const SubmitButton = ({ isLoading, onPress, btnText }: SubmitButtonProps) => {
@@ -13,7 +14,7 @@ const SubmitButton = ({ isLoading, onPress, btnText }: SubmitButtonProps) => {
       onPress={onPress}
       disabled={isLoading}
     >
-      <ButtonText>{btnText}</ButtonText>
+      <ButtonText className="text-white">{btnText}</ButtonText>
       {isLoading && <ButtonSpinner className="ms-2 text-white" />}
     </Button>
   );

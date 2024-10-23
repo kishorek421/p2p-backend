@@ -35,7 +35,7 @@ const WelcomePage = () => {
               router.push("/(auth)/login");
             }}
           >
-            <ButtonText>Let's get started</ButtonText>
+            <ButtonText className="text-white">Let's get started</ButtonText>
             <AntDesign
               name="arrowright"
               size={22}

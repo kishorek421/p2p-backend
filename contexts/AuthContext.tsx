@@ -8,16 +8,26 @@ import {
 } from "@/constants/storage_keys";
 import { getItem, removeItem } from "@/utils/secure_store";
 import { ThemeProvider } from "@react-navigation/native";
-import { setItem } from "expo-secure-store";
+import { GET_CUSTOMER_DETAILS } from "@/constants/api_endpoints";
+import api from "@/services/api";
+import { CustomerDetailsModel } from "@/models/customers";
 
-export const AuthContext = createContext({});
+interface AuthContextProps {
+  user: CustomerDetailsModel | undefined;
+  loading: boolean;
+  logout: any;
+}
+
+export const AuthContext = createContext<AuthContextProps | undefined>(
+  undefined,
+);
 
 interface AuthProviderProps {
   children?: ReactNode;
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState<CustomerDetailsModel | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -26,12 +36,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // router.replace({ pathname: "/route/map_view_screen" });
       const token = await getItem(AUTH_TOKEN_KEY);
       if (token) {
-        // try {
-        //   const response = await api.get(GET_CUSTOMER_LEAD_DETAILS); // Replace with your own endpoint
-        //   setUser(response.data);
-        // } catch (error) {
-        //   console.error("Failed to fetch user:", error);
-        // }
         const isLead = await getItem(IS_LEAD);
         if (isLead === undefined) {
           router.replace({ pathname: "/(auth)/login" });
@@ -48,6 +52,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             router.replace({ pathname: "/(auth)/login" });
           }
         } else {
+          try {
+            const response = await api.get(GET_CUSTOMER_DETAILS); // Replace with your own endpoint
+            setUser(response.data);
+          } catch (error) {
+            console.error("Failed to fetch user:", error);
+          }
           router.replace({ pathname: "/(root)/home" });
         }
       } else {
@@ -80,7 +90,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = async () => {
     await removeItem(AUTH_TOKEN_KEY);
-    setUser(null);
+    setUser(undefined);
     // Redirect to the login screen after logout
     router.replace({ pathname: "/(auth)/login" });
   };

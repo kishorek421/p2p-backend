@@ -34,7 +34,10 @@ export default function RootLayout() {
           <Stack>
             <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(root)" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="(root)"
+              options={{ headerShown: false, headerTitle: "Home" }}
+            />
             <Stack.Screen name="welcome" options={{ headerShown: false }} />
             <Stack.Screen name="+not-found" />
             {/* devices */}
@@ -72,6 +75,19 @@ export default function RootLayout() {
                 presentation: "modal",
                 headerShown: false,
               }}
+            />
+            {/* tickets */}
+            <Stack.Screen
+              name="tickets/raise_ticket/[customerId]"
+              options={{ headerTitle: "Raise Ticket", headerBackTitle: "" }}
+            />
+            <Stack.Screen
+              name="tickets/tickets_history/list/[customerId]"
+              options={{ headerTitle: "All Tickets", headerBackTitle: "Home" }}
+            />
+            <Stack.Screen
+              name="tickets/tickets_history/details/[ticketId]"
+              options={{ headerTitle: "Ticket Details", headerBackTitle: "" }}
             />
           </Stack>
           <Toast />

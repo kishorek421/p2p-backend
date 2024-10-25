@@ -24,7 +24,7 @@ const HomeScreen = () => {
   }, []);
 
   return (
-    <View className="py-2 px-4">
+    <View className="pb-2 px-4">
       <VStack>
         {/* <HStack className="justify-between items-center">
         <Icon name="bars" size={26} />

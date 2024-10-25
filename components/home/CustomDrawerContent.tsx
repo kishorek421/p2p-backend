@@ -17,13 +17,12 @@ const CustomDrawerContent = (props: any) => {
   return (
     <View style={{ flex: 1 }}>
       <DrawerContentScrollView {...props} scrollEnabled={false}>
-        {/* <View>
+        <View className="px-3 py-1">
           <Image
             source={require("../../assets/images/splash.png")}
-            height={10}
-            width={10}
+            className="w-full h-32"
           />
-        </View> */}
+        </View>
         <DrawerItemList {...props} />
         {/* <DrawerItem label={"Logout"} onPress={() => {}} /> */}
       </DrawerContentScrollView>
@@ -37,10 +36,10 @@ const CustomDrawerContent = (props: any) => {
             }}
           >
             <View className="flex flex-row">
-              <Text className="text-secondary-800 font-bold text-md ">
+              <Text className="text-primary-950 font-bold text-md ">
                 Logout
               </Text>
-              <Icon name="logout" size={16} color="#f5be47" className="ms-2" />
+              <Icon name="logout" size={16} color="#009c68" className="ms-2" />
             </View>
           </TouchableOpacity>
         </View>

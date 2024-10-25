@@ -131,13 +131,12 @@ const LoginScreen = () => {
               <Input
                 variant="outline"
                 size="md"
-                
                 isDisabled={false}
                 isInvalid={false}
                 isReadOnly={false}
               >
                 <InputField
-                keyboardType="email-address"
+                  keyboardType="email-address"
                   placeholder="customer@business.com"
                   onChangeText={(e) => {
                     setEmail(e);

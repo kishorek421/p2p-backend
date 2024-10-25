@@ -21,7 +21,7 @@ const TicketListItemLayout = ({
     <TouchableOpacity
       onPress={() => {
         router.push({
-          pathname: "/(root)/ticket_history_details/[ticketId]",
+          pathname: "/tickets/tickets_history/details/[ticketId]",
           params: {
             ticketId: ticketModel.id ?? "",
           },

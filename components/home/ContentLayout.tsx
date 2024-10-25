@@ -2,6 +2,7 @@ import {
   FlatList,
   Image,
   Text,
+  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
@@ -13,10 +14,9 @@ import { Button, ButtonText } from "@/components/ui/button";
 import Icon from "react-native-vector-icons/AntDesign";
 import RecentTicketHistoryLayout from "@/components/common/RecentTicketHistoryLayout";
 import { CustomerDetailsModel } from "@/models/customers";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { router } from "expo-router";
 import { ServiceItemModel } from "@/models/ui/service_item_model";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import AntDesign from "react-native-vector-icons/AntDesign";
 
 const ContentLayout = ({
   customerDetails,
@@ -24,20 +24,28 @@ const ContentLayout = ({
   customerDetails: CustomerDetailsModel;
 }) => {
   const serviceTabs: ServiceItemModel[] = [
-    {
-      label: "Devices",
-      icon: "laptop",
-      path: "/devices/devices_list",
-    },
+    // {
+    //   label: "Devices",
+    //   icon: "laptop",
+    //   path: "/devices/devices_list",
+    // },
     // {
     //   label: "Employees",
     //   icon: "user",
     //   path: "/employees/employees_list"
     // },
+    // {
+    //   label: " Users",
+    //   icon: "user",
+    //   path: "/users/users_list",
+    // },
     {
-      label: " Users",
+      label: "Tickets",
       icon: "user",
-      path: "/users/users_list",
+      path: "/tickets/tickets_history/list/[customerId]",
+      params: {
+        customerId: customerDetails.id ?? "",
+      },
     },
   ];
 
@@ -65,7 +73,7 @@ const ContentLayout = ({
               className="mb-4 mt-4 bg-gray-900"
               onPress={() =>
                 router.push({
-                  pathname: "/raise_ticket/[customerId]",
+                  pathname: "/tickets/raise_ticket/[customerId]",
                   params: {
                     customerId: customerDetails.id ?? "",
                   },
@@ -87,8 +95,8 @@ const ContentLayout = ({
           />
         </HStack>
       </Card>
-      {/* <VStack className="mt-8">
-        <Text className="text-[18px] font-bold">Quick Actions</Text>
+      <VStack className="mt-6">
+        <Text className="text-[16px] font-bold">Quick Actions</Text>
         <FlatList
           className="mt-2"
           data={serviceTabs}
@@ -100,19 +108,22 @@ const ContentLayout = ({
                 onPress={() => {
                   const path: any = item.item.path;
                   if (path) {
-                    router.push(path);
+                    router.push({
+                      pathname: path,
+                      params: item.item.params ?? {},
+                    });
                   }
                 }}
               >
-                <View className="px-6 py-4 bg-white my-2 me-6 rounded-lg flex justify-center items-center gap-2 w-36  ">
-                  <View className=" w-12 h-12 p-2 bg-primary-100 rounded-full flex justify-center items-center ">
+                <View className="px-2 py-3 bg-white my-2 me-6 rounded-lg flex justify-center items-center gap-2 w-32">
+                  <View className=" w-10 h-10 p-1 bg-primary-100 rounded-full flex justify-center items-center ">
                     <AntDesign
                       name={icon ?? "question"}
-                      size={24}
+                      size={22}
                       color="#39a676"
                     />
                   </View>
-                  <Text className="text-primary-900 font-semibold">
+                  <Text className="text-primary-900 font-semibold text-md">
                     {item.item.label}
                   </Text>
                 </View>
@@ -120,14 +131,14 @@ const ContentLayout = ({
             );
           }}
         />
-      </VStack> */}
+      </VStack>
 
       <HStack className="justify-between mt-6">
-        <Text className="text-[18px] font-bold">Latest Tickets</Text>
+        <Text className="text-[16px] font-bold">Latest Tickets</Text>
         <TouchableWithoutFeedback
           onPress={() =>
             router.push({
-              pathname: "/tickets_history/[customerId]",
+              pathname: "/tickets/tickets_history/list/[customerId]",
               params: {
                 customerId: customerDetails.id ?? "",
               },

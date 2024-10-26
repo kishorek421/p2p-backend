@@ -26,9 +26,10 @@ export const getFileName = (uri: string, isFullName = false) => {
 export const getDeviceStatusColor = (status?: string) => {
   switch (status) {
     case "IN_USE":
-      return "text-primary-900 bg-primary-200 "
+      return "text-primary-900 bg-primary-200 ";
     case "NOT_IN_USE":
-      return "text-red-500 bg-red-200"
-    default: return "text-grey-500"
+      return "text-red-500 bg-red-200";
+    default:
+      return "text-grey-500";
   }
-}
+};

@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { AssetMasterListItemModel } from "@/models/assets";
-import CustomSelect from "@/components/CustomSelect";
 import { DropdownModel, ErrorModel } from "@/models/common";
 import Toast from "react-native-toast-message";
 import api from "@/services/api";
@@ -33,6 +32,7 @@ import {
 } from "@/components/ui/form-control";
 import { FontAwesome } from "@expo/vector-icons";
 import { isFormFieldInValid } from "@/utils/helper";
+import PrimaryDropdownField from "@/components/fields/PrimaryDropdownField";
 
 const CreateDevice = () => {
   const [showDatePicker, setShowDatePicker] = useState(false);
@@ -205,7 +205,7 @@ const CreateDevice = () => {
                   Unique Identifier Type
                 </FormControlLabelText>
               </FormControlLabel>
-              <CustomSelect
+              <PrimaryDropdownField
                 options={assetTypes}
                 selectedValue={selectedAssetType}
                 placeholder=""
@@ -232,7 +232,7 @@ const CreateDevice = () => {
               <FormControlLabel className="mb-1">
                 <FormControlLabelText>Asset Type</FormControlLabelText>
               </FormControlLabel>
-              <CustomSelect
+              <PrimaryDropdownField
                 options={assetTypes}
                 selectedValue={selectedAssetType}
                 placeholder=""
@@ -259,7 +259,7 @@ const CreateDevice = () => {
               <FormControlLabel className="mb-1">
                 <FormControlLabelText>Asset Model</FormControlLabelText>
               </FormControlLabel>
-              <CustomSelect
+              <PrimaryDropdownField
                 options={assetModels}
                 selectedValue={selectedAssetModel}
                 placeholder=""
@@ -286,7 +286,7 @@ const CreateDevice = () => {
               <FormControlLabel className="mb-1">
                 <FormControlLabelText>Licensed Type</FormControlLabelText>
               </FormControlLabel>
-              <CustomSelect
+              <PrimaryDropdownField
                 options={licensedTypes}
                 selectedValue={selectedLicensedType}
                 placeholder=""
@@ -313,7 +313,7 @@ const CreateDevice = () => {
               <FormControlLabel className="mb-1">
                 <FormControlLabelText>Impact</FormControlLabelText>
               </FormControlLabel>
-              <CustomSelect
+              <PrimaryDropdownField
                 options={impacts}
                 selectedValue={selectedImpact}
                 placeholder=""

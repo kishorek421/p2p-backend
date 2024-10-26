@@ -17,7 +17,6 @@ import {
   FormControlLabel,
   FormControlLabelText,
 } from "@/components/ui/form-control";
-import CustomSelect from "@/components/CustomSelect";
 import { DropdownModel, ErrorModel } from "@/models/common";
 import { getFileName, isFormFieldInValid } from "@/utils/helper";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
@@ -33,6 +32,7 @@ import { HStack } from "@/components/ui/hstack";
 import SubmitButton from "@/components/SubmitButton";
 import ImagePickerComponent from "@/components/ImagePickerComponent";
 import Toast from "react-native-toast-message";
+import PrimaryDropdownField from "@/components/fields/PrimaryDropdownField";
 
 const RaiseTicketScreen = () => {
   const [assetsInUse, setAssetsInUse] = useState<AssetInUseListItemModel[]>([]);
@@ -237,7 +237,7 @@ const RaiseTicketScreen = () => {
           <FormControlLabel className="mb-1">
             <FormControlLabelText>Asset</FormControlLabelText>
           </FormControlLabel>
-          <CustomSelect
+          <PrimaryDropdownField
             options={assetsInUse.map((assetInUse) => ({
               label: assetInUse.serialNo?.toString(),
               value: assetInUse.id,
@@ -259,7 +259,7 @@ const RaiseTicketScreen = () => {
           <FormControlLabel className="mb-1">
             <FormControlLabelText>Issue Type</FormControlLabelText>
           </FormControlLabel>
-          <CustomSelect
+          <PrimaryDropdownField
             options={issueTypes.map((assetInUse) => ({
               label: assetInUse.name?.toString(),
               value: assetInUse.id,

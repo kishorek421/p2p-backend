@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
 import { Button, ButtonText } from "@/components/ui/button";
-import CustomeTypehead from "@/components/CustomeTypehead";
 import { OrgDropdownType } from "@/enums/enums";
 import { isFormFieldInValid } from "@/utils/helper";
 import {
@@ -295,7 +294,7 @@ const CreateUser = () => {
             <InputField />
           </Input> */}
 
-        <FormControl isInvalid={isFormFieldInValid("orgId", errors).length > 0}>
+        {/* <FormControl isInvalid={isFormFieldInValid("orgId", errors).length > 0}>
           <FormControlLabel className="mb-1 mt-4 p-1">
             <FormControlLabelText>Organization</FormControlLabelText>
           </FormControlLabel>
@@ -360,7 +359,7 @@ const CreateUser = () => {
               {isFormFieldInValid("designationId", errors)}
             </FormControlErrorText>
           </FormControlError>
-        </FormControl>
+        </FormControl> */}
 
         <View className="p-1 mt-6 mb-1">
           <Button

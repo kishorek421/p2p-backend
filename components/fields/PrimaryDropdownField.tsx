@@ -13,7 +13,7 @@ import {
 import { ChevronDownIcon } from "@/components/ui/icon";
 import { useEffect } from "react";
 
-interface PrimarySelectProps {
+interface PrimaryDropdownFieldProps {
   options: any[];
   selectedValue: any;
   type: string;
@@ -21,13 +21,13 @@ interface PrimarySelectProps {
   placeholder: string;
 }
 
-const CustomSelect = ({
+const PrimaryDropdownField = ({
   options,
   selectedValue,
   type,
   onChange,
   placeholder,
-}: PrimarySelectProps) => {
+}: PrimaryDropdownFieldProps) => {
   useEffect(() => {
     console.log(selectedValue);
   }, [selectedValue]);
@@ -70,4 +70,4 @@ const CustomSelect = ({
   );
 };
 
-export default CustomSelect;
+export default PrimaryDropdownField;

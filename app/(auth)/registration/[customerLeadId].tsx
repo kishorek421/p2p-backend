@@ -29,7 +29,7 @@ import {
   SIZE_OF_ORG,
   TYPE_OF_ORG,
 } from "@/constants/configuration_keys";
-import ConfigurationSelect from "@/components/ConfigurationSelect";
+import ConfigurationDropdownFormField from "@/components/fields/ConfigurationDropdownFormField";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import {
   AreaListItemModel,
@@ -50,21 +50,15 @@ import Toast from "react-native-toast-message";
 import LoadingBar from "@/components/LoadingBar";
 import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 import { GeoLocationType } from "@/enums/enums";
-import CustomeTypehead from "@/components/CustomeTypehead";
 import SubmitButton from "@/components/SubmitButton";
 import { getItem } from "expo-secure-store";
 import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
+import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
+import PrimaryTypeheadFormField from "@/components/fields/PrimaryTypeheadFormField";
 
 const RegistrationScreen = () => {
   const { customerLeadId } = useLocalSearchParams();
 
-  // options
-  // configurations
-  const [typesOfOrg, setTypesOfOrg] = useState<ConfigurationModel[]>([]);
-  const [categoriesOfOrg, setCategoriesOfOrg] = useState<ConfigurationModel[]>(
-    [],
-  );
-  const [sizesOfOrg, setSizesOfOrg] = useState<ConfigurationModel[]>([]);
   // geolocations
   const [pincodes, setPincodes] = useState<AutocompleteDropdownItem[]>([]);
   const [areas, setAreas] = useState<AutocompleteDropdownItem[]>([]);
@@ -107,47 +101,45 @@ const RegistrationScreen = () => {
 
   const [assetImage, setAssetImage] = useState<string>("");
 
-  const [autoCompleteLoading, setAutoCompleteLoading] = useState(false);
-
   const getGeoLocationSuggestionsUrl = (type: GeoLocationType) => {
     switch (type) {
       case GeoLocationType.PINCODE:
         return GET_PINCODES_LIST_BY_PINCODE_SEARCH;
       case GeoLocationType.AREA:
         return GET_AREAS_LIST_BY_NAME_SEARCH;
-      case GeoLocationType.CITY:
-        return GET_CITIES_LIST_BY_NAME_SEARCH;
-      case GeoLocationType.STATE:
-        return GET_STATES_LIST_BY_NAME_SEARCH;
-      case GeoLocationType.COUNTRY:
-        return GET_COUNTRIES_LIST_BY_NAME_SEARCH;
+      // case GeoLocationType.CITY:
+      //   return GET_CITIES_LIST_BY_NAME_SEARCH;
+      // case GeoLocationType.STATE:
+      //   return GET_STATES_LIST_BY_NAME_SEARCH;
+      // case GeoLocationType.COUNTRY:
+      //   return GET_COUNTRIES_LIST_BY_NAME_SEARCH;
       default:
         return "";
     }
   };
 
   const getSuggestions = useCallback(
-    async (q: string, type: GeoLocationType) => {
+    async (q: string, type: GeoLocationType, setLoading: any) => {
       console.log("getSuggestions", q);
       if (typeof q !== "string" || q.length < 3) {
         onClearPress(type);
         return;
       }
-      setAutoCompleteLoading(true);
+      setLoading(true);
 
       api
         .get(getGeoLocationSuggestionsUrl(type) + `?q=${q}`)
         .then((response) => {
           console.log("suggesgtions", response.data.data);
           setGeolocationSuggestions(type, response.data?.data ?? []);
-          setAutoCompleteLoading(false);
+          setLoading(false);
         })
         .catch((e) => {
           console.error(e);
-          setAutoCompleteLoading(false);
+          setLoading(false);
         });
 
-      setAutoCompleteLoading(false);
+      setLoading(false);
     },
     [],
   );
@@ -156,19 +148,23 @@ const RegistrationScreen = () => {
     switch (type) {
       case GeoLocationType.PINCODE:
         setPincodes([]);
+        setAreas([]);
+        setCities([]);
+        setStates([]);
+        setCountries([]);
         break;
       case GeoLocationType.AREA:
         setAreas([]);
         break;
-      case GeoLocationType.CITY:
-        setCities([]);
-        break;
-      case GeoLocationType.STATE:
-        setStates([]);
-        break;
-      case GeoLocationType.COUNTRY:
-        setCountries([]);
-        break;
+      // case GeoLocationType.CITY:
+      //   setCities([]);
+      //   break;
+      // case GeoLocationType.STATE:
+      //   setStates([]);
+      //   break;
+      // case GeoLocationType.COUNTRY:
+      //   setCountries([]);
+      //   break;
     }
   }, []);
 
@@ -188,6 +184,15 @@ const RegistrationScreen = () => {
                 title: title.toString(),
               };
             }
+            const cityId = item.cityId;
+            const cityName = item.cityName;
+            if (cityId && cityName) {
+              setCities([{ id: cityId, title: cityName }]);
+              setSelectedCity({
+                id: cityId,
+                title: cityName,
+              });
+            }
           }),
         );
         break;
@@ -205,94 +210,51 @@ const RegistrationScreen = () => {
           }),
         );
         break;
-      case GeoLocationType.CITY:
-        setCities(
-          suggestionsList.map((item: CityListItemModel) => {
-            const id = item.id;
-            const title = item.cityName;
-            if (id && title) {
-              return {
-                id: id,
-                title: title,
-              };
-            }
-          }),
-        );
-        break;
-      case GeoLocationType.STATE:
-        setStates(
-          suggestionsList.map((item: StateListItemModel) => {
-            const id = item.id;
-            const title = item.stateName;
-            if (id && title) {
-              return {
-                id: id,
-                title: title,
-              };
-            }
-          }),
-        );
-        break;
-      case GeoLocationType.COUNTRY:
-        setCountries(
-          suggestionsList.map((item: CountryListItemModel) => {
-            const id = item.id;
-            const title = item.countryName;
-            if (id && title) {
-              return {
-                id: id,
-                title: title,
-              };
-            }
-          }),
-        );
+      // case GeoLocationType.CITY:
+      //   setCities(
+      //     suggestionsList.map((item: CityListItemModel) => {
+      //       const id = item.id;
+      //       const title = item.cityName;
+      //       if (id && title) {
+      //         return {
+      //           id: id,
+      //           title: title,
+      //         };
+      //       }
+      //     }),
+      //   );
+      //   break;
+      // case GeoLocationType.STATE:
+      //   setStates(
+      //     suggestionsList.map((item: StateListItemModel) => {
+      //       const id = item.id;
+      //       const title = item.stateName;
+      //       if (id && title) {
+      //         return {
+      //           id: id,
+      //           title: title,
+      //         };
+      //       }
+      //     }),
+      //   );
+      //   break;
+      // case GeoLocationType.COUNTRY:
+      //   setCountries(
+      //     suggestionsList.map((item: CountryListItemModel) => {
+      //       const id = item.id;
+      //       const title = item.countryName;
+      //       if (id && title) {
+      //         return {
+      //           id: id,
+      //           title: title,
+      //         };
+      //       }
+      //     }),
+      //   );
     }
   };
 
   useEffect(() => {
-    const loadTypesOfOrg = () => {
-      api
-        .get(GET_CONFIGURATIONS_BY_CATEGORY, {
-          params: {
-            category: TYPE_OF_ORG,
-          },
-        })
-        .then((response) => {
-          setTypesOfOrg(response.data?.data ?? []);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    };
-    const loadCategoriesOfOrg = () => {
-      api
-        .get(GET_CONFIGURATIONS_BY_CATEGORY, {
-          params: {
-            category: CATEGORY_OF_ORG,
-          },
-        })
-        .then((response) => {
-          setCategoriesOfOrg(response.data?.data ?? []);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    };
-    const loadSizesOfOrg = () => {
-      api
-        .get(GET_CONFIGURATIONS_BY_CATEGORY, {
-          params: {
-            category: SIZE_OF_ORG,
-          },
-        })
-        .then((response) => {
-          setSizesOfOrg(response.data?.data ?? []);
-        })
-        .catch((e) => {
-          console.error(e);
-        });
-    };
-
     // customer lead details
     const loadCustomerLeadDetails = () => {
       api
@@ -379,9 +341,6 @@ const RegistrationScreen = () => {
         });
     };
 
-    loadTypesOfOrg();
-    loadCategoriesOfOrg();
-    loadSizesOfOrg();
     // load customer lead details
     loadCustomerLeadDetails();
   }, [router]);
@@ -408,7 +367,7 @@ const RegistrationScreen = () => {
     customerLeadDetailsModel.isCustomerLead = isLead;
     customerLeadDetailsModel.customerLeadId = customerLeadDetailsModel.id;
 
-    console.log(customerLeadDetailsModel);
+    console.log("customerLeadDetailsModel -> ", customerLeadDetailsModel);
 
     const formData = new FormData();
     (
@@ -499,9 +458,9 @@ const RegistrationScreen = () => {
         <LoadingBar />
       ) : (
         <ScrollView automaticallyAdjustKeyboardInsets={true}>
-          <Box className="p-4 mb-8">
+          <Box className="px-4  mb-12">
             <VStack>
-              <Text className="text-2xl font-bold">
+              {/* <Text className="text-2xl font-bold">
                 Register Your Organization 🚀
               </Text>
               <Text className="color-gray-500 text-sm mt-1">
@@ -509,135 +468,6 @@ const RegistrationScreen = () => {
                 As the POC (Point of Contact), you’ll be able to manage your
                 organization’s account, add users, and oversee the tickets
                 raised by your employees.
-              </Text>
-              {/* <Text className="font-bold text-lg mt-8">Profile Details</Text> */}
-              {/* <VStack className="gap-4 mt-3">
-                <FormControl
-                  isInvalid={isFormFieldInValid("firstName").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>First Name</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      defaultValue={customerLeadDetailsModel?.firstName ?? ""}
-                    
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.firstName = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("firstName")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("lastName").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Last Name</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      defaultValue={customerLeadDetailsModel?.lastName ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.lastName = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("lastName")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl isInvalid={isFormFieldInValid("email").length > 0}>
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Email</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="customer@business.com"
-                      defaultValue={customerLeadDetailsModel?.email ?? ""}
-                      keyboardType="email-address"
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.email = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("email")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("mobile").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Mobile No.</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      defaultValue={customerLeadDetailsModel?.mobile ?? ""}
-                      keyboardType="numeric"
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.mobile = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("mobile")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isRequired={true}
-                  isInvalid={isFormFieldInValid("alternateMobile").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>
-                      Alternate Mobile No.
-                    </FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      defaultValue={
-                        customerLeadDetailsModel?.alternateMobile ?? ""
-                      }
-                      keyboardType="numeric"
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.alternateMobile = e;
-                          
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("alternateMobile")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-              </VStack> */}
-              {/* <Text className="font-bold text-lg mt-8">
-                Organization Details
               </Text> */}
               <VStack className="gap-4 mt-3">
                 <FormControl
@@ -677,19 +507,20 @@ const RegistrationScreen = () => {
                       </View>
                     </View>
                   ) : (
-                    <View className="w-full flex justify-center items-center gap-4 h-36 bg-white rounded-xl">
-                      <Button
-                        className="bg-secondary-950 w-36"
-                        onPress={() => toggleImagePicker()}
-                      >
-                        <ButtonText>Choose</ButtonText>
-                        <Icon
-                          name="upload"
-                          className="ms-2"
-                          color="white"
-                          size={18}
-                        />
-                      </Button>
+                    <View className=" border-[1px] border-primary-950 border-dashed h-32 rounded-md mt-1 flex justify-center items-center">
+                      <View className="flex justify-center items-center mt-3">
+                        <View className="rounded-md p-2 bg-primary-300 w-auto">
+                          <Icon name="upload" color="#009c68" size={18} />
+                        </View>
+                        <Button
+                          className="bg-transparent w-40"
+                          onPress={() => toggleImagePicker()}
+                        >
+                          <ButtonText className="text-primary-950">
+                            Choose Image
+                          </ButtonText>
+                        </Button>
+                      </View>
                     </View>
                   )}
                   <FormControlError>
@@ -698,117 +529,80 @@ const RegistrationScreen = () => {
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("orgName").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>
-                      Organization Name
-                    </FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      defaultValue={customerLeadDetailsModel?.orgName ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.orgName = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("orgName")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("orgMobile").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>
-                      Organization Mobile No.
-                    </FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      keyboardType="number-pad"
-                      defaultValue={customerLeadDetailsModel?.orgMobile ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.orgMobile = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("orgMobile")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("typeOfOrgId").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>
-                      Type of organization
-                    </FormControlLabelText>
-                  </FormControlLabel>
-                  <ConfigurationSelect
-                    options={typesOfOrg}
-                    selectedConfig={selectedTypeOfOrg}
-                    setSelectedConfig={setSelectedTypeOfOrg}
-                    placeholder="Select type"
-                  />
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("typeOfOrgId")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("categoryOfOrgId").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>
-                      Category of organization
-                    </FormControlLabelText>
-                  </FormControlLabel>
-                  <ConfigurationSelect
-                    options={categoriesOfOrg}
-                    selectedConfig={selectedCategoryOfOrg}
-                    setSelectedConfig={setSelectedCategoryOfOrg}
-                    placeholder="Select category"
-                  />
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("categoryOfOrgId")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("sizeOfOrgId").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>
-                      Size of organization
-                    </FormControlLabelText>
-                  </FormControlLabel>
-                  <ConfigurationSelect
-                    options={sizesOfOrg}
-                    selectedConfig={selectedSizeOfOrg}
-                    setSelectedConfig={setSelectedSizeOfOrg}
-                    placeholder="Select size"
-                  />
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("sizeOfOrgId")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                <PrimaryTextFormField
+                  fieldName="orgName"
+                  label="Organization Name"
+                  placeholder="Enter here"
+                  errors={errors}
+                  setErrors={setErrors}
+                  min={3}
+                  defaultValue={customerLeadDetailsModel.orgName}
+                  filterExp={/^[a-zA-Z0-9 ]*$/}
+                  onChangeText={(value) => {
+                    console.log("value", value);
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.orgName = value;
+                      return prevState;
+                    });
+                  }}
+                />
+                <PrimaryTextFormField
+                  fieldName="orgMobile"
+                  label="Organization Mobile No."
+                  placeholder="Enter here"
+                  defaultValue={customerLeadDetailsModel.orgMobile}
+                  errors={errors}
+                  setErrors={setErrors}
+                  min={10}
+                  max={10}
+                  keyboardType="phone-pad"
+                  filterExp={/^[0-9]*$/}
+                  customValidations={(value) => {
+                    // mobile no should start with 6-9
+                    const customRE = /^[6-9]/;
+                    if (!customRE.test(value)) {
+                      return "Mobile no. should start with 6-9";
+                    }
+                    return undefined;
+                  }}
+                  onChangeText={(value) => {
+                    console.log("value", value);
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.orgMobile = value;
+                      return prevState;
+                    });
+                  }}
+                />
+                <ConfigurationDropdownFormField
+                  configurationCategory={TYPE_OF_ORG}
+                  selectedConfig={selectedTypeOfOrg}
+                  setSelectedConfig={setSelectedTypeOfOrg}
+                  placeholder="Select type"
+                  label="Type of organization"
+                  errors={errors}
+                  setErrors={setErrors}
+                  fieldName="typeOfOrgId"
+                />
+                <ConfigurationDropdownFormField
+                  configurationCategory={CATEGORY_OF_ORG}
+                  selectedConfig={selectedCategoryOfOrg}
+                  setSelectedConfig={setSelectedCategoryOfOrg}
+                  placeholder="Select category"
+                  label="Category of organization"
+                  errors={errors}
+                  setErrors={setErrors}
+                  fieldName="categoryOfOrgId"
+                />
+                <ConfigurationDropdownFormField
+                  configurationCategory={SIZE_OF_ORG}
+                  selectedConfig={selectedSizeOfOrg}
+                  setSelectedConfig={setSelectedSizeOfOrg}
+                  placeholder="Select size"
+                  label="Size of organization"
+                  errors={errors}
+                  setErrors={setErrors}
+                  fieldName="sizeOfOrgId"
+                />
                 <FormControl isInvalid={isFormFieldInValid("gstin").length > 0}>
                   <FormControlLabel className="mb-1">
                     <FormControlLabelText>GST No</FormControlLabelText>
@@ -1025,101 +819,57 @@ const RegistrationScreen = () => {
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("pincodeId").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Pincode</FormControlLabelText>
-                  </FormControlLabel>
-                  <CustomeTypehead
-                    type={GeoLocationType.PINCODE}
-                    onClearPress={onClearPress}
-                    selectedValue={selectedPincode}
-                    suggestions={pincodes}
-                    getSuggestions={getSuggestions}
-                    setSelectedValue={setSelectedPincode}
-                    loading={autoCompleteLoading}
-                    placeholder="Select pincode"
-                  />
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("pincodeId")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                {/* <FormControl
-                  isInvalid={isFormFieldInValid("areaId").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Area</FormControlLabelText>
-                  </FormControlLabel>
-                  <CustomSelect
-                    options={areas.map((area) => ({
-                      label: area.areaName?.toString(),
-                      value: area.id,
-                    }))}
-                    placeholder="Select area"
-                    selectedValue={selectedArea}
-                    type="area"
-                    onChange={setSelectedGeolocations}
-                  />
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("areaId")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl> */}
-                <FormControl
-                  isInvalid={isFormFieldInValid("areaId").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Area</FormControlLabelText>
-                  </FormControlLabel>
-                  <CustomeTypehead
-                    type={GeoLocationType.AREA}
-                    onClearPress={onClearPress}
-                    selectedValue={selectedArea}
-                    suggestions={areas}
-                    getSuggestions={getSuggestions}
-                    setSelectedValue={setSelectedArea}
-                    loading={autoCompleteLoading}
-                    placeholder="Select area"
-                  />
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("areaId")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("cityId").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>City</FormControlLabelText>
-                  </FormControlLabel>
-                  <CustomeTypehead
-                    type={GeoLocationType.CITY}
-                    onClearPress={onClearPress}
-                    selectedValue={selectedCity}
-                    suggestions={cities}
-                    getSuggestions={getSuggestions}
-                    setSelectedValue={setSelectedCity}
-                    loading={autoCompleteLoading}
-                    placeholder="Select city"
-                  />
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("cityId")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                <PrimaryTypeheadFormField
+                  type={GeoLocationType.PINCODE}
+                  onClearPress={onClearPress}
+                  selectedValue={selectedPincode}
+                  suggestions={pincodes}
+                  getSuggestions={getSuggestions}
+                  setSelectedValue={setSelectedPincode}
+                  placeholder="Search pincode"
+                  fieldName="pincodeId"
+                  label="Pincode"
+                  supportText="Please enter the first three digits of your postal code to
+                    view nearby locations."
+                  errors={errors}
+                  setErrors={setErrors}
+                />
+                <PrimaryTypeheadFormField
+                  type={GeoLocationType.AREA}
+                  onClearPress={onClearPress}
+                  selectedValue={selectedArea}
+                  suggestions={areas}
+                  getSuggestions={getSuggestions}
+                  setSelectedValue={setSelectedArea}
+                  placeholder="Search area"
+                  fieldName="areaId"
+                  label="Area"
+                  errors={errors}
+                  setErrors={setErrors}
+                  editable={selectedPincode?.id !== undefined}
+                />
+                <PrimaryTypeheadFormField
+                  type={GeoLocationType.CITY}
+                  onClearPress={onClearPress}
+                  selectedValue={selectedCity}
+                  suggestions={cities}
+                  getSuggestions={getSuggestions}
+                  setSelectedValue={setSelectedCity}
+                  placeholder="Search city"
+                  fieldName="cityId"
+                  label="City"
+                  errors={errors}
+                  setErrors={setErrors}
+                  editable={false}
+                />
+                {/* 
                 <FormControl
                   isInvalid={isFormFieldInValid("stateId").length > 0}
                 >
                   <FormControlLabel className="mb-1">
                     <FormControlLabelText>States</FormControlLabelText>
                   </FormControlLabel>
-                  <CustomeTypehead
+                  <PrimaryTypeheadField
                     type={GeoLocationType.STATE}
                     onClearPress={onClearPress}
                     selectedValue={selectedState}
@@ -1141,7 +891,7 @@ const RegistrationScreen = () => {
                   <FormControlLabel className="mb-1">
                     <FormControlLabelText>Country</FormControlLabelText>
                   </FormControlLabel>
-                  <CustomeTypehead
+                  <PrimaryTypeheadField
                     type={GeoLocationType.COUNTRY}
                     onClearPress={onClearPress}
                     selectedValue={selectedCountry}
@@ -1156,7 +906,7 @@ const RegistrationScreen = () => {
                       {isFormFieldInValid("countryId")}
                     </FormControlErrorText>
                   </FormControlError>
-                </FormControl>
+                </FormControl> */}
               </VStack>
               {/*<Pressable*/}
               {/*  className="bg-primary-950 mt-6 rounded p-3 items-center"*/}

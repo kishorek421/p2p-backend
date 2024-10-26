@@ -11,37 +11,43 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { ChevronDownIcon } from "@/components/ui/icon";
-import { ConfigurationModel } from "@/models/configurations";
+import { useEffect } from "react";
 
-interface PrimarySelectProps {
-  options: ConfigurationModel[];
-  selectedConfig: ConfigurationModel;
-  setSelectedConfig: any;
+interface PrimaryDropdownFormFieldProps {
+  options: any[];
+  selectedValue: any;
+  type: string;
+  onChange: (type: string, selectedConfig: any) => void;
   placeholder: string;
 }
 
-const ConfigurationSelect = ({
+const PrimaryDropdownFormField = ({
   options,
-  selectedConfig,
-  setSelectedConfig,
+  selectedValue,
+  type,
+  onChange,
   placeholder,
-}: PrimarySelectProps) => {
+}: PrimaryDropdownFormFieldProps) => {
+  useEffect(() => {
+    console.log(selectedValue);
+  }, [selectedValue]);
   return (
     <Select
       className="w-full"
-      selectedValue={selectedConfig.id}
+      selectedValue={selectedValue?.value}
       onValueChange={(e) => {
-        let config = options.find((option) => e === option.id);
-        if (config) {
-          setSelectedConfig(config);
-        }
+        // let config = options.find((option) => e === option.id);
+        // if (config) {
+        //   setSelectedConfig(config);
+        // }
+        onChange(type, e);
       }}
     >
       <SelectTrigger variant="outline" size="md">
         <SelectInput
           className="w-96"
           placeholder={placeholder}
-          value={selectedConfig.value}
+          value={selectedValue?.label}
         />
         <SelectIcon className="mr-3 " as={ChevronDownIcon} />
       </SelectTrigger>
@@ -51,18 +57,17 @@ const ConfigurationSelect = ({
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>
-          {options &&
-            options.map((value) => (
-              <SelectItem
-                label={value.value ?? "-"}
-                value={value.id ?? ""}
-                key={value.id}
-              />
-            ))}
+          {options.map((value) => (
+            <SelectItem
+              label={value?.label ?? "-"}
+              value={value?.value ?? ""}
+              key={value?.value}
+            />
+          ))}
         </SelectContent>
       </SelectPortal>
     </Select>
   );
 };
 
-export default ConfigurationSelect;
+export default PrimaryDropdownFormField;

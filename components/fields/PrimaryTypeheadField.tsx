@@ -1,37 +1,36 @@
-import { Text, Dimensions, Platform } from "react-native";
-import React, { useEffect } from "react";
+import { Text, Dimensions, Platform, View } from "react-native";
+import React, { useEffect, useState } from "react";
 import {
   AutocompleteDropdown,
   AutocompleteDropdownItem,
 } from "react-native-autocomplete-dropdown";
 import Feather from "react-native-vector-icons/Feather";
 
-const CustomeTypehead = ({
+interface PrimaryTypeheadFieldProps {
+  type: any;
+  onClearPress: (type: any) => void;
+  selectedValue?: AutocompleteDropdownItem;
+  suggestions: AutocompleteDropdownItem[];
+  getSuggestions: (q: string, type: any, setLoading: any) => void;
+  setSelectedValue: any;
+  placeholder: string;
+  filterExp?: RegExp;
+  editable?: boolean;
+}
+
+const PrimaryTypeheadField = ({
   type,
   onClearPress,
   selectedValue,
   suggestions,
   getSuggestions,
   setSelectedValue,
-  loading,
   placeholder,
-}: {
-  type: any;
-  onClearPress: (type: any) => void;
-  selectedValue?: AutocompleteDropdownItem;
-  suggestions: AutocompleteDropdownItem[];
-  getSuggestions: (q: string, type: any) => void;
-  setSelectedValue: any;
-  loading: boolean;
-  placeholder: string;
-}) => {
-  // const dropdownController = useRef(null);
-
-  // const searchRef = useRef(null);
-
-  // const onOpenSuggestionsList = useCallback((isOpened: boolean) => {}, []);
-
-  // console.log(suggestions);
+  filterExp,
+  editable = true,
+}: PrimaryTypeheadFieldProps) => {
+  const [searchText, setSearchText] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     console.log("selectedValue", selectedValue);
@@ -47,7 +46,12 @@ const CustomeTypehead = ({
       direction={Platform.select({ ios: "down" })}
       dataSet={suggestions}
       onChangeText={(text: string) => {
-        getSuggestions(text, type);
+        console.log("txext", text);
+        if (filterExp && !filterExp.test(text)) {
+          return;
+        }
+        setSearchText(text);
+        getSuggestions(text, type, setLoading);
       }}
       onSelectItem={(item: any) => {
         console.log("item", item);
@@ -66,6 +70,7 @@ const CustomeTypehead = ({
         placeholder: placeholder,
         autoCorrect: false,
         autoCapitalize: "none",
+        // value: searchText,
         style: {
           // borderRadius: 5,
           borderTopLeftRadius: 5,
@@ -106,11 +111,22 @@ const CustomeTypehead = ({
       }
       //   ClearIconComponent={<Feather name="x-circle" size={18} color="#fff" />}
       inputHeight={35}
-      showChevron={true}
+      showChevron={editable}
       closeOnBlur={false}
-      showClear={true}
+      showClear={editable}
+      clearOnFocus={false}
+      EmptyResultComponent={
+        searchText.length === 0 ? (
+          <View></View>
+        ) : (
+          <View className="py-3 px-3">
+            <Text>No items found</Text>
+          </View>
+        )
+      }
+      editable={editable}
     />
   );
 };
 
-export default CustomeTypehead;
+export default PrimaryTypeheadField;

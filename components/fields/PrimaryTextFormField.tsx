@@ -19,6 +19,10 @@ interface PrimaryTextFormFieldProps {
   errors: ErrorModel[];
   setErrors: any;
   onChangeText: (value: string) => void;
+  canValidateField: boolean;
+  setCanValidateField: any;
+  setFieldValidationStatus: any;
+  validateFieldFunc?: any;
   defaultValue?: string;
   isRequired?: boolean;
   keyboardType?: KeyboardTypeOptions;
@@ -36,6 +40,10 @@ const PrimaryTextFormField = ({
   setErrors,
   defaultValue,
   isRequired = true,
+  canValidateField,
+  setCanValidateField,
+  validateFieldFunc,
+  setFieldValidationStatus,
   keyboardType = "default",
   onChangeText,
   min,
@@ -46,10 +54,21 @@ const PrimaryTextFormField = ({
   const [value, setValue] = useState<string>("");
 
   useEffect(() => {
+    setFieldValidationStatus((prevState: any) => {
+      prevState[fieldName] = null;
+      return prevState;
+    });
+  }, []);
+
+  useEffect(() => {
     if (defaultValue) {
       setValue(defaultValue);
     }
-  }, [defaultValue]);
+    if (canValidateField) {
+      validateField(value);
+      setCanValidateField(false);
+    }
+  }, [defaultValue, canValidateField]);
 
   // error -> {value(current), message(mistake in the current value), param(in which parameter)}
   // {value, message, param} -> [errors]
@@ -83,6 +102,30 @@ const PrimaryTextFormField = ({
     });
   };
 
+  const validateField = (newValue: string) => {
+    if (isRequired && newValue.length === 0) {
+      setErrorValue(fieldName, value, `Please enter a ${label.toLowerCase()}`);
+      return;
+    }
+    if (customValidations) {
+      const errorValidationMsg = customValidations(value);
+      if (errorValidationMsg) {
+        validateFieldFunc && validateFieldFunc(false);
+        setErrorValue(fieldName, value, errorValidationMsg);
+        return;
+      }
+    }
+    const valLen = newValue.length;
+    if (min && valLen < min) {
+      validateFieldFunc && validateFieldFunc(false);
+      // if this field is not valid set validField is false
+      setErrorValue(fieldName, value, `Min. length should be ${min}`);
+      return;
+    }
+    validateFieldFunc && validateFieldFunc(true);
+    setErrorValue(fieldName, value, "");
+  };
+
   return (
     <FormControl
       key={fieldName}
@@ -99,33 +142,20 @@ const PrimaryTextFormField = ({
           placeholder={placeholder}
           value={value}
           keyboardType={keyboardType}
-          onChangeText={(value) => {
+          onChangeText={(newValue) => {
             // if expression not null and value matches the expressions(regular expressions)
-            if (filterExp && !filterExp.test(value)) {
+            if (filterExp && !filterExp.test(newValue)) {
               return;
             }
-            onChangeText(value);
-            const valLen = value.length;
+            if (canValidateField) {
+              // setCanValidateField(false);
+            }
+            onChangeText(newValue);
+            const valLen = newValue.length;
             if (max && valLen <= max) {
-              setValue(value);
+              setValue(newValue);
             }
-            if (customValidations) {
-              const errorValidationMsg = customValidations(value);
-              if (errorValidationMsg) {
-                setErrorValue(fieldName, value, errorValidationMsg);
-                return;
-              } else {
-                setErrorValue(fieldName, value, "");
-              }
-            }
-            if (min) {
-              if (valLen < min) {
-                setErrorValue(fieldName, value, `Min. length should be ${min}`);
-                return;
-              } else {
-                setErrorValue(fieldName, value, "");
-              }
-            }
+            validateField(newValue);
           }}
         />
       </Input>

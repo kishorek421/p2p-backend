@@ -1,21 +1,32 @@
-import { Text, Dimensions, Platform, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import {
+  Text,
+  Dimensions,
+  Platform,
+  View,
+  KeyboardTypeOptions,
+} from "react-native";
+import React, { useEffect, useState, useRef } from "react";
 import {
   AutocompleteDropdown,
   AutocompleteDropdownItem,
+  IAutocompleteDropdownRef,
 } from "react-native-autocomplete-dropdown";
 import Feather from "react-native-vector-icons/Feather";
+import { DropdownItemModel } from "@/models/ui/dropdown_item_model";
 
 interface PrimaryTypeheadFieldProps {
   type: any;
   onClearPress: (type: any) => void;
   selectedValue?: AutocompleteDropdownItem;
-  suggestions: AutocompleteDropdownItem[];
+  // suggestions: DropdownItemModel[];
+  suggestions: any[];
   getSuggestions: (q: string, type: any, setLoading: any) => void;
   setSelectedValue: any;
   placeholder: string;
   filterExp?: RegExp;
   editable?: boolean;
+  onItemSelect?: (type: any, item: DropdownItemModel) => void;
+  keyboardType?: KeyboardTypeOptions;
 }
 
 const PrimaryTypeheadField = ({
@@ -28,20 +39,25 @@ const PrimaryTypeheadField = ({
   placeholder,
   filterExp,
   editable = true,
+  onItemSelect,
+  keyboardType = "default",
 }: PrimaryTypeheadFieldProps) => {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
+  const dropdownController = useRef<IAutocompleteDropdownRef | null>(null);
 
   useEffect(() => {
-    console.log("selectedValue", selectedValue);
+    if (selectedValue?.id) {
+      dropdownController.current?.setItem(selectedValue);
+    }
   }, [selectedValue]);
 
   return (
     <AutocompleteDropdown
       // ref={searchRef}
-      // controller={(controller) => {
-      //   dropdownController.current = controller;
-      // }}
+      controller={(controller: IAutocompleteDropdownRef | null) => {
+        dropdownController.current = controller;
+      }}
       initialValue={{ id: selectedValue?.id ?? "" }}
       direction={Platform.select({ ios: "down" })}
       dataSet={suggestions}
@@ -54,8 +70,12 @@ const PrimaryTypeheadField = ({
         getSuggestions(text, type, setLoading);
       }}
       onSelectItem={(item: any) => {
-        console.log("item", item);
-        item && setSelectedValue(item);
+        if (item) {
+          setSelectedValue(item);
+          if (onItemSelect) {
+            onItemSelect(type, item);
+          }
+        }
       }}
       debounce={600}
       suggestionsListMaxHeight={Dimensions.get("window").height * 0.4}
@@ -71,6 +91,7 @@ const PrimaryTypeheadField = ({
         autoCorrect: false,
         autoCapitalize: "none",
         // value: searchText,
+        keyboardType: keyboardType,
         style: {
           // borderRadius: 5,
           borderTopLeftRadius: 5,

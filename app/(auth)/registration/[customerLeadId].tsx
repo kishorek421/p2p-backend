@@ -6,6 +6,7 @@ import {
   FormControlError,
   FormControlErrorText,
   FormControlLabel,
+  FormControlLabelAstrick,
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
@@ -55,16 +56,17 @@ import { getItem } from "expo-secure-store";
 import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
 import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
 import PrimaryTypeheadFormField from "@/components/fields/PrimaryTypeheadFormField";
+import { DropdownItemModel } from "@/models/ui/dropdown_item_model";
 
 const RegistrationScreen = () => {
   const { customerLeadId } = useLocalSearchParams();
 
   // geolocations
-  const [pincodes, setPincodes] = useState<AutocompleteDropdownItem[]>([]);
-  const [areas, setAreas] = useState<AutocompleteDropdownItem[]>([]);
-  const [cities, setCities] = useState<AutocompleteDropdownItem[]>([]);
-  const [states, setStates] = useState<AutocompleteDropdownItem[]>([]);
-  const [countries, setCountries] = useState<AutocompleteDropdownItem[]>([]);
+  const [pincodes, setPincodes] = useState<DropdownItemModel[]>([]);
+  const [areas, setAreas] = useState<DropdownItemModel[]>([]);
+  const [cities, setCities] = useState<DropdownItemModel[]>([]);
+  const [states, setStates] = useState<DropdownItemModel[]>([]);
+  const [countries, setCountries] = useState<DropdownItemModel[]>([]);
 
   // selected options
   // configurations
@@ -100,6 +102,11 @@ const RegistrationScreen = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
   const [assetImage, setAssetImage] = useState<string>("");
+
+  // can validate fields
+  const [canValidateField, setCanValidateField] = useState(false);
+
+  const [fieldValidationStatus, setFieldValidationStatus] = useState<any>({});
 
   const getGeoLocationSuggestionsUrl = (type: GeoLocationType) => {
     switch (type) {
@@ -182,16 +189,8 @@ const RegistrationScreen = () => {
               return {
                 id: id,
                 title: title.toString(),
+                data: item,
               };
-            }
-            const cityId = item.cityId;
-            const cityName = item.cityName;
-            if (cityId && cityName) {
-              setCities([{ id: cityId, title: cityName }]);
-              setSelectedCity({
-                id: cityId,
-                title: cityName,
-              });
             }
           }),
         );
@@ -251,6 +250,31 @@ const RegistrationScreen = () => {
       //       }
       //     }),
       //   );
+    }
+  };
+
+  const onItemSelect = (type: GeoLocationType, item: DropdownItemModel) => {
+    switch (type) {
+      case GeoLocationType.PINCODE:
+        const cityId = item.data?.cityId;
+        const cityName = item.data?.cityName;
+        if (cityId && cityName) {
+          console.log("item~~~~~~~~~~~~~~~~~~~~~~~~>", item);
+          setCities([
+            {
+              title: cityName,
+              id: cityId,
+            },
+          ]);
+          setSelectedCity({
+            title: cityName,
+            id: cityId,
+          });
+        }
+        // set state
+
+        // set country
+        break;
     }
   };
 
@@ -354,92 +378,135 @@ const RegistrationScreen = () => {
     }
   };
 
-  const updateCustomerLeadDetails = () => {
-    setIsLoading(true);
-    customerLeadDetailsModel.typeOfOrg = selectedTypeOfOrg.id;
-    customerLeadDetailsModel.categoryOfOrg = selectedCategoryOfOrg.id;
-    customerLeadDetailsModel.sizeOfOrg = selectedSizeOfOrg.id;
-    customerLeadDetailsModel.pincodeId = selectedPincode?.id ?? "";
-    customerLeadDetailsModel.areaId = selectedArea?.id ?? "";
-    customerLeadDetailsModel.cityId = selectedCity?.id ?? "";
-    customerLeadDetailsModel.stateId = selectedState?.id ?? "";
-    customerLeadDetailsModel.countryId = selectedCountry?.id ?? "";
-    customerLeadDetailsModel.isCustomerLead = isLead;
-    customerLeadDetailsModel.customerLeadId = customerLeadDetailsModel.id;
+  const updateCustomerLeadDetails = async () => {
+    setCanValidateField(true);
 
-    console.log("customerLeadDetailsModel -> ", customerLeadDetailsModel);
+    console.log("fieldValidationStatus -> ", fieldValidationStatus);
 
-    const formData = new FormData();
-    (
-      Object.keys(
-        customerLeadDetailsModel,
-      ) as (keyof CustomerLeadDetailsModel)[]
-    ).forEach((key) => {
-      const value = customerLeadDetailsModel[key];
-      if (value !== undefined && value !== null) {
-        formData.append(key as string, value as any); // Type assertion here
-      }
-    });
+    const validationPromises = Object.keys(fieldValidationStatus).map(
+      (key) =>
+        new Promise((resolve) => {
+          // Resolve each validation status based on field key
+          console.log("key ->>>>>", key);
+          
+          setFieldValidationStatus((prev: {}) => ({
+            ...prev,
+            [key]: resolve,
+          }));
+        }),
+    );
 
-    if (assetImage) {
-      // formData.append(
-      //   "orgImageFile",
-      //   new File([assetImage], getFileName(assetImage, true), {
-      //     type: "image/jpg",
-      //   }),
-      // );
-      // --@ts-ignore --
-      formData.append("orgImageFile", {
-        uri: assetImage,
-        type: "image/jpg",
-        name: getFileName(assetImage, true),
-      } as any);
+    // Wait for all validations to complete
+    await Promise.all(validationPromises);
+
+    // Check if all validations are valid
+    const allValid = Object.values(fieldValidationStatus).every(
+      (status) => status === true,
+    );
+
+    console.log("allValid ", allValid);
+
+
+    if (allValid) {
+      setIsLoading(true);
     }
 
-    setErrors([]);
+    // let canUpdate = true;
 
-    api
-      .post(CREATE_CUSTOMER, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      })
-      .then(async (response) => {
-        // router.push({pathname: ""});
-        console.log(response.data.data);
-        const token = getItem(AUTH_TOKEN_KEY);
-        if (token) {
-          router.replace("/(root)/home");
-          Toast.show({
-            type: "success",
-            text1: "Registration Completed",
-            text2: "Your organization registered successfully",
-          });
-        } else {
-          Toast.show({
-            type: "success",
-            text1: "Check your email",
-            text2: "Your login crendentials has sent to your email",
-          });
-          router.replace("/(auth)/login");
-        }
+    // for (const error of errors) {
+    //   const msg = error.message;
+    //   if (msg && msg.length !== 0) {
+    //     canUpdate = false;
+    //     break;
+    //   }
+    // }
 
-        setIsLoading(false);
-      })
-      .catch((e) => {
-        console.error("e ->", e);
-        let errors = e.response?.data?.errors;
-        if (errors) {
-          console.error("errors -> ", errors);
-          setErrors(errors);
-        }
-        setIsLoading(false);
-        Toast.show({
-          type: "error",
-          text1: "Invalid inputs",
-          text2: "Enter a valid details to register your organization",
-        });
-      });
+    console.log(errors);
+
+    // customerLeadDetailsModel.typeOfOrg = selectedTypeOfOrg.id;
+    // customerLeadDetailsModel.categoryOfOrg = selectedCategoryOfOrg.id;
+    // customerLeadDetailsModel.sizeOfOrg = selectedSizeOfOrg.id;
+    // customerLeadDetailsModel.pincodeId = selectedPincode?.id ?? "";
+    // customerLeadDetailsModel.areaId = selectedArea?.id ?? "";
+    // customerLeadDetailsModel.cityId = selectedCity?.id ?? "";
+    // customerLeadDetailsModel.stateId = selectedState?.id ?? "";
+    // customerLeadDetailsModel.countryId = selectedCountry?.id ?? "";
+    // customerLeadDetailsModel.isCustomerLead = isLead;
+    // customerLeadDetailsModel.customerLeadId = customerLeadDetailsModel.id;
+
+    // console.log("customerLeadDetailsModel -> ", customerLeadDetailsModel);
+
+    // const formData = new FormData();
+    // (
+    //   Object.keys(
+    //     customerLeadDetailsModel,
+    //   ) as (keyof CustomerLeadDetailsModel)[]
+    // ).forEach((key) => {
+    //   const value = customerLeadDetailsModel[key];
+    //   if (value !== undefined && value !== null) {
+    //     formData.append(key as string, value as any); // Type assertion here
+    //   }
+    // });
+
+    // if (assetImage) {
+    //   // formData.append(
+    //   //   "orgImageFile",
+    //   //   new File([assetImage], getFileName(assetImage, true), {
+    //   //     type: "image/jpg",
+    //   //   }),
+    //   // );
+    //   // --@ts-ignore --
+    //   formData.append("orgImageFile", {
+    //     uri: assetImage,
+    //     type: "image/jpg",
+    //     name: getFileName(assetImage, true),
+    //   } as any);
+    // }
+
+    // setErrors([]);
+
+    // api
+    //   .post(CREATE_CUSTOMER, formData, {
+    //     headers: {
+    //       "Content-Type": "multipart/form-data",
+    //     },
+    //   })
+    //   .then(async (response) => {
+    //     // router.push({pathname: ""});
+    //     console.log(response.data.data);
+    //     const token = getItem(AUTH_TOKEN_KEY);
+    //     if (token) {
+    //       router.replace("/(root)/home");
+    //       Toast.show({
+    //         type: "success",
+    //         text1: "Registration Completed",
+    //         text2: "Your organization registered successfully",
+    //       });
+    //     } else {
+    //       Toast.show({
+    //         type: "success",
+    //         text1: "Check your email",
+    //         text2: "Your login crendentials has sent to your email",
+    //       });
+    //       router.replace("/(auth)/login");
+    //     }
+
+    //     setIsLoading(false);
+    //   })
+    //   .catch((e) => {
+    //     console.error("e ->", e);
+    //     let errors = e.response?.data?.errors;
+    //     if (errors) {
+    //       console.error("errors -> ", errors);
+    //       setErrors(errors);
+    //     }
+    //     setIsLoading(false);
+    //     Toast.show({
+    //       type: "error",
+    //       text1: "Invalid inputs",
+    //       text2: "Enter a valid details to register your organization",
+    //     });
+    //   });
   };
 
   const isFormFieldInValid = (name: string): string => {
@@ -477,6 +544,9 @@ const RegistrationScreen = () => {
                     <FormControlLabelText>
                       Organization Image
                     </FormControlLabelText>
+                    <FormControlLabelAstrick className="text-red-400 ms-0.5">
+                      *
+                    </FormControlLabelAstrick>
                   </FormControlLabel>
                   <ImagePickerComponent
                     onImagePicked={(uri: string) => {
@@ -545,6 +615,10 @@ const RegistrationScreen = () => {
                       return prevState;
                     });
                   }}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={fieldValidationStatus["orgName"]}
                 />
                 <PrimaryTextFormField
                   fieldName="orgMobile"
@@ -557,6 +631,10 @@ const RegistrationScreen = () => {
                   max={10}
                   keyboardType="phone-pad"
                   filterExp={/^[0-9]*$/}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={fieldValidationStatus["orgMobile"]}
                   customValidations={(value) => {
                     // mobile no should start with 6-9
                     const customRE = /^[6-9]/;
@@ -647,127 +725,136 @@ const RegistrationScreen = () => {
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("firstName").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>POC First Name</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      defaultValue={customerLeadDetailsModel?.firstName ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.firstName = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("firstName")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("lastName").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>POC Last Name</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      defaultValue={customerLeadDetailsModel?.lastName ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.lastName = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("lastName")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl isInvalid={isFormFieldInValid("email").length > 0}>
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>POC Email</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="customer@business.com"
-                      keyboardType="email-address"
-                      defaultValue={customerLeadDetailsModel?.email ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.email = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("email")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("mobile").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>POC Mobile No.</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      keyboardType="number-pad"
-                      defaultValue={customerLeadDetailsModel?.mobile ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.mobile = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("mobile")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isRequired={true}
-                  isInvalid={isFormFieldInValid("alternateMobile").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>
-                      POC Alternate Mobile No.
-                    </FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      keyboardType="number-pad"
-                      defaultValue={
-                        customerLeadDetailsModel?.alternateMobile ?? ""
-                      }
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.alternateMobile = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("alternateMobile")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                <PrimaryTextFormField
+                  fieldName="firstName"
+                  label="POC First Name"
+                  placeholder="Enter here"
+                  errors={errors}
+                  setErrors={setErrors}
+                  min={4}
+                  defaultValue={customerLeadDetailsModel.firstName}
+                  filterExp={/^[a-zA-Z ]*$/}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={fieldValidationStatus["firstName"]}
+                  onChangeText={(value) => {
+                    console.log("value", value);
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.firstName = value;
+                      return prevState;
+                    });
+                  }}
+                />
+                <PrimaryTextFormField
+                  fieldName="lastName"
+                  label="POC Last Name"
+                  placeholder="Enter here"
+                  errors={errors}
+                  setErrors={setErrors}
+                  defaultValue={customerLeadDetailsModel.lastName}
+                  filterExp={/^[a-zA-Z ]*$/}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={fieldValidationStatus["lastName"]}
+                  onChangeText={(value) => {
+                    console.log("value", value);
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.lastName = value;
+                      return prevState;
+                    });
+                  }}
+                  isRequired={false}
+                />
+                <PrimaryTextFormField
+                  fieldName="email"
+                  label="POC Email"
+                  placeholder="Enter here"
+                  defaultValue={customerLeadDetailsModel.email}
+                  errors={errors}
+                  setErrors={setErrors}
+                  min={8}
+                  keyboardType="email-address"
+                  filterExp={/^[A-Za-z0-9!#$%&'*+/=?^_{|}~.-@]*$/}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={fieldValidationStatus["email"]}
+                  customValidations={(value) => {
+                    const customRE = /^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$/;
+                    if (!customRE.test(value)) {
+                      return "Please enter a valid email";
+                    }
+                    return undefined;
+                  }}
+                  onChangeText={(value) => {
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.email = value;
+                      return prevState;
+                    });
+                  }}
+                />
+                <PrimaryTextFormField
+                  fieldName="mobile"
+                  label="POC Mobile No."
+                  placeholder="Enter here"
+                  defaultValue={customerLeadDetailsModel.mobile}
+                  errors={errors}
+                  setErrors={setErrors}
+                  min={10}
+                  max={10}
+                  keyboardType="phone-pad"
+                  filterExp={/^[0-9]*$/}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={fieldValidationStatus["mobile"]}
+                  customValidations={(value) => {
+                    // mobile no should start with 6-9
+                    const customRE = /^[6-9]/;
+                    if (!customRE.test(value)) {
+                      return "Mobile no. should start with 6-9";
+                    }
+                    return undefined;
+                  }}
+                  onChangeText={(value) => {
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.mobile = value;
+                      return prevState;
+                    });
+                  }}
+                />
+                <PrimaryTextFormField
+                  fieldName="alternateMobile"
+                  label="POC Alternate Mobile No."
+                  placeholder="Enter here"
+                  defaultValue={customerLeadDetailsModel.alternateMobile}
+                  errors={errors}
+                  setErrors={setErrors}
+                  min={10}
+                  max={10}
+                  keyboardType="phone-pad"
+                  filterExp={/^[0-9]*$/}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={fieldValidationStatus["alternateMobile"]}
+                  customValidations={(value) => {
+                    // mobile no should start with 6-9
+                    const customRE = /^[6-9]/;
+                    if (!customRE.test(value)) {
+                      return "Mobile no. should start with 6-9";
+                    }
+                    return undefined;
+                  }}
+                  onChangeText={(value) => {
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.alternateMobile = value;
+                      return prevState;
+                    });
+                  }}
+                />
                 <FormControl
                   isInvalid={isFormFieldInValid("description").length > 0}
                 >
@@ -796,29 +883,27 @@ const RegistrationScreen = () => {
                 Organization Address
               </Text>
               <VStack className="gap-4 mt-3">
-                <FormControl
-                  isInvalid={isFormFieldInValid("address").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Address</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="Enter here"
-                      defaultValue={customerLeadDetailsModel?.address ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.address = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("address")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                <PrimaryTextFormField
+                  fieldName="address"
+                  label="Address"
+                  placeholder="Enter here"
+                  errors={errors}
+                  setErrors={setErrors}
+                  min={4}
+                  defaultValue={customerLeadDetailsModel.address}
+                  filterExp={/^[a-zA-Z0-9 \/#.]*$/}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={fieldValidationStatus["address"]}
+                  onChangeText={(value) => {
+                    console.log("value", value);
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.address = value;
+                      return prevState;
+                    });
+                  }}
+                />
                 <PrimaryTypeheadFormField
                   type={GeoLocationType.PINCODE}
                   onClearPress={onClearPress}
@@ -833,6 +918,8 @@ const RegistrationScreen = () => {
                     view nearby locations."
                   errors={errors}
                   setErrors={setErrors}
+                  onItemSelect={onItemSelect}
+                  keyboardType="numeric"
                 />
                 <PrimaryTypeheadFormField
                   type={GeoLocationType.AREA}
@@ -862,70 +949,40 @@ const RegistrationScreen = () => {
                   setErrors={setErrors}
                   editable={false}
                 />
-                {/* 
-                <FormControl
-                  isInvalid={isFormFieldInValid("stateId").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>States</FormControlLabelText>
-                  </FormControlLabel>
-                  <PrimaryTypeheadField
-                    type={GeoLocationType.STATE}
-                    onClearPress={onClearPress}
-                    selectedValue={selectedState}
-                    suggestions={states}
-                    getSuggestions={getSuggestions}
-                    setSelectedValue={setSelectedState}
-                    loading={autoCompleteLoading}
-                    placeholder="Select state"
-                  />
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("stateId")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
-                <FormControl
-                  isInvalid={isFormFieldInValid("countryId").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Country</FormControlLabelText>
-                  </FormControlLabel>
-                  <PrimaryTypeheadField
-                    type={GeoLocationType.COUNTRY}
-                    onClearPress={onClearPress}
-                    selectedValue={selectedCountry}
-                    suggestions={countries}
-                    getSuggestions={getSuggestions}
-                    setSelectedValue={setSelectedCountry}
-                    loading={autoCompleteLoading}
-                    placeholder="Select country"
-                  />
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("countryId")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl> */}
+                <PrimaryTypeheadFormField
+                  type={GeoLocationType.STATE}
+                  onClearPress={onClearPress}
+                  selectedValue={selectedCity}
+                  suggestions={states}
+                  getSuggestions={getSuggestions}
+                  setSelectedValue={setSelectedCity}
+                  placeholder="Search state"
+                  fieldName="stateId"
+                  label="States"
+                  errors={errors}
+                  setErrors={setErrors}
+                  editable={false}
+                />
+                <PrimaryTypeheadFormField
+                  type={GeoLocationType.COUNTRY}
+                  onClearPress={onClearPress}
+                  selectedValue={selectedCountry}
+                  suggestions={countries}
+                  getSuggestions={getSuggestions}
+                  setSelectedValue={setSelectedCountry}
+                  placeholder="Search country"
+                  fieldName="countryId"
+                  label="Country"
+                  errors={errors}
+                  setErrors={setErrors}
+                  editable={false}
+                />
               </VStack>
-              {/*<Pressable*/}
-              {/*  className="bg-primary-950 mt-6 rounded p-3 items-center"*/}
-              {/*  onPress={updateCustomerLeadDetails}*/}
-              {/*>*/}
-              {/*  <Text className="text-white font-medium">Save</Text>*/}
-              {/*</Pressable>*/}
               <SubmitButton
                 isLoading={isLoading}
                 onPress={updateCustomerLeadDetails}
                 btnText="Save"
-                className=""
               />
-              {/* <Button
-                className="bg-primary-950 mt-8 mb-8 h-12 rounded-lg shadow-sm"
-                onPress={updateCustomerLeadDetails}
-              >
-                <ButtonText>Save</ButtonText>
-              </Button> */}
             </VStack>
           </Box>
         </ScrollView>

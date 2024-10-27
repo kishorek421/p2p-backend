@@ -387,14 +387,14 @@ const RegistrationScreen = () => {
       (key) =>
         new Promise((resolve) => {
           // Resolve each validation status based on field key
-          console.log("key ->>>>>", key);
-          
-          setFieldValidationStatus((prev: {}) => ({
+          setFieldValidationStatus((prev: any) => ({
             ...prev,
             [key]: resolve,
           }));
         }),
     );
+
+    console.log(" validateFiels");
 
     // Wait for all validations to complete
     await Promise.all(validationPromises);
@@ -405,7 +405,6 @@ const RegistrationScreen = () => {
     );
 
     console.log("allValid ", allValid);
-
 
     if (allValid) {
       setIsLoading(true);
@@ -519,6 +518,16 @@ const RegistrationScreen = () => {
     return msg;
   };
 
+  const setFieldValidationStatusFunc = (
+    fieldName: string,
+    isValid: boolean,
+  ) => {
+    setFieldValidationStatus((prev: any) => ({
+      ...prev,
+      [fieldName]: isValid,
+    }));
+  };
+
   return (
     <View>
       {isLoading ? (
@@ -618,7 +627,7 @@ const RegistrationScreen = () => {
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
-                  validateFieldFunc={fieldValidationStatus["orgName"]}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                 />
                 <PrimaryTextFormField
                   fieldName="orgMobile"
@@ -634,7 +643,7 @@ const RegistrationScreen = () => {
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
-                  validateFieldFunc={fieldValidationStatus["orgMobile"]}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                   customValidations={(value) => {
                     // mobile no should start with 6-9
                     const customRE = /^[6-9]/;
@@ -737,7 +746,7 @@ const RegistrationScreen = () => {
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
-                  validateFieldFunc={fieldValidationStatus["firstName"]}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                   onChangeText={(value) => {
                     console.log("value", value);
                     setCustomerLeadDetailsModel((prevState) => {
@@ -757,7 +766,7 @@ const RegistrationScreen = () => {
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
-                  validateFieldFunc={fieldValidationStatus["lastName"]}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                   onChangeText={(value) => {
                     console.log("value", value);
                     setCustomerLeadDetailsModel((prevState) => {
@@ -780,7 +789,7 @@ const RegistrationScreen = () => {
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
-                  validateFieldFunc={fieldValidationStatus["email"]}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                   customValidations={(value) => {
                     const customRE = /^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$/;
                     if (!customRE.test(value)) {
@@ -809,7 +818,7 @@ const RegistrationScreen = () => {
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
-                  validateFieldFunc={fieldValidationStatus["mobile"]}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                   customValidations={(value) => {
                     // mobile no should start with 6-9
                     const customRE = /^[6-9]/;
@@ -839,7 +848,7 @@ const RegistrationScreen = () => {
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
-                  validateFieldFunc={fieldValidationStatus["alternateMobile"]}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                   customValidations={(value) => {
                     // mobile no should start with 6-9
                     const customRE = /^[6-9]/;
@@ -895,7 +904,7 @@ const RegistrationScreen = () => {
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
-                  validateFieldFunc={fieldValidationStatus["address"]}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                   onChangeText={(value) => {
                     console.log("value", value);
                     setCustomerLeadDetailsModel((prevState) => {

@@ -22,7 +22,7 @@ interface PrimaryTextFormFieldProps {
   canValidateField: boolean;
   setCanValidateField: any;
   setFieldValidationStatus: any;
-  validateFieldFunc?: any;
+  validateFieldFunc: (fieldName: string, isValid: boolean) => void;
   defaultValue?: string;
   isRequired?: boolean;
   keyboardType?: KeyboardTypeOptions;
@@ -54,10 +54,10 @@ const PrimaryTextFormField = ({
   const [value, setValue] = useState<string>("");
 
   useEffect(() => {
-    setFieldValidationStatus((prevState: any) => {
-      prevState[fieldName] = null;
-      return prevState;
-    });
+    setFieldValidationStatus((prevState: any) => ({
+      ...prevState,
+      [fieldName]: null,
+    }));
   }, []);
 
   useEffect(() => {
@@ -104,25 +104,26 @@ const PrimaryTextFormField = ({
 
   const validateField = (newValue: string) => {
     if (isRequired && newValue.length === 0) {
+      validateFieldFunc(fieldName, false);
       setErrorValue(fieldName, value, `Please enter a ${label.toLowerCase()}`);
       return;
     }
     if (customValidations) {
       const errorValidationMsg = customValidations(value);
       if (errorValidationMsg) {
-        validateFieldFunc && validateFieldFunc(false);
+        validateFieldFunc(fieldName, false);
         setErrorValue(fieldName, value, errorValidationMsg);
         return;
       }
     }
     const valLen = newValue.length;
     if (min && valLen < min) {
-      validateFieldFunc && validateFieldFunc(false);
+      validateFieldFunc(fieldName, false);
       // if this field is not valid set validField is false
       setErrorValue(fieldName, value, `Min. length should be ${min}`);
       return;
     }
-    validateFieldFunc && validateFieldFunc(true);
+    validateFieldFunc(fieldName, true);
     setErrorValue(fieldName, value, "");
   };
 
@@ -146,9 +147,6 @@ const PrimaryTextFormField = ({
             // if expression not null and value matches the expressions(regular expressions)
             if (filterExp && !filterExp.test(newValue)) {
               return;
-            }
-            if (canValidateField) {
-              // setCanValidateField(false);
             }
             onChangeText(newValue);
             const valLen = newValue.length;

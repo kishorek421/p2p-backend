@@ -12,7 +12,7 @@ import BottomSheet from "./BottomSheet";
 import Entypo from "@expo/vector-icons/Entypo";
 
 type ImagePickerComponentProps = {
-  onImagePicked: (uri: string) => void;
+  onImagePicked: (uri: string, fileSizeBytes: number) => void;
   setIsModalVisible: any;
   bottomSheetRef: any;
 };
@@ -108,7 +108,6 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
   };
 
   const pickImage = async () => {
-    console.log("pickImage");
     const permissionsGranted = await requestPermissions(
       PickerPermissions.MEDIA,
     );
@@ -119,11 +118,14 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      base64: true,
     });
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      onImagePicked(uri);
+    if (!result.canceled && result.assets.length > 0) {
+      const asset = result.assets[0];
+      const fileSize = (asset.base64?.length ?? 0) * (3 / 4) - 2;
+      const uri = asset.uri;
+      onImagePicked(uri, fileSize);
       closeModal();
     }
   };
@@ -138,11 +140,14 @@ const ImagePickerComponent: React.FC<ImagePickerComponentProps> = ({
       allowsEditing: true,
       aspect: [4, 3],
       quality: 1,
+      base64: true,
     });
 
     if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      onImagePicked(uri);
+      const asset = result.assets[0];
+      const fileSize = (asset.base64?.length ?? 0) * (3 / 4) - 2;
+      const uri = asset.uri;
+      onImagePicked(uri, fileSize);
       closeModal();
     }
   };

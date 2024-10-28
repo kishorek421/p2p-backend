@@ -10,6 +10,7 @@ export enum OrgDropdownType {
   ORGANIZATION,
   DEPARTMENT,
   DESIGNATION,
+  BRANCH,
 }
 
 export enum TextCase {

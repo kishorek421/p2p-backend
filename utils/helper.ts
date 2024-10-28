@@ -70,3 +70,7 @@ export const getDeviceStatusColor = (status?: string) => {
       return "text-grey-500";
   }
 };
+
+export function bytesToMB(bytes: number) {
+  return bytes / (1024 * 1024);
+}

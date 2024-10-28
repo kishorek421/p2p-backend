@@ -8,11 +8,11 @@ import { HStack } from "../ui/hstack";
 import { getDeviceStatusColor } from "@/utils/helper";
 import { AssetMasterListItemModel } from "@/models/assets";
 
-interface DevicesListItemLayoutProps {
+interface DeviceListItemLayoutProps {
   data: AssetMasterListItemModel;
 }
 
-const DevicesListItemLayout = ({ data }: DevicesListItemLayoutProps) => {
+const DeviceListItemLayout = ({ data }: DeviceListItemLayoutProps) => {
   return (
     <TouchableOpacity
       className="p-4"
@@ -82,4 +82,4 @@ const DevicesListItemLayout = ({ data }: DevicesListItemLayoutProps) => {
   );
 };
 
-export default DevicesListItemLayout;
+export default DeviceListItemLayout;

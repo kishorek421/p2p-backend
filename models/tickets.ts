@@ -24,6 +24,7 @@ export interface TicketListItemModel {
   createdAt?: string;
   ticketNo?: string;
   assignedToDetails?: EmployeeDetailsModel;
+  ticketImages?: string[];
 }
 
 export interface RaiseTicketRequestModel {

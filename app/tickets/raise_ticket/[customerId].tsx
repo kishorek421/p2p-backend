@@ -10,9 +10,18 @@ import {
   AssetInUseListItemModel,
   IssueTypeListItemModel,
 } from "@/models/assets";
-import { FormControl } from "@/components/ui/form-control";
+import {
+  FormControl,
+  FormControlError,
+  FormControlErrorText,
+} from "@/components/ui/form-control";
 import { DropdownModel, ErrorModel } from "@/models/common";
-import { getFileName } from "@/utils/helper";
+import {
+  bytesToMB,
+  getFileName,
+  isFormFieldInValid,
+  setErrorValue,
+} from "@/utils/helper";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { Pressable, ScrollView, Text, View, Image } from "react-native";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -26,6 +35,7 @@ import ImagePickerComponent from "@/components/ImagePickerComponent";
 import Toast from "react-native-toast-message";
 import PrimaryDropdownFormField from "@/components/fields/PrimaryDropdownFormField";
 import PrimaryTextareaFormField from "@/components/fields/PrimaryTextareaFormField";
+import useRefresh from "@/hooks/useRefresh";
 
 const RaiseTicketScreen = () => {
   const [assetsInUse, setAssetsInUse] = useState<AssetInUseListItemModel[]>([]);
@@ -66,6 +76,10 @@ const RaiseTicketScreen = () => {
     }
   };
 
+  const [canClearForm, setCanClearForm] = useState(false);
+
+  const { triggerRefresh } = useRefresh();
+
   useEffect(() => {
     navigation.setOptions({
       headerLeftContainerStyle: {
@@ -97,7 +111,17 @@ const RaiseTicketScreen = () => {
 
     loadAssetsInUse();
     loadIssueTypes();
+
+    setCanClearForm(false);
   }, [customerId, navigation]);
+
+  const clearForm = () => {
+    setRaiseTicketModel({});
+    setAssetImages([]);
+    setSelectedAssetInUse({});
+    setSelectedIssueType({});
+    setCanClearForm(true);
+  };
 
   const onItemSelect = (type: string, e: any) => {
     switch (type) {
@@ -132,6 +156,18 @@ const RaiseTicketScreen = () => {
   };
 
   const raiseTicket = async () => {
+    console.log("assetImages.length", assetImages.length);
+    if (assetImages.length === 0) {
+      setErrorValue(
+        "assetImages",
+        "",
+        "Atleast one asset image is required",
+        setErrors,
+      );
+    } else {
+      setErrorValue("assetImages", "", "", setErrors);
+    }
+
     const validationPromises = Object.keys(fieldValidationStatus).map(
       (key) =>
         new Promise((resolve) => {
@@ -201,8 +237,6 @@ const RaiseTicketScreen = () => {
               assetImages: uploadedAssetImages,
             };
 
-            console.log("ticketData", ticketData);
-
             api
               .post(CREATE_TICKET, ticketData)
               .then((response) => {
@@ -212,6 +246,8 @@ const RaiseTicketScreen = () => {
                   type: "success",
                   text1: "Ticket Created Sucessfully",
                 });
+                clearForm();
+                triggerRefresh();
                 router.back();
               })
               .catch((e) => {
@@ -300,13 +336,18 @@ const RaiseTicketScreen = () => {
           setCanValidateField={setCanValidateField}
           setFieldValidationStatus={setFieldValidationStatus}
           validateFieldFunc={setFieldValidationStatusFunc}
+          canClearForm={canClearForm}
         />
-        <FormControl>
+        <FormControl
+          isInvalid={isFormFieldInValid("assetImages", errors).length > 0}
+        >
           <HStack className="justify-between mt-2 mb-1">
-            <Text className="font-medium">Asset Images</Text>
+            <Text className="font-medium">
+              Asset Images <Text className="text-red-400">*</Text>
+            </Text>
             <Text className="text-gray-500">{assetImages.length}/3</Text>
           </HStack>
-          <View className="flex-row flex-wrap mt-2">
+          <View className="flex-row flex-wrap">
             {assetImages.map((uri, index) => (
               <Pressable
                 onPress={() => {
@@ -317,7 +358,8 @@ const RaiseTicketScreen = () => {
                     },
                   });
                 }}
-                className="me-3"
+                className="me-3 mt-2"
+                key={index}
               >
                 <View>
                   <Image
@@ -374,6 +416,11 @@ const RaiseTicketScreen = () => {
               <ButtonText className="text-black">Add Image</ButtonText>
             </Button>
           )}
+          <FormControlError className="mt-2">
+            <FormControlErrorText>
+              {isFormFieldInValid("assetImages", errors)}
+            </FormControlErrorText>
+          </FormControlError>
         </FormControl>
         <SubmitButton
           btnText="Raise"
@@ -389,7 +436,15 @@ const RaiseTicketScreen = () => {
         </View>
       </VStack>
       <ImagePickerComponent
-        onImagePicked={(uri) => {
+        onImagePicked={(uri, fileSizeBytes) => {
+          const fileSizeMB = bytesToMB(fileSizeBytes);
+          if (fileSizeMB > 3) {
+            Toast.show({
+              type: "error",
+              text1: "Image larger than 3MB are not accepted.",
+            });
+            return;
+          }
           setAssetImages((prevState) => [...prevState, uri]);
         }}
         setIsModalVisible={setIsModalVisible}

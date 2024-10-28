@@ -10,6 +10,7 @@ import Toast from "react-native-toast-message";
 import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 import { Pressable } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { RefreshProvider } from "@/contexts/RefreshContext";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -32,90 +33,95 @@ export default function RootLayout() {
     <GluestackUIProvider mode="light">
       <AutocompleteDropdownContextProvider>
         <AuthProvider>
-          <Stack>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen
-              name="(root)"
-              options={{ headerShown: false, headerTitle: "Home" }}
-            />
-            <Stack.Screen name="welcome" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-            {/* devices */}
-            <Stack.Screen
-              name="devices/devices_list"
-              options={{
-                headerTitle: "All Devices",
-                headerBackTitle: "Home",
-                headerRight: () => {
-                  return (
-                    <Pressable
-                      onPress={() => router.push("/devices/create_device")}
-                    >
-                      <AntDesign name="pluscircleo" size={20} color="black" />
-                    </Pressable>
-                  );
-                },
-              }}
-            />
-            <Stack.Screen
-              name="devices/device_details/[deviceId]"
-              options={{ headerTitle: "Device Details" }}
-            />
-            <Stack.Screen
-              name="devices/create_device"
-              options={{ headerTitle: "Create Device" }}
-            />
-            {/* employees */}
-            <Stack.Screen name="employees/employees_list" />
-            <Stack.Screen name="employees/employee_details/[employeeId]" />
-            {/* users */}
-            <Stack.Screen
-              name="users/create_user"
-              options={{ headerTitle: "Create User" }}
-            />
-            <Stack.Screen
-              name="users/users_list"
-              options={{
-                headerTitle: "All Users",
-                headerBackTitle: "Home",
-                headerRight: () => {
-                  return (
-                    <Pressable
-                      onPress={() => router.push("/users/create_user")}
-                    >
-                      <AntDesign name="pluscircleo" size={20} color="black" />
-                    </Pressable>
-                  );
-                },
-              }}
-            />
-            <Stack.Screen
-              name="users/user_details/[userId]"
-              options={{ headerTitle: "User Details" }}
-            />
-            <Stack.Screen
-              name="image_viewer/[uri]"
-              options={{
-                presentation: "modal",
-                headerShown: false,
-              }}
-            />
-            {/* tickets */}
-            <Stack.Screen
-              name="tickets/raise_ticket/[customerId]"
-              options={{ headerTitle: "Raise Ticket", headerBackTitle: "" }}
-            />
-            <Stack.Screen
-              name="tickets/tickets_history/list/[customerId]"
-              options={{ headerTitle: "All Tickets", headerBackTitle: "Home" }}
-            />
-            <Stack.Screen
-              name="tickets/tickets_history/details/[ticketId]"
-              options={{ headerTitle: "Ticket Details", headerBackTitle: "" }}
-            />
-          </Stack>
-          <Toast />
+          <RefreshProvider>
+            <Stack>
+              <Stack.Screen name="index" options={{ headerShown: false }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="(root)"
+                options={{ headerShown: false, headerTitle: "Home" }}
+              />
+              <Stack.Screen name="welcome" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+              {/* devices */}
+              <Stack.Screen
+                name="devices/devices_list"
+                options={{
+                  headerTitle: "All Devices",
+                  headerBackTitle: "Home",
+                  headerRight: () => {
+                    return (
+                      <Pressable
+                        onPress={() => router.push("/devices/create_device")}
+                      >
+                        <AntDesign name="pluscircleo" size={20} color="black" />
+                      </Pressable>
+                    );
+                  },
+                }}
+              />
+              <Stack.Screen
+                name="devices/device_details/[deviceId]"
+                options={{ headerTitle: "Device Details" }}
+              />
+              <Stack.Screen
+                name="devices/create_device"
+                options={{ headerTitle: "Create Device" }}
+              />
+              {/* employees */}
+              <Stack.Screen name="employees/employees_list" />
+              <Stack.Screen name="employees/employee_details/[employeeId]" />
+              {/* users */}
+              <Stack.Screen
+                name="users/create_user"
+                options={{ headerTitle: "Create User" }}
+              />
+              <Stack.Screen
+                name="users/users_list"
+                options={{
+                  headerTitle: "All Users",
+                  headerBackTitle: "Home",
+                  headerRight: () => {
+                    return (
+                      <Pressable
+                        onPress={() => router.push("/users/create_user")}
+                      >
+                        <AntDesign name="pluscircleo" size={20} color="black" />
+                      </Pressable>
+                    );
+                  },
+                }}
+              />
+              <Stack.Screen
+                name="users/user_details/[userId]"
+                options={{ headerTitle: "User Details" }}
+              />
+              <Stack.Screen
+                name="image_viewer/[uri]"
+                options={{
+                  presentation: "modal",
+                  headerShown: false,
+                }}
+              />
+              {/* tickets */}
+              <Stack.Screen
+                name="tickets/raise_ticket/[customerId]"
+                options={{ headerTitle: "Raise Ticket", headerBackTitle: "" }}
+              />
+              <Stack.Screen
+                name="tickets/tickets_history/list/[customerId]"
+                options={{
+                  headerTitle: "All Tickets",
+                  headerBackTitle: "Home",
+                }}
+              />
+              <Stack.Screen
+                name="tickets/tickets_history/details/[ticketId]"
+                options={{ headerTitle: "Ticket Details", headerBackTitle: "" }}
+              />
+            </Stack>
+            <Toast />
+          </RefreshProvider>
         </AuthProvider>
       </AutocompleteDropdownContextProvider>
     </GluestackUIProvider>

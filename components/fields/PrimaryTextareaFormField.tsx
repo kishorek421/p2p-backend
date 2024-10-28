@@ -31,6 +31,7 @@ interface PrimaryTextareaFormFieldProps {
   max?: number;
   filterExp?: RegExp;
   customValidations?: (value: string) => string | undefined;
+  canClearForm?: boolean;
 }
 
 const PrimaryTextareaFormField = ({
@@ -51,8 +52,15 @@ const PrimaryTextareaFormField = ({
   max = 50,
   filterExp,
   customValidations,
+  canClearForm,
 }: PrimaryTextareaFormFieldProps) => {
   const [value, setValue] = useState<string>("");
+
+  useEffect(() => {
+    if (canClearForm && value.length > 0) {
+      setValue("");
+    }
+  }, [canClearForm]);
 
   useEffect(() => {
     setFieldValidationStatus((prevState: any) => ({

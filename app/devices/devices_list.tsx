@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import api from "@/services/api";
 import { GET_ASSET_MASTERS_LIST } from "@/constants/api_endpoints";
 import { AssetMasterListItemModel } from "@/models/assets";
-import DevicesListItemLayout from "@/components/devices/devices_list_item_layout";
+import DeviceListItemLayout from "@/components/devices/DeviceListItemLayout";
 
 const DevicesList = () => {
   const [devicesList, setDevicesList] = useState<AssetMasterListItemModel[]>(
@@ -28,7 +28,7 @@ const DevicesList = () => {
   ) : (
     <FlatList
       data={devicesList}
-      renderItem={({ item }) => <DevicesListItemLayout data={item} />}
+      renderItem={({ item }) => <DeviceListItemLayout data={item} />}
       keyExtractor={(_, index) => index.toString()}
       onEndReached={() => {}}
     />

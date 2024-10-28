@@ -1,29 +1,15 @@
 import { View, ScrollView } from "react-native";
-import React, { useCallback, useEffect, useState } from "react";
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorText,
-  FormControlLabel,
-  FormControlLabelText,
-} from "@/components/ui/form-control";
-import { Input, InputField } from "@/components/ui/input";
-import { Button, ButtonText } from "@/components/ui/button";
+import React, { useEffect, useState } from "react";
 import { OrgDropdownType } from "@/enums/enums";
-import { isFormFieldInValid } from "@/utils/helper";
 import {
+  BranchDetailsModel,
   OrgDepartmentMappingDetailsModel,
   OrgDesignationMappingDetailsModel,
-  OrgDetailsModel,
 } from "@/models/org";
-import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 import api from "@/services/api";
 import {
-  GET_DEPARTMENT_DROPDOWN,
-  GET_ORG_DROPDOWN,
-  GET_DESIGNATION_DROPDOWN,
   CREATE_USER,
-  GET_ISSUE_TYPES,
+  GET_BRANCHES_LIST,
   GET_DEPARTMENT_DROPDOWN_LIST,
   GET_DESIGNATION_DROPDOWN_BY_DEPARTMENT,
 } from "@/constants/api_endpoints";
@@ -39,6 +25,9 @@ const CreateUser = () => {
   const [userModel, setUserModel] = useState<CreateUserModel>({});
 
   const [errors, setErrors] = useState<ErrorModel[]>([]);
+
+  const [branches, setBranches] = useState<BranchDetailsModel[]>([]);
+  const [selectedBranch, setSelectedBranch] = useState<DropdownModel>({});
 
   const [departments, setDepartments] = useState<
     OrgDepartmentMappingDetailsModel[]
@@ -62,18 +51,30 @@ const CreateUser = () => {
   const [fieldValidationStatus, setFieldValidationStatus] = useState<any>({});
 
   useEffect(() => {
-    const loadDepartments = () => {
+    const fetchDepartments = () => {
       api
         .get(GET_DEPARTMENT_DROPDOWN_LIST, {})
         .then((response) => {
-          setDepartments(response.data?.data?.content ?? []);
+          setDepartments(response.data?.data ?? []);
         })
         .catch((e) => {
           console.error(e);
         });
     };
 
-    loadDepartments();
+    const fetchBranches = () => {
+      api
+        .get(GET_BRANCHES_LIST, {})
+        .then((response) => {
+          setBranches(response.data?.data ?? []);
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    };
+
+    fetchDepartments();
+    fetchBranches();
   }, []);
 
   const fetchDesignations = (departmentId: string) => {
@@ -157,23 +158,30 @@ const CreateUser = () => {
 
   const onItemSelect = (type: any, e: any) => {
     switch (type) {
+      case OrgDropdownType.BRANCH:
+        let iSelectedBranch = branches.find((branch) => branch.id === e);
+        setSelectedBranch({
+          label: iSelectedBranch?.name,
+          value: iSelectedBranch?.id,
+        });
+        break;
       case OrgDropdownType.DEPARTMENT:
-        let selectedDepartment = departments.find(
+        let iSelectedDepartment = departments.find(
           (department) => department.id === e,
         );
         setSelectedDepartment({
-          label: selectedDepartment?.name,
-          value: selectedDepartment?.id,
+          label: iSelectedDepartment?.name,
+          value: iSelectedDepartment?.id,
         });
-        fetchDesignations(selectedDepartment?.id ?? "");
+        fetchDesignations(iSelectedDepartment?.id ?? "");
         break;
       case OrgDropdownType.DESIGNATION:
-        let selectedDesignation = designations.find(
+        let iSelectedDesignation = designations.find(
           (designation) => designation.id === e,
         );
         setSelectedDesignation({
-          label: selectedDesignation?.name,
-          value: selectedDesignation?.id,
+          label: iSelectedDesignation?.name,
+          value: iSelectedDesignation?.id,
         });
         break;
     }
@@ -286,6 +294,26 @@ const CreateUser = () => {
               return prevState;
             });
           }}
+        />
+        <PrimaryDropdownFormField
+          className="mb-3"
+          options={branches.map((branch) => ({
+            label: branch.name?.toString(),
+            value: branch.id,
+          }))}
+          selectedValue={selectedBranch}
+          setSelectedValue={setSelectedBranch}
+          type={OrgDropdownType.BRANCH}
+          placeholder="Select branch"
+          fieldName="branchId"
+          label="Branch"
+          canValidateField={canValidateField}
+          setCanValidateField={setCanValidateField}
+          setFieldValidationStatus={setFieldValidationStatus}
+          validateFieldFunc={setFieldValidationStatusFunc}
+          errors={errors}
+          setErrors={setErrors}
+          onItemSelect={onItemSelect}
         />
         <PrimaryDropdownFormField
           className="mb-3"

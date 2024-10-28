@@ -1,5 +1,6 @@
 import { ConfigurationModel } from "./configurations";
-import { OrgDetailsModel } from "./org";
+import { OrgDesignationMappingDetailsModel,OrgDepartmentMappingDetailsModel, OrgDetailsModel } from "./org";
+import {CityListItemModel} from "./geolocations"
 
 export interface CreateUserModel {
   firstName?: string;
@@ -20,4 +21,16 @@ export interface UserDetailsModel {
   statusDetails?: ConfigurationModel;
   userTypeDetails?: ConfigurationModel;
   orgDetails?: OrgDetailsModel;
+  orgDesignationDetails?: OrgDesignationMappingDetailsModel;
+  orgDepartmentDetails?: OrgDepartmentMappingDetailsModel;
+  ticketDetails?: UserTicketDetailsModel;
+  
 }
+
+export interface UserTicketDetailsModel{
+  lastTicketStatus?: string;
+  raisedTicketCount?: number ;
+  closedTicketCount?: number ;
+}
+            
+

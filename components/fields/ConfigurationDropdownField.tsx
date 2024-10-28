@@ -12,20 +12,47 @@ import {
 } from "@/components/ui/select";
 import { ChevronDownIcon } from "@/components/ui/icon";
 import { ConfigurationModel } from "@/models/configurations";
+import { useEffect, useState } from "react";
+import { GET_CONFIGURATIONS_BY_CATEGORY } from "@/constants/api_endpoints";
+import api from "@/services/api";
 
-interface PrimarySelectProps {
-  options: ConfigurationModel[];
+interface ConfigurationDropdownFieldProps {
+  configurationCategory: string;
   selectedConfig: ConfigurationModel;
   setSelectedConfig: any;
   placeholder: string;
+  onItemSelect?: (config: ConfigurationModel) => void;
 }
 
-const ConfigurationSelect = ({
-  options,
+const ConfigurationDropdownField = ({
+  configurationCategory,
   selectedConfig,
   setSelectedConfig,
   placeholder,
-}: PrimarySelectProps) => {
+  onItemSelect,
+}: ConfigurationDropdownFieldProps) => {
+  const [options, setOptions] = useState<ConfigurationModel[]>([]);
+
+  useEffect(() => {
+    const fetchOptions = () => {
+      api
+        .get(GET_CONFIGURATIONS_BY_CATEGORY, {
+          params: {
+            category: configurationCategory,
+          },
+        })
+        .then((response) => {
+          setOptions(response.data?.data ?? []);
+        })
+        .catch((e) => {
+          console.error(e);
+          setOptions([]);
+        });
+    };
+
+    fetchOptions();
+  }, []);
+
   return (
     <Select
       className="w-full"
@@ -34,6 +61,7 @@ const ConfigurationSelect = ({
         let config = options.find((option) => e === option.id);
         if (config) {
           setSelectedConfig(config);
+          onItemSelect && onItemSelect(config);
         }
       }}
     >
@@ -65,4 +93,4 @@ const ConfigurationSelect = ({
   );
 };
 
-export default ConfigurationSelect;
+export default ConfigurationDropdownField;

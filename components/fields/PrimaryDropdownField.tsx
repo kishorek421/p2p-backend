@@ -13,41 +13,39 @@ import {
 import { ChevronDownIcon } from "@/components/ui/icon";
 import { useEffect } from "react";
 
-interface PrimarySelectProps {
+interface PrimaryDropdownFieldProps {
   options: any[];
   selectedValue: any;
   type: string;
-  onChange: (type: string, selectedConfig: any) => void;
+  onItemSelect?: (type: string, selectedConfig: any) => void;
   placeholder: string;
+  setSelectedValue: any;
 }
 
-const CustomSelect = ({
+const PrimaryDropdownField = ({
   options,
   selectedValue,
   type,
-  onChange,
+  onItemSelect,
   placeholder,
-}: PrimarySelectProps) => {
-  useEffect(() => {
-    console.log(selectedValue);
-  }, [selectedValue]);
+  setSelectedValue,
+}: PrimaryDropdownFieldProps) => {
+  // useEffect(() => {}, [selectedValue]);
+
   return (
     <Select
       className="w-full"
-      selectedValue={selectedValue?.value}
+      selectedValue={selectedValue.value}
       onValueChange={(e) => {
-        // let config = options.find((option) => e === option.id);
-        // if (config) {
-        //   setSelectedConfig(config);
-        // }
-        onChange(type, e);
+        // setSelectedValue(e);
+        onItemSelect && onItemSelect(type, e);
       }}
     >
       <SelectTrigger variant="outline" size="md">
         <SelectInput
           className="w-96"
           placeholder={placeholder}
-          value={selectedValue?.label}
+          value={selectedValue.label}
         />
         <SelectIcon className="mr-3 " as={ChevronDownIcon} />
       </SelectTrigger>
@@ -57,17 +55,18 @@ const CustomSelect = ({
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>
-          {options.map((value) => (
-            <SelectItem
-              label={value?.label ?? "-"}
-              value={value?.value ?? ""}
-              key={value?.value}
-            />
-          ))}
+          {options &&
+            options.map((value) => (
+              <SelectItem
+                label={value.label ?? "-"}
+                value={value.value ?? ""}
+                key={value.value}
+              />
+            ))}
         </SelectContent>
       </SelectPortal>
     </Select>
   );
 };
 
-export default CustomSelect;
+export default PrimaryDropdownField;

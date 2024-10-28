@@ -18,12 +18,13 @@ export interface TicketListItemModel {
   serviceTypeDetails?: ConfigurationModel;
   warrantyDetails?: ConfigurationModel;
   customerDetails?: AssetInUseCustomerDetailsModel;
-  issueTypeDetails?: ConfigurationModel;
+  issueTypeDetails?: IssueTypeModel;
   billable?: boolean;
   timerRunning?: boolean;
   createdAt?: string;
   ticketNo?: string;
   assignedToDetails?: EmployeeDetailsModel;
+  ticketImages?: string[];
 }
 
 export interface RaiseTicketRequestModel {
@@ -31,4 +32,10 @@ export interface RaiseTicketRequestModel {
   issueType?: string;
   description?: string;
   assetImages?: string[];
+}
+
+export interface IssueTypeModel {
+  id?: string;
+  name?: string;
+  code?: string;
 }

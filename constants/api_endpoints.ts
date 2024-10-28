@@ -60,10 +60,11 @@ export const GET_EMPLOYEES_LIST = "/employees/activeEmployee/list";
 
 // orgs
 export const GET_ORG_DROPDOWN = "/organisation/getOrganisationDropdown";
-export const GET_DEPARTMENT_DROPDOWN =
+export const GET_DEPARTMENT_DROPDOWN_LIST =
   "/organisation/department/getDepartmentByNameAndOrgId";
-export const GET_DESIGNATION_DROPDOWN =
-  "/organisation/designation/getDesignationListByIds";
+export const GET_DESIGNATION_DROPDOWN_BY_DEPARTMENT =
+  "/organisation/designation/getDesignationListByName";
+export const GET_BRANCHES_LIST = "/organisation/getBranchListByOrgId";
 
 // users
 export const CREATE_USER = "/users/create";

@@ -9,7 +9,7 @@ import {
 import { UserDetailsModel } from "@/models/users";
 import api from "@/services/api";
 import { AssetMasterListItemModel } from "@/models/assets";
-import DevicesListItemLayout from "@/components/devices/devices_list_item_layout";
+import DeviceListItemLayout from "@/components/devices/DeviceListItemLayout";
 
 const UserDetails = () => {
   const { userId } = useLocalSearchParams();
@@ -93,7 +93,7 @@ const UserDetails = () => {
         ) : (
           <FlatList
             data={assignedDevicesList}
-            renderItem={({ item }) => <DevicesListItemLayout data={item} />}
+            renderItem={({ item }) => <DeviceListItemLayout data={item} />}
             keyExtractor={(_, index) => index.toString()}
             onEndReached={() => {}}
           />

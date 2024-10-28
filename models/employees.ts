@@ -1,4 +1,8 @@
-import { OrgDepartmentMappingDetailsModel, OrgDesignationMappingDetailsModel } from "./org";
+import {
+  OrgDepartmentMappingDetailsModel,
+  OrgDesignationMappingDetailsModel,
+} from "./org";
+import { RoleModel } from "./rbac";
 
 export interface EmployeeDetailsModel {
   id?: string;
@@ -8,4 +12,11 @@ export interface EmployeeDetailsModel {
   dateOfJoining?: string;
   designationDetails?: OrgDesignationMappingDetailsModel;
   departmentDetails?: OrgDepartmentMappingDetailsModel;
+  userRoleDetails: UserRoleDetailsModel;
+}
+
+export interface UserRoleDetailsModel {
+  id?: string;
+  userId?: string;
+  roleDetails: RoleModel;
 }

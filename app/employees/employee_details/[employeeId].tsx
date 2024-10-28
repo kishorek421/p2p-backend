@@ -6,7 +6,7 @@ import { VStack } from "@/components/ui/vstack";
 import { useLocalSearchParams } from "expo-router";
 import { Button } from "@/components/ui/button";
 import { HStack } from "@/components/ui/hstack";
-import DevicesListItemLayout from "@/components/devices/devices_list_item_layout";
+import DeviceListItemLayout from "@/components/devices/DeviceListItemLayout";
 
 const EmployeeDetails = () => {
   const { employeeId } = useLocalSearchParams();
@@ -54,7 +54,7 @@ const EmployeeDetails = () => {
         </View>
         <FlatList
           data={assignedDevicesList}
-          renderItem={({ item }) => <DevicesListItemLayout data={item} />}
+          renderItem={({ item }) => <DeviceListItemLayout data={item} />}
           keyExtractor={(_, index) => index.toString()}
           onEndReached={() => {}}
         />

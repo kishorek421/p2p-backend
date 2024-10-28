@@ -1,7 +1,12 @@
-import { Redirect } from "expo-router";
+import LoadingBar from "@/components/LoadingBar";
+import { View } from "react-native";
 
 const IndexPage = () => {
-  return <Redirect href="/welcome" />;
+  return (
+    <View>
+      <LoadingBar />
+    </View>
+  );
 };
 
 export default IndexPage;

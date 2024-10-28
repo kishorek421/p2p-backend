@@ -24,7 +24,7 @@ const TicketsHistoryScreen = () => {
         className="bg-primary-950 mx-4 mt-4"
         onPress={() =>
           router.push({
-            pathname: "/raise_ticket/[customerId]",
+            pathname: "/tickets/raise_ticket/[customerId]",
             params: { customerId: customerId as string },
           })
         }

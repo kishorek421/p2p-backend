@@ -1,6 +1,8 @@
+import { ReactElement } from "react";
+
 export interface ServiceItemModel {
   label?: string;
-  icon?: string;
+  icon?: ReactElement;
   path?: string;
   params?: {};
 }

@@ -26,27 +26,8 @@ const HomeScreen = () => {
   return (
     <View className="pb-2 px-4">
       <VStack>
-        {/* <HStack className="justify-between items-center">
-        <Icon name="bars" size={26} />
-        <Avatar size="md">
-          <AvatarFallbackText>
-            {customerDetails?.orgDetails?.name ?? "-"}
-          </AvatarFallbackText>
-          <AvatarImage
-            source={{
-              uri: customerDetails?.branchDetails?.branchPic,
-            }}
-          />
-        </Avatar>
-      </HStack> */}
         <ContentLayout customerDetails={customerDetails} />
       </VStack>
-      {/* <View className="flex-1 justify-center items-center">
-      <Link href="/(devices)/my_devices">
-        <Button title="Go to My Device" />
-      </Link>
-   
-      </View> */}
     </View>
   );
 };

@@ -7,5 +7,13 @@ export enum GeoLocationType {
 }
 
 export enum OrgDropdownType {
-  ORGANIZATION, DEPARTMENT, DESIGNATION,
+  ORGANIZATION,
+  DEPARTMENT,
+  DESIGNATION,
+}
+
+export enum TextCase {
+  uppercase,
+  lowercase,
+  freeform,
 }

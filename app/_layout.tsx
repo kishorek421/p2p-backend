@@ -2,13 +2,14 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import "@/global.css";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { router, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import Toast from "react-native-toast-message";
 import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
-
+import { Pressable } from "react-native";
+import AntDesign from "@expo/vector-icons/AntDesign";
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
@@ -43,7 +44,19 @@ export default function RootLayout() {
             {/* devices */}
             <Stack.Screen
               name="devices/devices_list"
-              options={{ headerTitle: "All Devices", headerBackTitle: "Home" }}
+              options={{
+                headerTitle: "All Devices",
+                headerBackTitle: "Home",
+                headerRight: () => {
+                  return (
+                    <Pressable
+                      onPress={() => router.push("/devices/create_device")}
+                    >
+                      <AntDesign name="pluscircleo" size={20} color="black" />
+                    </Pressable>
+                  );
+                },
+              }}
             />
             <Stack.Screen
               name="devices/device_details/[deviceId]"
@@ -63,7 +76,19 @@ export default function RootLayout() {
             />
             <Stack.Screen
               name="users/users_list"
-              options={{ headerTitle: "All Users", headerBackTitle: "Home" }}
+              options={{
+                headerTitle: "All Users",
+                headerBackTitle: "Home",
+                headerRight: () => {
+                  return (
+                    <Pressable
+                      onPress={() => router.push("/users/create_user")}
+                    >
+                      <AntDesign name="pluscircleo" size={20} color="black" />
+                    </Pressable>
+                  );
+                },
+              }}
             />
             <Stack.Screen
               name="users/user_details/[userId]"

@@ -1,4 +1,4 @@
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import {
@@ -6,23 +6,16 @@ import {
   FormControlError,
   FormControlErrorText,
   FormControlLabel,
-  FormControlLabelAstrick,
   FormControlLabelText,
 } from "@/components/ui/form-control";
 import { Input, InputField } from "@/components/ui/input";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ConfigurationModel } from "@/models/configurations";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import api from "@/services/api";
 import {
   CREATE_CUSTOMER,
   GET_AREAS_LIST_BY_NAME_SEARCH,
-  GET_CITIES_LIST_BY_NAME_SEARCH,
-  GET_CONFIGURATIONS_BY_CATEGORY,
-  GET_COUNTRIES_LIST_BY_NAME_SEARCH,
   GET_CUSTOMER_LEAD_DETAILS,
   GET_PINCODES_LIST_BY_PINCODE_SEARCH,
-  GET_STATES_LIST_BY_NAME_SEARCH,
 } from "@/constants/api_endpoints";
 import {
   CATEGORY_OF_ORG,
@@ -32,31 +25,24 @@ import {
 } from "@/constants/configuration_keys";
 import ConfigurationDropdownFormField from "@/components/fields/ConfigurationDropdownFormField";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
-import {
-  AreaListItemModel,
-  CityListItemModel,
-  CountryListItemModel,
-  PincodeListItemModel,
-  StateListItemModel,
-} from "@/models/geolocations";
+import { AreaListItemModel, PincodeListItemModel } from "@/models/geolocations";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Button, ButtonText } from "@/components/ui/button";
-import ImagePickerComponent from "@/components/ImagePickerComponent";
-import { Image } from "react-native";
-import Icon from "react-native-vector-icons/AntDesign";
-import { getFileName } from "@/utils/helper";
-import Toast from "react-native-toast-message";
+
+import { getFileName, isFormFieldInValid } from "@/utils/helper";
 import LoadingBar from "@/components/LoadingBar";
 import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
-import { GeoLocationType } from "@/enums/enums";
+import { GeoLocationType, TextCase } from "@/enums/enums";
 import SubmitButton from "@/components/SubmitButton";
-import { getItem } from "expo-secure-store";
-import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
 import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
 import PrimaryTypeheadFormField from "@/components/fields/PrimaryTypeheadFormField";
 import { DropdownItemModel } from "@/models/ui/dropdown_item_model";
+import ImageFormField from "@/components/fields/ImageFormField";
+import PrimaryTextareaFormField from "@/components/fields/PrimaryTextareaFormField";
+import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
+import { getItem } from "expo-secure-store";
+import Toast from "react-native-toast-message";
 
 const RegistrationScreen = () => {
   const { customerLeadId } = useLocalSearchParams();
@@ -68,14 +54,6 @@ const RegistrationScreen = () => {
   const [states, setStates] = useState<DropdownItemModel[]>([]);
   const [countries, setCountries] = useState<DropdownItemModel[]>([]);
 
-  // selected options
-  // configurations
-  const [selectedTypeOfOrg, setSelectedTypeOfOrg] =
-    useState<ConfigurationModel>({});
-  const [selectedCategoryOfOrg, setSelectedCategoryOfOrg] =
-    useState<ConfigurationModel>({});
-  const [selectedSizeOfOrg, setSelectedSizeOfOrg] =
-    useState<ConfigurationModel>({});
   // geolocations
   const [selectedPincode, setSelectedPincode] =
     useState<AutocompleteDropdownItem>();
@@ -97,11 +75,7 @@ const RegistrationScreen = () => {
 
   const [errors, setErrors] = useState<ErrorModel[]>([]);
 
-  const bottomSheetRef = useRef(null);
-
-  const [isModalVisible, setIsModalVisible] = useState(false);
-
-  const [assetImage, setAssetImage] = useState<string>("");
+  const [orgImage, setOrgImage] = useState<string>("");
 
   // can validate fields
   const [canValidateField, setCanValidateField] = useState(false);
@@ -114,12 +88,6 @@ const RegistrationScreen = () => {
         return GET_PINCODES_LIST_BY_PINCODE_SEARCH;
       case GeoLocationType.AREA:
         return GET_AREAS_LIST_BY_NAME_SEARCH;
-      // case GeoLocationType.CITY:
-      //   return GET_CITIES_LIST_BY_NAME_SEARCH;
-      // case GeoLocationType.STATE:
-      //   return GET_STATES_LIST_BY_NAME_SEARCH;
-      // case GeoLocationType.COUNTRY:
-      //   return GET_COUNTRIES_LIST_BY_NAME_SEARCH;
       default:
         return "";
     }
@@ -127,7 +95,6 @@ const RegistrationScreen = () => {
 
   const getSuggestions = useCallback(
     async (q: string, type: GeoLocationType, setLoading: any) => {
-      console.log("getSuggestions", q);
       if (typeof q !== "string" || q.length < 3) {
         onClearPress(type);
         return;
@@ -137,7 +104,6 @@ const RegistrationScreen = () => {
       api
         .get(getGeoLocationSuggestionsUrl(type) + `?q=${q}`)
         .then((response) => {
-          console.log("suggesgtions", response.data.data);
           setGeolocationSuggestions(type, response.data?.data ?? []);
           setLoading(false);
         })
@@ -163,15 +129,6 @@ const RegistrationScreen = () => {
       case GeoLocationType.AREA:
         setAreas([]);
         break;
-      // case GeoLocationType.CITY:
-      //   setCities([]);
-      //   break;
-      // case GeoLocationType.STATE:
-      //   setStates([]);
-      //   break;
-      // case GeoLocationType.COUNTRY:
-      //   setCountries([]);
-      //   break;
     }
   }, []);
 
@@ -209,47 +166,6 @@ const RegistrationScreen = () => {
           }),
         );
         break;
-      // case GeoLocationType.CITY:
-      //   setCities(
-      //     suggestionsList.map((item: CityListItemModel) => {
-      //       const id = item.id;
-      //       const title = item.cityName;
-      //       if (id && title) {
-      //         return {
-      //           id: id,
-      //           title: title,
-      //         };
-      //       }
-      //     }),
-      //   );
-      //   break;
-      // case GeoLocationType.STATE:
-      //   setStates(
-      //     suggestionsList.map((item: StateListItemModel) => {
-      //       const id = item.id;
-      //       const title = item.stateName;
-      //       if (id && title) {
-      //         return {
-      //           id: id,
-      //           title: title,
-      //         };
-      //       }
-      //     }),
-      //   );
-      //   break;
-      // case GeoLocationType.COUNTRY:
-      //   setCountries(
-      //     suggestionsList.map((item: CountryListItemModel) => {
-      //       const id = item.id;
-      //       const title = item.countryName;
-      //       if (id && title) {
-      //         return {
-      //           id: id,
-      //           title: title,
-      //         };
-      //       }
-      //     }),
-      //   );
     }
   };
 
@@ -259,7 +175,6 @@ const RegistrationScreen = () => {
         const cityId = item.data?.cityId;
         const cityName = item.data?.cityName;
         if (cityId && cityName) {
-          console.log("item~~~~~~~~~~~~~~~~~~~~~~~~>", item);
           setCities([
             {
               title: cityName,
@@ -272,8 +187,35 @@ const RegistrationScreen = () => {
           });
         }
         // set state
-
+        const stateId = item.data?.stateId;
+        const stateName = item.data?.stateName;
+        if (stateId && stateName) {
+          setStates([
+            {
+              title: stateName,
+              id: stateId,
+            },
+          ]);
+          setSelectedState({
+            title: stateName,
+            id: stateId,
+          });
+        }
         // set country
+        const countryId = item.data?.countryId;
+        const countryName = item.data?.countryName;
+        if (countryId && countryName) {
+          setCountries([
+            {
+              title: countryName,
+              id: countryId,
+            },
+          ]);
+          setSelectedCountry({
+            title: countryName,
+            id: countryId,
+          });
+        }
         break;
     }
   };
@@ -295,15 +237,11 @@ const RegistrationScreen = () => {
             }
 
             if (data.orgImage) {
-              setAssetImage(data.orgImage);
+              setOrgImage(data.orgImage);
             }
 
             setCustomerLeadDetailsModel(data);
             setIsLead(true);
-
-            setSelectedTypeOfOrg(data.typeOfOrgDetails ?? {});
-            setSelectedCategoryOfOrg(data.categoryOfOrgDetails ?? {});
-            setSelectedSizeOfOrg(data.sizeOfOrgDetails ?? {});
 
             setPincodes([
               {
@@ -369,20 +307,7 @@ const RegistrationScreen = () => {
     loadCustomerLeadDetails();
   }, [router]);
 
-  const toggleImagePicker = () => {
-    setIsModalVisible(!isModalVisible);
-    if (!isModalVisible) {
-      bottomSheetRef.current?.show();
-    } else {
-      bottomSheetRef.current?.hide();
-    }
-  };
-
   const updateCustomerLeadDetails = async () => {
-    setCanValidateField(true);
-
-    console.log("fieldValidationStatus -> ", fieldValidationStatus);
-
     const validationPromises = Object.keys(fieldValidationStatus).map(
       (key) =>
         new Promise((resolve) => {
@@ -394,138 +319,101 @@ const RegistrationScreen = () => {
         }),
     );
 
-    console.log(" validateFiels");
+    setCanValidateField(true);
 
     // Wait for all validations to complete
     await Promise.all(validationPromises);
 
-    // Check if all validations are valid
-    const allValid = Object.values(fieldValidationStatus).every(
-      (status) => status === true,
-    );
-
-    console.log("allValid ", allValid);
+    const allValid = errors
+      .map((error) => error.message?.length === 0)
+      .every((status) => status === true);
 
     if (allValid) {
       setIsLoading(true);
-    }
 
-    // let canUpdate = true;
+      customerLeadDetailsModel.pincodeId = selectedPincode?.id ?? "";
+      customerLeadDetailsModel.areaId = selectedArea?.id ?? "";
+      customerLeadDetailsModel.cityId = selectedCity?.id ?? "";
+      customerLeadDetailsModel.stateId = selectedState?.id ?? "";
+      customerLeadDetailsModel.countryId = selectedCountry?.id ?? "";
+      customerLeadDetailsModel.isCustomerLead = isLead;
+      customerLeadDetailsModel.customerLeadId = customerLeadDetailsModel.id;
 
-    // for (const error of errors) {
-    //   const msg = error.message;
-    //   if (msg && msg.length !== 0) {
-    //     canUpdate = false;
-    //     break;
-    //   }
-    // }
+      const formData = new FormData();
+      (
+        Object.keys(
+          customerLeadDetailsModel,
+        ) as (keyof CustomerLeadDetailsModel)[]
+      ).forEach((key) => {
+        const value = customerLeadDetailsModel[key];
+        if (value !== undefined && value !== null) {
+          formData.append(key as string, value as any); // Type assertion here
+        }
+      });
 
-    console.log(errors);
-
-    // customerLeadDetailsModel.typeOfOrg = selectedTypeOfOrg.id;
-    // customerLeadDetailsModel.categoryOfOrg = selectedCategoryOfOrg.id;
-    // customerLeadDetailsModel.sizeOfOrg = selectedSizeOfOrg.id;
-    // customerLeadDetailsModel.pincodeId = selectedPincode?.id ?? "";
-    // customerLeadDetailsModel.areaId = selectedArea?.id ?? "";
-    // customerLeadDetailsModel.cityId = selectedCity?.id ?? "";
-    // customerLeadDetailsModel.stateId = selectedState?.id ?? "";
-    // customerLeadDetailsModel.countryId = selectedCountry?.id ?? "";
-    // customerLeadDetailsModel.isCustomerLead = isLead;
-    // customerLeadDetailsModel.customerLeadId = customerLeadDetailsModel.id;
-
-    // console.log("customerLeadDetailsModel -> ", customerLeadDetailsModel);
-
-    // const formData = new FormData();
-    // (
-    //   Object.keys(
-    //     customerLeadDetailsModel,
-    //   ) as (keyof CustomerLeadDetailsModel)[]
-    // ).forEach((key) => {
-    //   const value = customerLeadDetailsModel[key];
-    //   if (value !== undefined && value !== null) {
-    //     formData.append(key as string, value as any); // Type assertion here
-    //   }
-    // });
-
-    // if (assetImage) {
-    //   // formData.append(
-    //   //   "orgImageFile",
-    //   //   new File([assetImage], getFileName(assetImage, true), {
-    //   //     type: "image/jpg",
-    //   //   }),
-    //   // );
-    //   // --@ts-ignore --
-    //   formData.append("orgImageFile", {
-    //     uri: assetImage,
-    //     type: "image/jpg",
-    //     name: getFileName(assetImage, true),
-    //   } as any);
-    // }
-
-    // setErrors([]);
-
-    // api
-    //   .post(CREATE_CUSTOMER, formData, {
-    //     headers: {
-    //       "Content-Type": "multipart/form-data",
-    //     },
-    //   })
-    //   .then(async (response) => {
-    //     // router.push({pathname: ""});
-    //     console.log(response.data.data);
-    //     const token = getItem(AUTH_TOKEN_KEY);
-    //     if (token) {
-    //       router.replace("/(root)/home");
-    //       Toast.show({
-    //         type: "success",
-    //         text1: "Registration Completed",
-    //         text2: "Your organization registered successfully",
-    //       });
-    //     } else {
-    //       Toast.show({
-    //         type: "success",
-    //         text1: "Check your email",
-    //         text2: "Your login crendentials has sent to your email",
-    //       });
-    //       router.replace("/(auth)/login");
-    //     }
-
-    //     setIsLoading(false);
-    //   })
-    //   .catch((e) => {
-    //     console.error("e ->", e);
-    //     let errors = e.response?.data?.errors;
-    //     if (errors) {
-    //       console.error("errors -> ", errors);
-    //       setErrors(errors);
-    //     }
-    //     setIsLoading(false);
-    //     Toast.show({
-    //       type: "error",
-    //       text1: "Invalid inputs",
-    //       text2: "Enter a valid details to register your organization",
-    //     });
-    //   });
-  };
-
-  const isFormFieldInValid = (name: string): string => {
-    let msg = "";
-    for (const error of errors) {
-      if (error.param === name) {
-        msg = error.message ?? "";
+      if (orgImage) {
+        // --@ts-ignore --
+        formData.append("orgImageFile", {
+          uri: orgImage,
+          type: "image/jpg",
+          name: getFileName(orgImage, true),
+        } as any);
       }
+
+      setErrors([]);
+
+      api
+        .post(CREATE_CUSTOMER, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        })
+        .then(async (response) => {
+          // router.push({pathname: ""});
+          console.log(response.data.data);
+          const token = getItem(AUTH_TOKEN_KEY);
+          if (token) {
+            router.replace("/(root)/home");
+            Toast.show({
+              type: "success",
+              text1: "Registration Completed",
+              text2: "Your organization registered successfully",
+            });
+          } else {
+            Toast.show({
+              type: "success",
+              text1: "Check your email",
+              text2: "Your login crendentials has sent to your email",
+            });
+            router.replace("/(auth)/login");
+          }
+
+          setIsLoading(false);
+        })
+        .catch((e) => {
+          console.error("e ->", e);
+          let errors = e.response?.data?.errors;
+          if (errors) {
+            console.error("errors -> ", errors);
+            setErrors(errors);
+          }
+          setIsLoading(false);
+          Toast.show({
+            type: "error",
+            text1: "Invalid inputs",
+            text2: "Enter a valid details to register your organization",
+          });
+        });
     }
-    return msg;
   };
 
   const setFieldValidationStatusFunc = (
     fieldName: string,
     isValid: boolean,
   ) => {
-    setFieldValidationStatus((prev: any) => ({
-      ...prev,
-      [fieldName]: isValid,
-    }));
+    if (fieldValidationStatus[fieldName]) {
+      fieldValidationStatus[fieldName](isValid);
+    }
   };
 
   return (
@@ -546,68 +434,18 @@ const RegistrationScreen = () => {
                 raised by your employees.
               </Text> */}
               <VStack className="gap-4 mt-3">
-                <FormControl
-                  isInvalid={isFormFieldInValid("orgImage").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>
-                      Organization Image
-                    </FormControlLabelText>
-                    <FormControlLabelAstrick className="text-red-400 ms-0.5">
-                      *
-                    </FormControlLabelAstrick>
-                  </FormControlLabel>
-                  <ImagePickerComponent
-                    onImagePicked={(uri: string) => {
-                      setAssetImage(uri);
-                    }}
-                    setIsModalVisible={setIsModalVisible}
-                    bottomSheetRef={bottomSheetRef}
-                  />
-                  {assetImage ? (
-                    <View>
-                      <Image
-                        source={{ uri: assetImage }}
-                        className="w-full h-36 rounded-xl absolute"
-                      />
-                      <View className="w-full flex items-end gap-4 h-36 shadow-soft-2  rounded-xl">
-                        <TouchableOpacity
-                          className="mt-2 me-2"
-                          onPress={() => {
-                            setAssetImage("");
-                          }}
-                        >
-                          <AntDesign
-                            name="closecircle"
-                            size={20}
-                            color="white"
-                          />
-                        </TouchableOpacity>
-                      </View>
-                    </View>
-                  ) : (
-                    <View className=" border-[1px] border-primary-950 border-dashed h-32 rounded-md mt-1 flex justify-center items-center">
-                      <View className="flex justify-center items-center mt-3">
-                        <View className="rounded-md p-2 bg-primary-300 w-auto">
-                          <Icon name="upload" color="#009c68" size={18} />
-                        </View>
-                        <Button
-                          className="bg-transparent w-40"
-                          onPress={() => toggleImagePicker()}
-                        >
-                          <ButtonText className="text-primary-950">
-                            Choose Image
-                          </ButtonText>
-                        </Button>
-                      </View>
-                    </View>
-                  )}
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("orgImage")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                <ImageFormField
+                  fieldName="orgImage"
+                  label="Organization Image"
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
+                  errors={errors}
+                  setErrors={setErrors}
+                  imagePath={orgImage}
+                  setImagePath={setOrgImage}
+                />
                 <PrimaryTextFormField
                   fieldName="orgName"
                   label="Organization Name"
@@ -662,57 +500,92 @@ const RegistrationScreen = () => {
                 />
                 <ConfigurationDropdownFormField
                   configurationCategory={TYPE_OF_ORG}
-                  selectedConfig={selectedTypeOfOrg}
-                  setSelectedConfig={setSelectedTypeOfOrg}
                   placeholder="Select type"
                   label="Type of organization"
                   errors={errors}
                   setErrors={setErrors}
                   fieldName="typeOfOrgId"
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
+                  onItemSelect={(config) => {
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.typeOfOrg = config.id;
+                      return prevState;
+                    });
+                  }}
                 />
                 <ConfigurationDropdownFormField
                   configurationCategory={CATEGORY_OF_ORG}
-                  selectedConfig={selectedCategoryOfOrg}
-                  setSelectedConfig={setSelectedCategoryOfOrg}
                   placeholder="Select category"
                   label="Category of organization"
                   errors={errors}
                   setErrors={setErrors}
                   fieldName="categoryOfOrgId"
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
+                  onItemSelect={(config) => {
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.categoryOfOrg = config.id;
+                      return prevState;
+                    });
+                  }}
                 />
                 <ConfigurationDropdownFormField
                   configurationCategory={SIZE_OF_ORG}
-                  selectedConfig={selectedSizeOfOrg}
-                  setSelectedConfig={setSelectedSizeOfOrg}
                   placeholder="Select size"
                   label="Size of organization"
                   errors={errors}
                   setErrors={setErrors}
                   fieldName="sizeOfOrgId"
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
+                  onItemSelect={(config) => {
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.sizeOfOrg = config.id;
+                      return prevState;
+                    });
+                  }}
                 />
-                <FormControl isInvalid={isFormFieldInValid("gstin").length > 0}>
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>GST No</FormControlLabelText>
-                  </FormControlLabel>
-                  <Input variant="outline" size="md">
-                    <InputField
-                      placeholder="ESHD123AJDUID123"
-                      defaultValue={customerLeadDetailsModel?.gstin ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.gstin = e;
-                        }
-                      }}
-                    />
-                  </Input>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("gstin")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                <PrimaryTextFormField
+                  fieldName="gstin"
+                  label="GSTIN No."
+                  placeholder="22AAAAA0000A1Z5"
+                  defaultValue={customerLeadDetailsModel.gstin}
+                  errors={errors}
+                  setErrors={setErrors}
+                  min={15}
+                  max={15}
+                  filterExp={/^[a-zA-Z0-9]*$/}
+                  customValidations={(value) => {
+                    const customRE =
+                      /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
+                    if (!customRE.test(value)) {
+                      return "Please enter a valid GST NO";
+                    }
+                    return undefined;
+                  }}
+                  isRequired={false}
+                  textCase={TextCase.uppercase}
+                  onChangeText={(value) => {
+                    console.log("value", value);
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.gstin = value;
+                      return prevState;
+                    });
+                  }}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
+                />
                 <FormControl
-                  isInvalid={isFormFieldInValid("msmeNo").length > 0}
+                  isInvalid={isFormFieldInValid("msmeNo", errors).length > 0}
                 >
                   <FormControlLabel className="mb-1">
                     <FormControlLabelText>MSME No.</FormControlLabelText>
@@ -730,7 +603,7 @@ const RegistrationScreen = () => {
                   </Input>
                   <FormControlError>
                     <FormControlErrorText>
-                      {isFormFieldInValid("msmeNo")}
+                      {isFormFieldInValid("msmeNo", errors)}
                     </FormControlErrorText>
                   </FormControlError>
                 </FormControl>
@@ -748,7 +621,6 @@ const RegistrationScreen = () => {
                   setFieldValidationStatus={setFieldValidationStatus}
                   validateFieldFunc={setFieldValidationStatusFunc}
                   onChangeText={(value) => {
-                    console.log("value", value);
                     setCustomerLeadDetailsModel((prevState) => {
                       prevState.firstName = value;
                       return prevState;
@@ -768,7 +640,6 @@ const RegistrationScreen = () => {
                   setFieldValidationStatus={setFieldValidationStatus}
                   validateFieldFunc={setFieldValidationStatusFunc}
                   onChangeText={(value) => {
-                    console.log("value", value);
                     setCustomerLeadDetailsModel((prevState) => {
                       prevState.lastName = value;
                       return prevState;
@@ -790,13 +661,13 @@ const RegistrationScreen = () => {
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
                   validateFieldFunc={setFieldValidationStatusFunc}
-                  customValidations={(value) => {
-                    const customRE = /^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$/;
-                    if (!customRE.test(value)) {
-                      return "Please enter a valid email";
-                    }
-                    return undefined;
-                  }}
+                  // customValidations={(value) => {
+                  //   const customRE = /^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$/;
+                  //   if (!customRE.test(value)) {
+                  //     return "Please enter a valid email";
+                  //   }
+                  //   return undefined;
+                  // }}
                   onChangeText={(value) => {
                     setCustomerLeadDetailsModel((prevState) => {
                       prevState.email = value;
@@ -864,29 +735,27 @@ const RegistrationScreen = () => {
                     });
                   }}
                 />
-                <FormControl
-                  isInvalid={isFormFieldInValid("description").length > 0}
-                >
-                  <FormControlLabel className="mb-1">
-                    <FormControlLabelText>Description</FormControlLabelText>
-                  </FormControlLabel>
-                  <Textarea size="md" variant="default">
-                    <TextareaInput
-                      placeholder="Write a short description about your organization"
-                      defaultValue={customerLeadDetailsModel?.description ?? ""}
-                      onChangeText={(e) => {
-                        if (customerLeadDetailsModel) {
-                          customerLeadDetailsModel.description = e;
-                        }
-                      }}
-                    />
-                  </Textarea>
-                  <FormControlError>
-                    <FormControlErrorText>
-                      {isFormFieldInValid("description")}
-                    </FormControlErrorText>
-                  </FormControlError>
-                </FormControl>
+                <PrimaryTextareaFormField
+                  fieldName="description"
+                  label="Description"
+                  placeholder="Write a short description about your organization"
+                  errors={errors}
+                  setErrors={setErrors}
+                  min={10}
+                  max={200}
+                  defaultValue={customerLeadDetailsModel.description}
+                  filterExp={/^[a-zA-Z0-9 ]*$/}
+                  onChangeText={(value) => {
+                    setCustomerLeadDetailsModel((prevState) => {
+                      prevState.description = value;
+                      return prevState;
+                    });
+                  }}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
+                />
               </VStack>
               <Text className="font-bold text-lg mt-8">
                 Organization Address
@@ -906,7 +775,6 @@ const RegistrationScreen = () => {
                   setFieldValidationStatus={setFieldValidationStatus}
                   validateFieldFunc={setFieldValidationStatusFunc}
                   onChangeText={(value) => {
-                    console.log("value", value);
                     setCustomerLeadDetailsModel((prevState) => {
                       prevState.address = value;
                       return prevState;
@@ -929,6 +797,14 @@ const RegistrationScreen = () => {
                   setErrors={setErrors}
                   onItemSelect={onItemSelect}
                   keyboardType="numeric"
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
+                  // defaultValue={{
+                  //   id: "asdf",
+                  //   title: "560078",
+                  // }}
                 />
                 <PrimaryTypeheadFormField
                   type={GeoLocationType.AREA}
@@ -943,6 +819,10 @@ const RegistrationScreen = () => {
                   errors={errors}
                   setErrors={setErrors}
                   editable={selectedPincode?.id !== undefined}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                 />
                 <PrimaryTypeheadFormField
                   type={GeoLocationType.CITY}
@@ -957,20 +837,28 @@ const RegistrationScreen = () => {
                   errors={errors}
                   setErrors={setErrors}
                   editable={false}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                 />
                 <PrimaryTypeheadFormField
                   type={GeoLocationType.STATE}
                   onClearPress={onClearPress}
-                  selectedValue={selectedCity}
+                  selectedValue={selectedState}
                   suggestions={states}
                   getSuggestions={getSuggestions}
-                  setSelectedValue={setSelectedCity}
+                  setSelectedValue={setSelectedState}
                   placeholder="Search state"
                   fieldName="stateId"
-                  label="States"
+                  label="State"
                   errors={errors}
                   setErrors={setErrors}
                   editable={false}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                 />
                 <PrimaryTypeheadFormField
                   type={GeoLocationType.COUNTRY}
@@ -985,6 +873,10 @@ const RegistrationScreen = () => {
                   errors={errors}
                   setErrors={setErrors}
                   editable={false}
+                  canValidateField={canValidateField}
+                  setCanValidateField={setCanValidateField}
+                  setFieldValidationStatus={setFieldValidationStatus}
+                  validateFieldFunc={setFieldValidationStatusFunc}
                 />
               </VStack>
               <SubmitButton

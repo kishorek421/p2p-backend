@@ -28,6 +28,7 @@ import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import LottieView from "lottie-react-native";
 import Toast from "react-native-toast-message";
+import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -37,78 +38,112 @@ const LoginScreen = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const animationRef = useRef<LottieView>(null);
-
   const router = useRouter();
 
-  const login = () => {
-    setIsLoading(true);
+  // can validate fields
+  const [canValidateField, setCanValidateField] = useState(false);
 
-    let data = {
-      email: email,
-      password: password,
-    };
+  const [fieldValidationStatus, setFieldValidationStatus] = useState<any>({});
 
-    setErrors([]);
+  const login = async () => {
+    const validationPromises = Object.keys(fieldValidationStatus).map(
+      (key) =>
+        new Promise((resolve) => {
+          // Resolve each validation status based on field key
+          setFieldValidationStatus((prev: any) => ({
+            ...prev,
+            [key]: resolve,
+          }));
+        }),
+    );
 
-    api
-      .post(LOGIN, data)
-      .then(async (response) => {
-        let loginData = response.data.data;
-        console.log("loginData ", loginData);
+    setCanValidateField(true);
 
-        await setItem(AUTH_TOKEN_KEY, loginData.token);
-        await setItem(REFRESH_TOKEN_KEY, loginData.refreshToken);
+    // Wait for all validations to complete
+    await Promise.all(validationPromises);
 
-        if (loginData) {
-          try {
-            let leadResponse = await api.get<
-              ApiResponseModel<CustomerLeadDetailsModel>
-            >(GET_CUSTOMER_LEAD_DETAILS);
-            let data = leadResponse.data.data ?? {};
-            console.log("customerData", data);
+    const allValid = errors
+      .map((error) => error.message?.length === 0)
+      .every((status) => status === true);
 
-            if (data && data.id) {
-              let leadStatus = data.onBoardingStatusDetails?.key;
+    if (allValid) {
+      setIsLoading(true);
 
-              await setItem(CUSTOMER_LEAD_ID, data.id);
+      let data = {
+        email: email,
+        password: password,
+      };
 
-              if (leadStatus === CUSTOMER_LEAD_ACTIVE) {
-                await setItem(IS_LEAD, "false");
-                router.replace({ pathname: "/home" });
-              } else {
-                await setItem(IS_LEAD, "true");
-                router.replace({
-                  pathname: "/(auth)/registration/[customerLeadId]",
-                  params: { customerLeadId: data.id },
-                });
+      setErrors([]);
+
+      api
+        .post(LOGIN, data)
+        .then(async (response) => {
+          let loginData = response.data.data;
+          console.log("loginData ", loginData);
+
+          await setItem(AUTH_TOKEN_KEY, loginData.token);
+          await setItem(REFRESH_TOKEN_KEY, loginData.refreshToken);
+
+          if (loginData) {
+            try {
+              let leadResponse = await api.get<
+                ApiResponseModel<CustomerLeadDetailsModel>
+              >(GET_CUSTOMER_LEAD_DETAILS);
+              let data = leadResponse.data.data ?? {};
+              console.log("customerData", data);
+
+              if (data && data.id) {
+                let leadStatus = data.onBoardingStatusDetails?.key;
+
+                await setItem(CUSTOMER_LEAD_ID, data.id);
+
+                if (leadStatus === CUSTOMER_LEAD_ACTIVE) {
+                  await setItem(IS_LEAD, "false");
+                  router.replace({ pathname: "/home" });
+                } else {
+                  await setItem(IS_LEAD, "true");
+                  router.replace({
+                    pathname: "/(auth)/registration/[customerLeadId]",
+                    params: { customerLeadId: data.id },
+                  });
+                }
+
+                setIsLoading(false);
               }
-
+            } catch (e) {
+              console.error(e);
               setIsLoading(false);
             }
-          } catch (e) {
-            console.error(e);
+          } else {
             setIsLoading(false);
           }
-        } else {
+        })
+        .catch((e) => {
+          console.error(e);
+          // console.error(e.response?.data);
+          let errors = e.response?.data?.errors;
+          if (errors) {
+            console.error("errors -> ", errors);
+            setErrors(errors);
+          }
           setIsLoading(false);
-        }
-      })
-      .catch((e) => {
-        console.error(e);
-        // console.error(e.response?.data);
-        let errors = e.response?.data?.errors;
-        if (errors) {
-          console.error("errors -> ", errors);
-          setErrors(errors);
-        }
-        setIsLoading(false);
-        Toast.show({
-          type: "error",
-          text1: "Invalid credentials",
-          text2: "Enter a valid email and password",
+          Toast.show({
+            type: "error",
+            text1: "Invalid credentials",
+            text2: "Enter a valid email and password",
+          });
         });
-      });
+    }
+  };
+
+  const setFieldValidationStatusFunc = (
+    fieldName: string,
+    isValid: boolean,
+  ) => {
+    if (fieldValidationStatus[fieldName]) {
+      fieldValidationStatus[fieldName](isValid);
+    }
   };
 
   return (
@@ -122,61 +157,48 @@ const LoginScreen = () => {
             Log in to manage your organization's IT issues seamlessly
           </Text>
           <VStack className="gap-4 mt-4">
-            <FormControl
-              isInvalid={isFormFieldInValid("email", errors).length > 0}
-            >
-              <FormControlLabel className="mb-1">
-                <FormControlLabelText>Email</FormControlLabelText>
-              </FormControlLabel>
-              <Input
-                variant="outline"
-                size="md"
-                isDisabled={false}
-                isInvalid={false}
-                isReadOnly={false}
-              >
-                <InputField
-                  keyboardType="email-address"
-                  placeholder="customer@business.com"
-                  onChangeText={(e) => {
-                    setEmail(e);
-                  }}
-                />
-              </Input>
-              <FormControlError>
-                <FormControlErrorText>
-                  {isFormFieldInValid("email", errors)}
-                </FormControlErrorText>
-              </FormControlError>
-            </FormControl>
-            <FormControl
-              isInvalid={isFormFieldInValid("password", errors).length > 0}
-            >
-              <FormControlLabel className="mb-1">
-                <FormControlLabelText>Password</FormControlLabelText>
-              </FormControlLabel>
-              <Input
-                variant="outline"
-                size="md"
-                isDisabled={false}
-                isInvalid={false}
-                isReadOnly={false}
-              >
-                <InputField
-                  type="password"
-                  keyboardType="visible-password"
-                  placeholder="•••••••••"
-                  onChangeText={(e) => {
-                    setPassword(e);
-                  }}
-                />
-              </Input>
-              <FormControlError>
-                <FormControlErrorText>
-                  {isFormFieldInValid("password", errors)}
-                </FormControlErrorText>
-              </FormControlError>
-            </FormControl>
+            <PrimaryTextFormField
+              fieldName="email"
+              label="Email"
+              placeholder="customer@business.com"
+              errors={errors}
+              setErrors={setErrors}
+              min={8}
+              keyboardType="email-address"
+              filterExp={/^[A-Za-z0-9!#$%&'*+/=?^_{|}~.-@]*$/}
+              canValidateField={canValidateField}
+              setCanValidateField={setCanValidateField}
+              setFieldValidationStatus={setFieldValidationStatus}
+              validateFieldFunc={setFieldValidationStatusFunc}
+              // customValidations={(value) => {
+              //   const customRE = /^[\w\.-]+@[a-zA-Z\d-]+(\.[a-zA-Z\d-]+)*\.[a-zA-Z]{2}$/;
+              //   if (!customRE.test(value)) {
+              //     return "Please enter a valid email";
+              //   }
+              //   return undefined;
+              // }}
+              onChangeText={(value) => {
+                setEmail(value);
+              }}
+            />
+            <PrimaryTextFormField
+              inputType="password"
+              fieldName="password"
+              label="Password"
+              placeholder="•••••••••"
+              errors={errors}
+              setErrors={setErrors}
+              min={8}
+              keyboardType="visible-password"
+              // filterExp={/^[A-Za-z0-9!#$%&'*+/=?^_{|}~.-@]*$/}
+              canValidateField={canValidateField}
+              setCanValidateField={setCanValidateField}
+              setFieldValidationStatus={setFieldValidationStatus}
+              validateFieldFunc={setFieldValidationStatusFunc}
+              onChangeText={(value) => {
+                setPassword(value);
+              }}
+            />
             <SubmitButton
               btnText="Log In"
               isLoading={isLoading}

@@ -1,4 +1,4 @@
-import { View, Text, KeyboardTypeOptions, Pressable } from "react-native";
+import { View, Text, KeyboardTypeOptions } from "react-native";
 import React, { useEffect, useState } from "react";
 import { isFormFieldInValid, setErrorValue } from "@/utils/helper";
 import {
@@ -11,10 +11,9 @@ import {
 } from "../ui/form-control";
 import { Input, InputField } from "../ui/input";
 import { ErrorModel } from "@/models/common";
-import { TextCase } from "@/enums/enums";
-import Feather from "@expo/vector-icons/Feather";
+import { Textarea, TextareaInput } from "../ui/textarea";
 
-interface PrimaryTextFormFieldProps {
+interface PrimaryTextareaFormFieldProps {
   fieldName: string;
   label: string;
   placeholder: string;
@@ -32,12 +31,9 @@ interface PrimaryTextFormFieldProps {
   max?: number;
   filterExp?: RegExp;
   customValidations?: (value: string) => string | undefined;
-  textCase?: TextCase;
-  inputType?: "text" | "password";
-  className?: string;
 }
 
-const PrimaryTextFormField = ({
+const PrimaryTextareaFormField = ({
   fieldName,
   label,
   placeholder,
@@ -55,12 +51,8 @@ const PrimaryTextFormField = ({
   max = 50,
   filterExp,
   customValidations,
-  textCase = TextCase.freeform,
-  inputType = "text",
-  className = "",
-}: PrimaryTextFormFieldProps) => {
+}: PrimaryTextareaFormFieldProps) => {
   const [value, setValue] = useState<string>("");
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   useEffect(() => {
     setFieldValidationStatus((prevState: any) => ({
@@ -90,8 +82,7 @@ const PrimaryTextFormField = ({
       );
       return;
     }
-    const valLen = newValue.length;
-    if (customValidations && valLen > 0) {
+    if (customValidations) {
       const errorValidationMsg = customValidations(value);
       if (errorValidationMsg) {
         validateFieldFunc(fieldName, false);
@@ -99,7 +90,8 @@ const PrimaryTextFormField = ({
         return;
       }
     }
-    if (valLen > 0 && min && valLen < min) {
+    const valLen = newValue.length;
+    if (min && valLen < min) {
       validateFieldFunc(fieldName, false);
       // if this field is not valid set validField is false
       setErrorValue(
@@ -118,7 +110,6 @@ const PrimaryTextFormField = ({
     <FormControl
       key={fieldName}
       isInvalid={isFormFieldInValid(fieldName, errors).length > 0}
-      className={className}
     >
       <FormControlLabel className="mb-1">
         <FormControlLabelText>{label}</FormControlLabelText>
@@ -126,9 +117,8 @@ const PrimaryTextFormField = ({
           {isRequired ? "*" : ""}
         </FormControlLabelAstrick>
       </FormControlLabel>
-      <Input variant="outline" size="md">
-        <InputField
-          type={isPasswordVisible ? "text" : inputType}
+      <Textarea size="md" variant="default">
+        <TextareaInput
           placeholder={placeholder}
           value={value}
           keyboardType={keyboardType}
@@ -138,49 +128,14 @@ const PrimaryTextFormField = ({
               return;
             }
             const valLen = newValue.length;
-            let caseValue = newValue;
             if (max && valLen <= max) {
-              switch (textCase) {
-                case TextCase.uppercase:
-                  caseValue = newValue.toUpperCase();
-                  break;
-                case TextCase.lowercase:
-                  caseValue = newValue.toLowerCase();
-                  break;
-              }
-              onChangeText(caseValue);
-              setValue(caseValue);
+              onChangeText(newValue);
+              setValue(newValue);
             }
-            validateField(caseValue);
+            validateField(newValue);
           }}
         />
-        {inputType === "password" ? (
-          isPasswordVisible ? (
-            <Pressable
-              onPress={() => {
-                setIsPasswordVisible(!isPasswordVisible);
-              }}
-            >
-              <Feather name="eye" className="me-3" size={16} color="#9ca3af" />
-            </Pressable>
-          ) : (
-            <Pressable
-              onPress={() => {
-                setIsPasswordVisible(!isPasswordVisible);
-              }}
-            >
-              <Feather
-                name="eye-off"
-                className="me-3"
-                size={16}
-                color="#6b7280"
-              />
-            </Pressable>
-          )
-        ) : (
-          <></>
-        )}
-      </Input>
+      </Textarea>
       <FormControlError>
         <FormControlErrorText>
           {isFormFieldInValid(fieldName, errors)}
@@ -190,4 +145,4 @@ const PrimaryTextFormField = ({
   );
 };
 
-export default PrimaryTextFormField;
+export default PrimaryTextareaFormField;

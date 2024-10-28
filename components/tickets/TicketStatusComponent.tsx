@@ -31,7 +31,7 @@ const TicketStatusComponent = ({
   };
 
   return (
-    <View className={`py-2 px-4 rounded ${getStatusColor(statusKey)}`}>
+    <View className={`py-2 px-4 rounded-lg ${getStatusColor(statusKey)}`}>
       <Text className={`${getStatusColor(statusKey)}`}>
         {statusValue ?? "-"}
       </Text>

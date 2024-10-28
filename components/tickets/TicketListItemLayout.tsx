@@ -32,7 +32,7 @@ const TicketListItemLayout = ({
         <VStack>
           <HStack className="justify-between">
             <Text>Ticket Id:</Text>
-            <Text className="color-secondary-950 underline font-bold">
+            <Text className="bg-gray-900 underline font-bold">
               {ticketModel.ticketNo ?? "-"}
             </Text>
           </HStack>

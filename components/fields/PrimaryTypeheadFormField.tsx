@@ -1,7 +1,7 @@
 import { KeyboardTypeOptions, Text } from "react-native";
 import React, { useEffect } from "react";
 import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
-import { isFormFieldInValid } from "@/utils/helper";
+import { isFormFieldInValid, setErrorValue } from "@/utils/helper";
 import {
   FormControl,
   FormControlLabel,
@@ -32,6 +32,11 @@ interface PrimaryTypeheadFormFieldProps {
   editable?: boolean;
   onItemSelect?: (type: any, item: DropdownItemModel) => void;
   keyboardType?: KeyboardTypeOptions;
+  defaultValue?: DropdownItemModel;
+  canValidateField: boolean;
+  setCanValidateField: any;
+  setFieldValidationStatus: any;
+  validateFieldFunc: (fieldName: string, isValid: boolean) => void;
 }
 
 const PrimaryTypeheadFormField = ({
@@ -52,10 +57,46 @@ const PrimaryTypeheadFormField = ({
   editable = true,
   onItemSelect,
   keyboardType,
+  defaultValue,
+  canValidateField,
+  setCanValidateField,
+  validateFieldFunc,
+  setFieldValidationStatus,
 }: PrimaryTypeheadFormFieldProps) => {
   useEffect(() => {
-    console.log("selectedValue", selectedValue);
-  }, [suggestions, selectedValue]);
+    if (defaultValue && defaultValue.id !== undefined) {
+      setSelectedValue(defaultValue);
+    }
+  }, []);
+
+  useEffect(() => {
+    setFieldValidationStatus((prevState: any) => ({
+      ...prevState,
+      [fieldName]: null,
+    }));
+  }, []);
+
+  useEffect(() => {
+    if (canValidateField) {
+      validateField(selectedValue);
+      setCanValidateField(false);
+    }
+  }, [canValidateField]);
+
+  const validateField = (newValue?: AutocompleteDropdownItem) => {
+    if (isRequired && (newValue === undefined || newValue.id === undefined)) {
+      validateFieldFunc(fieldName, false);
+      setErrorValue(
+        fieldName,
+        newValue?.title ?? "",
+        `Please select a ${label.toLowerCase()}`,
+        setErrors,
+      );
+      return;
+    }
+    validateFieldFunc(fieldName, true);
+    setErrorValue(fieldName, newValue?.title ?? "", "", setErrors);
+  };
 
   return (
     <FormControl isInvalid={isFormFieldInValid(fieldName, errors).length > 0}>
@@ -77,6 +118,8 @@ const PrimaryTypeheadFormField = ({
         editable={editable}
         onItemSelect={onItemSelect}
         keyboardType={keyboardType}
+        fieldName={fieldName}
+        errors={errors}
       />
       <FormControlError>
         <FormControlErrorText>

@@ -13,6 +13,8 @@ import {
 } from "react-native-autocomplete-dropdown";
 import Feather from "react-native-vector-icons/Feather";
 import { DropdownItemModel } from "@/models/ui/dropdown_item_model";
+import { isFormFieldInValid } from "@/utils/helper";
+import { ErrorModel } from "@/models/common";
 
 interface PrimaryTypeheadFieldProps {
   type: any;
@@ -27,6 +29,8 @@ interface PrimaryTypeheadFieldProps {
   editable?: boolean;
   onItemSelect?: (type: any, item: DropdownItemModel) => void;
   keyboardType?: KeyboardTypeOptions;
+  errors: ErrorModel[];
+  fieldName: string;
 }
 
 const PrimaryTypeheadField = ({
@@ -41,6 +45,8 @@ const PrimaryTypeheadField = ({
   editable = true,
   onItemSelect,
   keyboardType = "default",
+  errors,
+  fieldName,
 }: PrimaryTypeheadFieldProps) => {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -112,7 +118,10 @@ const PrimaryTypeheadField = ({
         alignSelf: "center",
       }}
       inputContainerStyle={{
-        backgroundColor: "#d8d7d7",
+        backgroundColor:
+          isFormFieldInValid(fieldName, errors).length === 0
+            ? "#d8d7d7"
+            : "#b91c1c",
         borderRadius: 5,
         // borderColor: "#8c8c8c",
         padding: 1,

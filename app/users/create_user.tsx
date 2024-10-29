@@ -114,6 +114,8 @@ const CreateUser = () => {
       .every((status) => status === true);
 
     if (allValid) {
+      setIsLoading(true);
+
       let userModel: CreateUserModel = {
         departmentId: selectedDepartment?.value,
         designationId: selectedDesignation?.value,

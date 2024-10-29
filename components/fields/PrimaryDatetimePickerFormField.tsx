@@ -1,52 +1,58 @@
-import { ConfigurationModel } from "@/models/configurations";
-import ConfigurationDropdownField from "./ConfigurationDropdownField";
+import { useEffect, useState } from "react";
 import { isFormFieldInValid, setErrorValue } from "@/utils/helper";
 import {
   FormControl,
   FormControlLabel,
   FormControlLabelText,
+  FormControlLabelAstrick,
   FormControlError,
   FormControlErrorText,
-  FormControlLabelAstrick,
 } from "../ui/form-control";
 import { ErrorModel } from "@/models/common";
-import { useEffect, useState } from "react";
-import { min } from "moment";
+import PrimaryDatetimePickerField from "./PrimaryDateTimePickerField";
 
-interface ConfigurationDropdownFormFieldProps {
-  configurationCategory: string;
+interface PrimaryDatetimePickerFormFieldProps {
+  onSelect?: (value: string) => void;
   placeholder: string;
-  errors: ErrorModel[];
-  setErrors: any;
-  fieldName: string;
-  label: string;
-  isRequired?: boolean;
-  onItemSelect?: (config: ConfigurationModel) => void;
-  defaultValue?: ConfigurationModel;
   canValidateField: boolean;
   setCanValidateField: any;
   setFieldValidationStatus: any;
   validateFieldFunc: (fieldName: string, isValid: boolean) => void;
+  fieldName: string;
+  errors: ErrorModel[];
+  setErrors: any;
+  label: string;
+  isRequired?: boolean;
+  defaultValue?: any;
   className?: string;
+  mode?: "date" | "datetime" | "time";
 }
 
-const ConfigurationDropdownFormField = ({
-  configurationCategory,
+const PrimaryDatetimePickerFormField = ({
   placeholder,
   errors,
   setErrors,
   fieldName,
   label,
   isRequired = true,
-  onItemSelect,
-  defaultValue,
   canValidateField,
   setCanValidateField,
   validateFieldFunc,
   setFieldValidationStatus,
+  defaultValue,
   className = "",
-}: ConfigurationDropdownFormFieldProps) => {
-  const [selectedConfig, setSelectedConfig] = useState<ConfigurationModel>({});
+  onSelect,
+  mode,
+}: PrimaryDatetimePickerFormFieldProps) => {
+  // useEffect(() => {}, [selectedValue]);
+
+  const [selectedValue, setSelectedValue] = useState<string>("");
+
+  useEffect(() => {
+    if (defaultValue) {
+      setSelectedValue(defaultValue);
+    }
+  }, [defaultValue]);
 
   useEffect(() => {
     setFieldValidationStatus((prevState: any) => ({
@@ -56,31 +62,25 @@ const ConfigurationDropdownFormField = ({
   }, []);
 
   useEffect(() => {
-    if (defaultValue) {
-      setSelectedConfig(defaultValue);
-    }
-  }, [defaultValue]);
-
-  useEffect(() => {
     if (canValidateField) {
-      validateField(selectedConfig);
+      validateField(selectedValue);
       setCanValidateField(false);
     }
   }, [canValidateField]);
 
-  const validateField = (newValue: ConfigurationModel) => {
-    if (isRequired && newValue.id === undefined) {
+  const validateField = (newValue: string) => {
+    if (isRequired && newValue.length === 0) {
       validateFieldFunc(fieldName, false);
       setErrorValue(
         fieldName,
-        newValue.value ?? "",
+        newValue ?? "",
         `Please select a ${label.toLowerCase()}`,
         setErrors,
       );
       return;
     }
     validateFieldFunc(fieldName, true);
-    setErrorValue(fieldName, newValue.value ?? "", "", setErrors);
+    setErrorValue(fieldName, newValue ?? "", "", setErrors);
   };
 
   return (
@@ -94,12 +94,12 @@ const ConfigurationDropdownFormField = ({
           {isRequired ? "*" : ""}
         </FormControlLabelAstrick>
       </FormControlLabel>
-      <ConfigurationDropdownField
-        configurationCategory={configurationCategory}
-        selectedConfig={selectedConfig}
-        setSelectedConfig={setSelectedConfig}
+      <PrimaryDatetimePickerField
         placeholder={placeholder}
-        onItemSelect={onItemSelect}
+        onSelect={onSelect}
+        mode={mode}
+        selectedValue={selectedValue}
+        setSelectedValue={setSelectedValue}
       />
       <FormControlError>
         <FormControlErrorText>
@@ -110,4 +110,4 @@ const ConfigurationDropdownFormField = ({
   );
 };
 
-export default ConfigurationDropdownFormField;
+export default PrimaryDatetimePickerFormField;

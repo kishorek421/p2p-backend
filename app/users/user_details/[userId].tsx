@@ -20,7 +20,6 @@ const UserDetails = () => {
 
   const [userDetails, setUserDetails] = useState<UserDetailsModel>({});
 
-
   useEffect(() => {
     fetchUserDetails();
 
@@ -42,7 +41,7 @@ const UserDetails = () => {
   }, [userId]);
 
   return (
-    <View className="p-6 bg-white h-full ">
+    <View className="p-4 bg-white h-full ">
       <View className="flex rounded-lg  shadow-sm p-4 bg-white">
         <View className="flex-row justify-between w-full">
           <View className="flex-row items-center">
@@ -55,7 +54,9 @@ const UserDetails = () => {
               className="rounded-full"
             />
             <View className="ms-2">
-              <Text className="font-bold"> {userDetails.firstName ?? "-"} {userDetails.lastName ?? ""}</Text>
+              <Text className="font-bold">
+                {userDetails.firstName ?? "-"} {userDetails.lastName ?? ""}
+              </Text>
               <Text className="text-gray-500 text-[13px] mt-[1px]">
                 {userDetails.mobile ?? "-"}
               </Text>
@@ -76,17 +77,13 @@ const UserDetails = () => {
         <View className="w-full mt-3">
           <View className="flex-row items-center justify-between">
             <View className="flex">
-              <Text className="text-gray-500 text-md ">
-                Department
-              </Text>
+              <Text className="text-gray-500 text-md ">Department</Text>
               <Text className="text-md text-gray-900 font-semibold  mt-[2px]">
                 {userDetails.orgDepartmentDetails?.name ?? "-"}
               </Text>
             </View>
             <View className="flex items-end">
-              <Text className="text-gray-500 text-md ">
-                Designation
-              </Text>
+              <Text className="text-gray-500 text-md ">Designation</Text>
               <Text className="text-md text-gray-900 font-semibold  mt-[2px]">
                 {userDetails.orgDesignationDetails?.name ?? "-"}
               </Text>
@@ -96,17 +93,13 @@ const UserDetails = () => {
         <View className="w-full mt-3">
           <View className="flex-row items-center justify-between">
             <View className="flex">
-              <Text className="text-gray-500 text-md ">
-                Work Location
-              </Text>
+              <Text className="text-gray-500 text-md ">Work Location</Text>
               <Text className="text-md text-gray-900 font-semibold mt-[2px]">
                 {userDetails.orgDetails?.cityDetails?.cityName ?? "-"}
               </Text>
             </View>
             <View className="flex items-end">
-              <Text className="text-gray-500 text-md ">
-                Last Ticket Status
-              </Text>
+              <Text className="text-gray-500 text-md ">Last Ticket Status</Text>
               <Text className="text-md text-gray-900 font-semibold mt-[2px]">
                 {userDetails.ticketDetails?.lastTicketStatus ?? "-"}
               </Text>
@@ -117,17 +110,13 @@ const UserDetails = () => {
         <View className="w-full">
           <View className="flex-row items-center justify-between">
             <View className="flex">
-              <Text className="text-gray-500 text-md ">
-                Raised Tickets
-              </Text>
+              <Text className="text-gray-500 text-md ">Raised Tickets</Text>
               <Text className="text-md text-gray-900 font-semibold  mt-[2px]">
                 {userDetails.ticketDetails?.raisedTicketCount ?? "-"}
               </Text>
             </View>
             <View className="flex items-end">
-              <Text className="text-gray-500 text-md ">
-                Resolved Tickets
-              </Text>
+              <Text className="text-gray-500 text-md ">Resolved Tickets</Text>
               <Text className="text-md text-gray-900 font-semibold  mt-[2px]">
                 {userDetails.ticketDetails?.closedTicketCount ?? "-"}
               </Text>
@@ -136,7 +125,7 @@ const UserDetails = () => {
         </View>
       </View>
       <View className="mt-6">
-        <Text className="font-extrabold text-lg">Assigned Assets</Text>
+        <Text className="text-[16px] font-bold">Assigned Assets</Text>
       </View>
       <View>
         {assignedDevicesList.length === 0 ? (
@@ -148,7 +137,7 @@ const UserDetails = () => {
             data={assignedDevicesList}
             renderItem={({ item }) => <DeviceListItemLayout data={item} />}
             keyExtractor={(_, index) => index.toString()}
-            onEndReached={() => { }}
+            onEndReached={() => {}}
           />
         )}
       </View>

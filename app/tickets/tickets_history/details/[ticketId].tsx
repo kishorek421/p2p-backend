@@ -5,8 +5,6 @@ import { TicketListItemModel } from "@/models/tickets";
 import api from "@/services/api";
 import { GET_TICKET_DETAILS } from "@/constants/api_endpoints";
 import LoadingBar from "@/components/LoadingBar";
-import { VStack } from "@/components/ui/vstack";
-import { Card } from "@/components/ui/card";
 import TicketStatusComponent from "@/components/tickets/TicketStatusComponent";
 import moment from "moment";
 

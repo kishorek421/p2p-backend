@@ -7,7 +7,7 @@ import { GET_USERS_LIST } from "@/constants/api_endpoints";
 import { UserDetailsModel } from "@/models/users";
 import TicketStatusComponent from "@/components/tickets/TicketStatusComponent";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import UserListItemLayout from "@/components/users/UserListItemLayout";
 
 const UsersList = () => {
@@ -28,7 +28,7 @@ const UsersList = () => {
       <View className="px-4 mt-3 w-auto">
         <View className="flex-row justify-between items-center">
           <View className="flex-row items-center">
-            <AntDesign name="filter" size={20} color="black"/>
+            <AntDesign name="filter" size={20} color="black" />
             <Text className="font-semibold ms-1">Filter By</Text>
             {/* <FontAwesome6 name="filter" size={16} color="black" className="ms-1" /> */}
           </View>
@@ -50,10 +50,10 @@ const UsersList = () => {
           data={usersList}
           className="mt-2"
           renderItem={({ item }) => (
-           <UserListItemLayout   userDetailsModel={item} />
+            <UserListItemLayout userDetailsModel={item} />
           )}
           keyExtractor={(_, index) => index.toString()}
-          onEndReached={() => { }}
+          onEndReached={() => {}}
         />
       )}
     </View>

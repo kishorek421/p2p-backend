@@ -48,9 +48,13 @@ export const GET_ASSETS_LIST_BY_USER_ID =
   "assets/assetsInUse/getCustomerAssetsInUseListBySerialNoSearch";
 export const GET_ASSET_DETAILS =
   "/assets/assetMaster/getAssetMasterDetailsById";
-export const CREATE_ASSET = "/assets/assetMaster/getAssetMastersList";
+export const CREATE_ASSET = "/assets/assetMaster/createAssetMaster";
 export const GET_ASSET_TYPES = "/assets/assetType/getAssetTypesList";
+export const GET_ASSET_TYPES_BY_NAME_SEARCH =
+  "/assets/assetType/getAssetTypesListByNameSearch";
 export const GET_ASSET_MODELS = "/assets/assetModel/getAssetModelsList";
+export const GET_ASSET_MODELS_BY_ASSET_TYPE =
+  "/assets/assetModel/getAssetModelsListByNameSearchAndAssetTypes";
 export const GET_LICENSED_TYPES =
   "/configurations/getConfigurationsForDropdown";
 export const GET_IMPACTS = "/configurations/getConfigurationsForDropdown";

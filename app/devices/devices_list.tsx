@@ -3,9 +3,8 @@ import React, { useEffect, useState } from "react";
 import api from "@/services/api";
 import { GET_ASSET_MASTERS_LIST } from "@/constants/api_endpoints";
 import { AssetMasterListItemModel } from "@/models/assets";
-import DeviceListItemLayout from "@/components/devices/DeviceListItemLayout";
 import { getDeviceStatusColor } from "@/utils/helper";
-import TicketStatusComponent from "@/components/tickets/TicketStatusComponent";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const DevicesList = () => {
   const [devicesList, setDevicesList] = useState<AssetMasterListItemModel[]>(
@@ -160,6 +159,15 @@ const DevicesList = () => {
                     </Text>
                   </View>
                 </View> */}
+              </View>
+              <View className="flex-row bg-secondary-950 p-3 justify-center items-center rounded-md mt-4">
+                <Ionicons
+                  name="ticket-outline"
+                  size={20}
+                  color="white"
+                  className="me-2"
+                />
+                <Text className="text-white font-semibold">Raise Ticket</Text>
               </View>
             </View>
           </View>

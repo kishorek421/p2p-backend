@@ -35,6 +35,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const loadUser = async () => {
       // router.replace({ pathname: "/route/map_view_screen" });
       const token = await getItem(AUTH_TOKEN_KEY);
+      console.log("token", token);
       if (token) {
         const isLead = await getItem(IS_LEAD);
         if (isLead === undefined) {

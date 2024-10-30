@@ -3,8 +3,7 @@ import React, { useEffect, useState } from "react";
 import api from "@/services/api";
 import { GET_ASSET_MASTERS_LIST } from "@/constants/api_endpoints";
 import { AssetMasterListItemModel } from "@/models/assets";
-import { getDeviceStatusColor } from "@/utils/helper";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import DeviceListItemLayout from "@/components/devices/DeviceListItemLayout";
 
 const DevicesList = () => {
   const [devicesList, setDevicesList] = useState<AssetMasterListItemModel[]>(

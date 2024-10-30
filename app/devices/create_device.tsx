@@ -153,7 +153,6 @@ const CreateDevice = () => {
           });
           setIsLoading(false);
           router.push({ pathname: "/devices/devices_list" });
-          // router.replace("/(auth)/login");
         })
         .catch((e) => {
           console.error(e.response?.data);

@@ -135,7 +135,6 @@ const CreateUser = () => {
           });
           setIsLoading(false);
           router.push({ pathname: "/users/users_list" });
-          // router.replace("/(auth)/login");
         })
         .catch((e) => {
           console.error(e.response?.data);

@@ -1,21 +1,11 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Linking, Pressable, Text, View } from "react-native";
-import {
-  FormControl,
-  FormControlError,
-  FormControlErrorText,
-  FormControlLabel,
-  FormControlLabelText,
-} from "@/components/ui/form-control";
-import { Input, InputField } from "@/components/ui/input";
-import { Box } from "@/components/ui/box";
+import { Linking, Text, View } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Link, useRouter } from "expo-router";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { GET_CUSTOMER_LEAD_DETAILS, LOGIN } from "@/constants/api_endpoints";
 import api from "@/services/api";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
-import { isFormFieldInValid } from "@/utils/helper";
 import SubmitButton from "@/components/SubmitButton";
 import {
   AUTH_TOKEN_KEY,
@@ -26,7 +16,6 @@ import {
 import { setItem } from "@/utils/secure_store";
 import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
 import { CustomerLeadDetailsModel } from "@/models/customers";
-import LottieView from "lottie-react-native";
 import Toast from "react-native-toast-message";
 import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
 

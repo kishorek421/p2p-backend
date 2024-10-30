@@ -3,9 +3,8 @@ import React, { useEffect, useState } from "react";
 import api from "@/services/api";
 import { GET_ASSET_MASTERS_LIST } from "@/constants/api_endpoints";
 import { AssetMasterListItemModel } from "@/models/assets";
-import DeviceListItemLayout from "@/components/devices/DeviceListItemLayout";
 import { getDeviceStatusColor } from "@/utils/helper";
-import TicketStatusComponent from "@/components/tickets/TicketStatusComponent";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 const DevicesList = () => {
   const [devicesList, setDevicesList] = useState<AssetMasterListItemModel[]>(

@@ -71,7 +71,7 @@ const RegistrationScreen = () => {
 
   const [isLead, setIsLead] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const [errors, setErrors] = useState<ErrorModel[]>([]);
 

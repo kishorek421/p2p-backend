@@ -1,4 +1,4 @@
-import { FlatList, View, Text } from "react-native";
+import { FlatList, View, Text, Image } from "react-native";
 import React, { useEffect, useState } from "react";
 import api from "@/services/api";
 import { GET_ASSET_MASTERS_LIST } from "@/constants/api_endpoints";

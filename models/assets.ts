@@ -53,6 +53,11 @@ export interface AssetMasterListItemModel {
   oemWarrantyDate?: string;
   extendedWarrantyDate?: string;
   uniqueIdentifier?: string;
+  uniqueIdentifierType?: string;
+  licensedType?: string;
+  impact?: string;
+  assetModelId?: string;
+  assetTypeId?: string;
   assetTypeDetails?: AssetTypeListItemModel;
   assetModelDetails?: AssetModelListItemModel;
   impactDetails?: ConfigurationModel;

@@ -27,6 +27,7 @@ interface ConfigurationDropdownFormFieldProps {
   setCanValidateField: any;
   setFieldValidationStatus: any;
   validateFieldFunc: (fieldName: string, isValid: boolean) => void;
+  className?: string;
 }
 
 const ConfigurationDropdownFormField = ({
@@ -43,6 +44,7 @@ const ConfigurationDropdownFormField = ({
   setCanValidateField,
   validateFieldFunc,
   setFieldValidationStatus,
+  className = "",
 }: ConfigurationDropdownFormFieldProps) => {
   const [selectedConfig, setSelectedConfig] = useState<ConfigurationModel>({});
 
@@ -82,7 +84,10 @@ const ConfigurationDropdownFormField = ({
   };
 
   return (
-    <FormControl isInvalid={isFormFieldInValid(fieldName, errors).length > 0}>
+    <FormControl
+      isInvalid={isFormFieldInValid(fieldName, errors).length > 0}
+      className={className}
+    >
       <FormControlLabel className="mb-1">
         <FormControlLabelText>{label}</FormControlLabelText>
         <FormControlLabelAstrick className="text-red-400 ms-0.5">

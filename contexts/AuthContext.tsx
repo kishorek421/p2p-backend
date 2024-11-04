@@ -5,6 +5,7 @@ import {
   CUSTOMER_LEAD_ID,
   IS_LEAD,
   IS_WELCOMED,
+  REFRESH_TOKEN_KEY,
 } from "@/constants/storage_keys";
 import { getItem, removeItem } from "@/utils/secure_store";
 import { ThemeProvider } from "@react-navigation/native";
@@ -38,7 +39,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.log("token", token);
       if (token) {
         const isLead = await getItem(IS_LEAD);
+        console.log("isLead", isLead);
         if (isLead === undefined) {
+          removeItem(REFRESH_TOKEN_KEY);
+          removeItem(AUTH_TOKEN_KEY);
           router.replace({ pathname: "/(auth)/login" });
         } else if (isLead === "true") {
           const customerLeadId = await getItem(CUSTOMER_LEAD_ID);
@@ -50,6 +54,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               },
             });
           } else {
+            removeItem(IS_LEAD);
+            removeItem(REFRESH_TOKEN_KEY);
+            removeItem(AUTH_TOKEN_KEY);
             router.replace({ pathname: "/(auth)/login" });
           }
         } else {
@@ -90,6 +97,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // };
 
   const logout = async () => {
+    await removeItem(REFRESH_TOKEN_KEY);
     await removeItem(AUTH_TOKEN_KEY);
     setUser(undefined);
     // Redirect to the login screen after logout

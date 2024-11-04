@@ -124,7 +124,7 @@ const UserDetails = () => {
           </View>
         </View>
       </View>
-      <View className="mt-6">
+      {/* <View className="mt-6">
         <Text className="text-[16px] font-bold">Assigned Assets</Text>
       </View>
       <View>
@@ -140,7 +140,7 @@ const UserDetails = () => {
             onEndReached={() => {}}
           />
         )}
-      </View>
+      </View> */}
     </View>
   );
 };

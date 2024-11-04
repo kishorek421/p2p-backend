@@ -16,7 +16,7 @@ const DevicesList = () => {
 
   const fetchMyDevices = () => {
     api.get(GET_ASSET_MASTERS_LIST).then((response) => {
-      console.log(response.data.data);
+      console.log("devices list ----->", response.data.data);
       setDevicesList(response.data?.data?.content ?? []);
     });
   };

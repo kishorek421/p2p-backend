@@ -4,6 +4,7 @@ import { Button, ButtonText } from "@/components/ui/button";
 import Icon from "react-native-vector-icons/AntDesign";
 import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { useEffect } from "react";
+import { View } from "react-native";
 
 const TicketsHistoryScreen = () => {
   const { customerId } = useLocalSearchParams();
@@ -32,7 +33,9 @@ const TicketsHistoryScreen = () => {
         <ButtonText>Raise a Ticket</ButtonText>
         <Icon name="arrowright" color="white" size={22} className="ms-2" />
       </Button>
-      <RecentTicketHistoryLayout placing="tickets_list" />
+      <View className="mt-2 ">
+        <RecentTicketHistoryLayout placing="tickets_list" />
+      </View>
     </VStack>
   );
 };

@@ -60,13 +60,13 @@ const UserListItemLayout = ({ userDetailsModel }: UserListItemLayoutProps) => {
               <View className="flex">
                 <Text className="text-gray-500 text-md ">Department</Text>
                 <Text className="text-md text-gray-900 font-semibold  mt-[2px]">
-                  {userDetailsModel.orgDepartmentDetails?.name ?? "-"}
+                  {userDetailsModel.departmentDetails?.name ?? "-"}
                 </Text>
               </View>
               <View className="flex items-end">
                 <Text className="text-gray-500 text-md ">Designation</Text>
                 <Text className="text-md text-gray-900 font-semibold  mt-[2px]">
-                  {userDetailsModel.orgDesignationDetails?.name ?? "-"}
+                  {userDetailsModel.designationDetails?.name ?? "-"}
                 </Text>
               </View>
             </View>

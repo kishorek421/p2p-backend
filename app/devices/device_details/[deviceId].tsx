@@ -1,13 +1,9 @@
 import { View, Text, Image } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button, ButtonText } from "@/components/ui/button";
-import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams } from "expo-router";
 import api from "@/services/api";
 import { GET_ASSET_DETAILS } from "@/constants/api_endpoints";
 import { AssetMasterListItemModel } from "@/models/assets";
-import TicketStatusComponent from "@/components/tickets/TicketStatusComponent";
 import { getDeviceStatusColor } from "@/utils/helper";
 
 const DeviceDetailsScreen = () => {
@@ -102,8 +98,9 @@ const DeviceDetailsScreen = () => {
               </View>
             </View>
           </View>
+          {/*
           <View className="border-[.5px] border-gray-300 h-[1px] mt-3 mb-3 w-full" />
-          <View className="w-full">
+           <View className="w-full">
             <View className="flex-row items-center justify-between">
               <View className="flex">
                 <Text className="text-gray-500 text-md ">Raised Tickets</Text>
@@ -116,16 +113,9 @@ const DeviceDetailsScreen = () => {
                 <Text className="text-md text-gray-900 font-semibold ">
                   Raised
                 </Text>
-                {/* <View className="mt-1">
-                  <TicketStatusComponent
-                    statusKey={"RAISED"}
-                    statusValue={"Raised"}
-                  />
-                </View> */}
               </View>
             </View>
-          </View>
-
+          </View> */}
           <View className=" border-[.5px] border-gray-300 h-[1px] mt-3 mb-3 w-full" />
           <View className="flex-row justify-between w-full items-center">
             <View className="flex-row items-center">

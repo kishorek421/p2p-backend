@@ -1,12 +1,9 @@
-import { View, Text, TouchableOpacity, Image, Pressable } from "react-native";
+import { View, Text, Image, Pressable } from "react-native";
 import React from "react";
 import { router } from "expo-router";
-import Feather from "react-native-vector-icons/Feather";
-import { Button, ButtonText } from "../ui/button";
-import { Card } from "../ui/card";
-import { HStack } from "../ui/hstack";
 import { getDeviceStatusColor } from "@/utils/helper";
 import { AssetMasterListItemModel } from "@/models/assets";
+import moment from "moment";
 
 interface DeviceListItemLayoutProps {
   data: AssetMasterListItemModel;
@@ -85,8 +82,8 @@ const DeviceListItemLayout = ({ data }: DeviceListItemLayoutProps) => {
                 </View>
               </View>
             </View>
-            <View className="border-[.5px] border-gray-300 h-[1px] mt-3 mb-3 w-full" />
-            <View className="w-full">
+            {/* <View className="border-[.5px] border-gray-300 h-[1px] mt-3 mb-3 w-full" />
+           <View className="w-full">
               <View className="flex-row items-center justify-between">
                 <View className="flex">
                   <Text className="text-gray-500 text-md ">Raised Tickets</Text>
@@ -101,16 +98,9 @@ const DeviceListItemLayout = ({ data }: DeviceListItemLayoutProps) => {
                   <Text className="text-md text-gray-900 font-semibold ">
                     Raised
                   </Text>
-                  {/* <View className="mt-1">
-                      <TicketStatusComponent
-                        statusKey={"RAISED"}
-                        statusValue={"Raised"}
-                      />
-                    </View> */}
                 </View>
               </View>
-            </View>
-
+            </View> */}
             <View className=" border-[.5px] border-gray-300 h-[1px] mt-3 mb-3 w-full" />
             <View className="flex-row justify-between w-full items-center">
               <View className="flex-row items-center">
@@ -126,7 +116,10 @@ const DeviceListItemLayout = ({ data }: DeviceListItemLayoutProps) => {
                   <Text className="text-gray-500 text-[13px] mt-[1px]">
                     Assigned To
                   </Text>
-                  <Text className="font-bold ">Dharani Shree</Text>
+                  <Text className="font-bold ">
+                    {(data.userAssignedToDetails?.firstName ?? "- ") +
+                      (data.userAssignedToDetails?.lastName ?? "")}
+                  </Text>
                 </View>
               </View>
               <View className="ms-2 flex items-end">
@@ -134,10 +127,11 @@ const DeviceListItemLayout = ({ data }: DeviceListItemLayoutProps) => {
                   Assigned At
                 </Text>
                 <Text className="font-bold">
-                  {/* {item.createdAt
-                    ? moment(ticketModel.createdAt).fromNow()
-                    : "-"} */}
-                  28-08-24
+                  {data.userAssignedToDetails?.createdAt
+                    ? moment(data.userAssignedToDetails?.createdAt).format(
+                        "DD-MM-YYYY",
+                      )
+                    : "-"}
                 </Text>
               </View>
               {/* <View className="flex items-end  ">

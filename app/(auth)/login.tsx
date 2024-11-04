@@ -97,7 +97,6 @@ const LoginScreen = () => {
                     params: { customerLeadId: data.id },
                   });
                 }
-
                 setIsLoading(false);
               }
             } catch (e) {

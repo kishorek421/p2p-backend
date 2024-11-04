@@ -74,3 +74,7 @@ export const GET_BRANCHES_LIST = "/organisation/getBranchListByOrgId";
 export const CREATE_USER = "/users/create";
 export const GET_USERS_LIST = "/users/list";
 export const GET_USER_DETAILS = "/users/view";
+
+// modules
+export const GET_LOGINED_USER_MODULES =
+  "/rbac/roles/getLoginedUserRoleModulePermissionsAsTree";

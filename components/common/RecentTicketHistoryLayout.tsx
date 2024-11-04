@@ -54,8 +54,8 @@ const RecentTicketHistoryLayout = ({ placing }: { placing: string }) => {
 
   return recentTickets.length === 0 ? (
     <View
-      className={`mt-4 bg-gray-200 flex justify-center items-center rounded-lg h-36 ${
-        placing === "home" ? "mx-0" : "mx-4"
+      className={` bg-gray-200 flex justify-center items-center rounded-lg h-36 ${
+        placing === "home" ? "mx-4 mt-0" : "mx-4 mt-4"
       }`}
     >
       <Text className="text-gray-500 text-sm text-center">
@@ -65,19 +65,19 @@ const RecentTicketHistoryLayout = ({ placing }: { placing: string }) => {
   ) : (
     <FlatList
       data={recentTickets}
-      renderItem={({ item }) => (
-        <TicketListItemLayout
-          cn={`${placing !== "home" ? "m-3" : "mb-4"} `}
-          ticketModel={item}
-        />
+      renderItem={({ item, index }) => (
+        <TicketListItemLayout cn={`my-2 px-4`} ticketModel={item} />
       )}
-      className={`my-4 ${placing === "home" ? "h-96 pb-16" : ""}`}
+      className={`${placing === "home" ? "h-96 mb-16" : ""}`}
       keyExtractor={(_, index) => index.toString()}
       onEndReached={() => {
         if (placing !== "home" && !isLastPage) {
           fetchTickets(currentPage + 1);
         }
       }}
+      ListFooterComponent={
+        <View style={{ height: placing === "home" ? 30 : 140 }} />
+      }
     />
   );
 };

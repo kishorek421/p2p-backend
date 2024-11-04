@@ -25,22 +25,6 @@ const UsersList = () => {
   }, []);
   return (
     <View className="bg-white h-full">
-      <View className="px-4 mt-3 w-auto">
-        <View className="flex-row justify-between items-center">
-          <View className="flex-row items-center">
-            <AntDesign name="filter" size={20} color="black" />
-            <Text className="font-semibold ms-1">Filter By</Text>
-            {/* <FontAwesome6 name="filter" size={16} color="black" className="ms-1" /> */}
-          </View>
-          <View className="bg-gray-200 flex-row items-center py-1 px-2 rounded-lg">
-            <AntDesign name="close" size={16} color="gray" />
-            <Text className="text-sm ms-1 text-gray-600">Clear</Text>
-          </View>
-        </View>
-        <View className="mt-2 bg-gray-200 rounded-lg py-3 px-3 w-auto">
-          <Text>Branch - Bangalore</Text>
-        </View>
-      </View>
       {usersList.length === 0 ? (
         <View className="w-full h-full flex justify-center items-center mt-2">
           <Text className="text-gray-500">No Users Found</Text>

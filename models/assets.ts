@@ -45,6 +45,14 @@ export interface AssetInUseListItemModel {
   createdAt?: string;
 }
 
+export interface AssignedToUserDetails {
+  userId?: string;
+  createdAt?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
+}
+
 export interface AssetMasterListItemModel {
   id?: string;
   serialNo?: string;
@@ -64,6 +72,8 @@ export interface AssetMasterListItemModel {
   assetStatusDetails?: ConfigurationModel;
   uniqueIdentifierTypeDetails?: ConfigurationModel;
   licensedTypeDetails?: ConfigurationModel;
+  userAssignedToDetails?: AssignedToUserDetails;
+  customerDetails?: AssignedToUserDetails;
 }
 
 export interface IssueTypeListItemModel {

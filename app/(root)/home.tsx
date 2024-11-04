@@ -10,6 +10,7 @@ const HomeScreen = () => {
   const [customerDetails, setCustomerDetails] = useState<CustomerDetailsModel>(
     {},
   );
+  const [authorizedModules, setAuthorizedModules] = useState();
 
   useEffect(() => {
     api

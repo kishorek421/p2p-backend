@@ -28,11 +28,7 @@ const DevicesList = () => {
   ) : (
     <FlatList
       data={devicesList}
-      renderItem={({ item }) => (
-        <DeviceListItemLayout data={item}/>
-        
- 
-      )}
+      renderItem={({ item }) => <DeviceListItemLayout data={item} />}
       keyExtractor={(_, index) => index.toString()}
       onEndReached={() => {}}
     />

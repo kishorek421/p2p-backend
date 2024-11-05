@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import { getDeviceStatusColor } from "@/utils/helper";
 import { AssetMasterListItemModel } from "@/models/assets";
 import moment from "moment";
+import Feather from "@expo/vector-icons/Feather";
 
 interface DeviceListItemLayoutProps {
   data: AssetMasterListItemModel;
@@ -12,7 +13,7 @@ interface DeviceListItemLayoutProps {
 const DeviceListItemLayout = ({ data }: DeviceListItemLayoutProps) => {
   console.log(data);
   return (
-    <View className="p-4">
+    <View className="px-4 py-2">
       <View className="w-full bg-white px-3 py-3 rounded-lg shadow-sm">
         <Pressable
           onPress={() =>
@@ -23,7 +24,6 @@ const DeviceListItemLayout = ({ data }: DeviceListItemLayoutProps) => {
               },
             })
           }
-          className=""
         >
           <View className="flex">
             <View className="w-full ">
@@ -104,14 +104,17 @@ const DeviceListItemLayout = ({ data }: DeviceListItemLayoutProps) => {
             <View className=" border-[.5px] border-gray-300 h-[1px] mt-3 mb-3 w-full" />
             <View className="flex-row justify-between w-full items-center">
               <View className="flex-row items-center">
-                <Image
+                {/* <Image
                   source={{
                     uri: "https://images.unsplash.com/photo-1445053023192-8d45cb66099d?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                   }}
                   width={35}
                   height={35}
                   className="rounded-full"
-                />
+                /> */}
+                <View className="bg-gray-100 p-2 rounded-full">
+                  <Feather name="user" size={24} color="#9ca3af" />
+                </View>
                 <View className="ms-2">
                   <Text className="text-gray-500 text-[13px] mt-[1px]">
                     Assigned To

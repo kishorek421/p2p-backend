@@ -1,28 +1,51 @@
-import { View, Text, FlatList, Pressable, Image } from "react-native";
+import { View, Text, FlatList } from "react-native";
 import React, { useEffect, useState } from "react";
 import api from "@/services/api";
-import { router } from "expo-router";
-
 import { GET_USERS_LIST } from "@/constants/api_endpoints";
 import { UserDetailsModel } from "@/models/users";
-import TicketStatusComponent from "@/components/tickets/TicketStatusComponent";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import UserListItemLayout from "@/components/users/UserListItemLayout";
+import useRefresh from "@/hooks/useRefresh";
 
 const UsersList = () => {
   const [usersList, setUsersList] = useState<UserDetailsModel[]>([]);
 
-  useEffect(() => {
-    fetchUsersList();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLastPage, setIsLastPage] = useState(false);
+  const { refreshFlag } = useRefresh();
 
-    function fetchUsersList() {
-      api.get(GET_USERS_LIST).then((response) => {
-        console.log(response.data.data);
-        setUsersList(response.data?.data?.content ?? []);
-      });
+  function fetchUsersList(nextPageNumber: number) {
+    if (nextPageNumber === 1) {
+      setUsersList([]);
     }
-  }, []);
+
+    api
+      .get(GET_USERS_LIST, {
+        params: {
+          pageNo: nextPageNumber,
+          pageSize: 10,
+        },
+      })
+      .then((response) => {
+        let content = response.data?.data?.content ?? [];
+        if (content && content.length > 0) {
+          setUsersList((prevState) => [...prevState, ...content]);
+        }
+        let paginator = response.data?.data?.paginator;
+        if (paginator) {
+          let iCurrentPage = paginator.currentPage;
+          let iLastPage = paginator.lastPage;
+          if (iCurrentPage && iLastPage !== undefined) {
+            setCurrentPage(iCurrentPage);
+            setIsLastPage(iLastPage);
+          }
+        }
+      });
+  }
+
+  useEffect(() => {
+    fetchUsersList(1);
+  }, [refreshFlag]);
+
   return (
     <View className="bg-white h-full">
       {usersList.length === 0 ? (
@@ -37,7 +60,12 @@ const UsersList = () => {
             <UserListItemLayout userDetailsModel={item} />
           )}
           keyExtractor={(_, index) => index.toString()}
-          onEndReached={() => {}}
+          onEndReached={() => {
+            if (!isLastPage) {
+              fetchUsersList(currentPage + 1);
+            }
+          }}
+          ListFooterComponent={<View style={{ height: 30 }} />}
         />
       )}
     </View>

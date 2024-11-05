@@ -7,13 +7,13 @@ import api from "@/services/api";
 import {
   GET_CUSTOMER_DETAILS,
   GET_LOGINED_USER_MODULES,
+  GET_USER_DETAILS,
 } from "@/constants/api_endpoints";
 import { RoleModel, RoleModulePermissionsModel } from "@/models/rbac";
+import { UserDetailsModel } from "@/models/users";
 
 const HomeScreen = () => {
-  const [customerDetails, setCustomerDetails] = useState<CustomerDetailsModel>(
-    {},
-  );
+  const [customerDetails, setCustomerDetails] = useState<UserDetailsModel>({});
   const [authorizedModules, setAuthorizedModules] = useState<
     RoleModulePermissionsModel[]
   >([]);
@@ -22,7 +22,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     api
-      .get(GET_CUSTOMER_DETAILS, {})
+      .get(GET_USER_DETAILS, {})
       .then((response) => {
         console.log("customerDetails", response);
         setCustomerDetails(response.data?.data ?? []);
@@ -33,7 +33,10 @@ const HomeScreen = () => {
     api
       .get(GET_LOGINED_USER_MODULES, {})
       .then((response) => {
-        console.log("logined user modules", response);
+        console.log(
+          "logined user modules---------------------",
+          response.data?.data?.role,
+        );
         const modulesAsTree = response.data?.data?.modules;
         if (modulesAsTree) {
           setAuthorizedModules(convertTreeToFlat(modulesAsTree));

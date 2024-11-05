@@ -9,9 +9,10 @@ import {
 } from "@/constants/storage_keys";
 import { getItem, removeItem } from "@/utils/secure_store";
 import { ThemeProvider } from "@react-navigation/native";
-import { GET_CUSTOMER_DETAILS } from "@/constants/api_endpoints";
+import { GET_USER_DETAILS } from "@/constants/api_endpoints";
 import api from "@/services/api";
 import { CustomerDetailsModel } from "@/models/customers";
+import { UserDetailsModel } from "@/models/users";
 
 interface AuthContextProps {
   user: CustomerDetailsModel | undefined;
@@ -28,7 +29,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<CustomerDetailsModel | undefined>(undefined);
+  const [user, setUser] = useState<UserDetailsModel | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -61,7 +62,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           }
         } else {
           try {
-            const response = await api.get(GET_CUSTOMER_DETAILS); // Replace with your own endpoint
+            const response = await api.get(GET_USER_DETAILS);
             setUser(response.data);
           } catch (error) {
             console.error("Failed to fetch user:", error);

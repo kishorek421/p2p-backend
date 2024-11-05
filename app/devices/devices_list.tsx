@@ -4,21 +4,48 @@ import api from "@/services/api";
 import { GET_ASSET_MASTERS_LIST } from "@/constants/api_endpoints";
 import { AssetMasterListItemModel } from "@/models/assets";
 import DeviceListItemLayout from "@/components/devices/DeviceListItemLayout";
+import useRefresh from "@/hooks/useRefresh";
 
 const DevicesList = () => {
   const [devicesList, setDevicesList] = useState<AssetMasterListItemModel[]>(
     [],
   );
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLastPage, setIsLastPage] = useState(false);
+  const { refreshFlag } = useRefresh();
+
   useEffect(() => {
-    fetchMyDevices();
+    fetchMyDevices(1);
   }, []);
 
-  const fetchMyDevices = () => {
-    api.get(GET_ASSET_MASTERS_LIST).then((response) => {
-      console.log("devices list ----->", response.data.data);
-      setDevicesList(response.data?.data?.content ?? []);
-    });
+  const fetchMyDevices = (nextPageNumber: number) => {
+    if (nextPageNumber === 1) {
+      setDevicesList([]);
+    }
+
+    api
+      .get(GET_ASSET_MASTERS_LIST, {
+        params: {
+          pageNo: nextPageNumber,
+          pageSize: 10,
+        },
+      })
+      .then((response) => {
+        let content = response.data?.data?.content ?? [];
+        if (content && content.length > 0) {
+          setDevicesList((prevState) => [...prevState, ...content]);
+        }
+        let paginator = response.data?.data?.paginator;
+        if (paginator) {
+          let iCurrentPage = paginator.currentPage;
+          let iLastPage = paginator.lastPage;
+          if (iCurrentPage && iLastPage !== undefined) {
+            setCurrentPage(iCurrentPage);
+            setIsLastPage(iLastPage);
+          }
+        }
+      });
   };
 
   return devicesList.length === 0 ? (
@@ -30,7 +57,12 @@ const DevicesList = () => {
       data={devicesList}
       renderItem={({ item }) => <DeviceListItemLayout data={item} />}
       keyExtractor={(_, index) => index.toString()}
-      onEndReached={() => {}}
+      onEndReached={() => {
+        if (!isLastPage) {
+          fetchMyDevices(currentPage + 1);
+        }
+      }}
+      ListFooterComponent={<View style={{ height: 30 }} />}
     />
   );
 };

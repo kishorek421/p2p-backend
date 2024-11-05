@@ -3,7 +3,11 @@ import { Linking, Text, View } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { GET_CUSTOMER_LEAD_DETAILS, LOGIN } from "@/constants/api_endpoints";
+import {
+  GET_CUSTOMER_LEAD_DETAILS,
+  GET_USER_DETAILS,
+  LOGIN,
+} from "@/constants/api_endpoints";
 import api from "@/services/api";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
 import SubmitButton from "@/components/SubmitButton";
@@ -18,6 +22,7 @@ import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import Toast from "react-native-toast-message";
 import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
+import { UserDetailsModel } from "@/models/users";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -76,14 +81,15 @@ const LoginScreen = () => {
 
           if (loginData) {
             try {
-              let leadResponse = await api.get<
-                ApiResponseModel<CustomerLeadDetailsModel>
-              >(GET_CUSTOMER_LEAD_DETAILS);
+              let leadResponse =
+                await api.get<ApiResponseModel<UserDetailsModel>>(
+                  GET_USER_DETAILS,
+                );
               let data = leadResponse.data.data ?? {};
               console.log("customerData", data);
 
               if (data && data.id) {
-                let leadStatus = data.onBoardingStatusDetails?.key;
+                let leadStatus = data.statusDetails?.key;
 
                 await setItem(CUSTOMER_LEAD_ID, data.id);
 
@@ -100,7 +106,7 @@ const LoginScreen = () => {
                 setIsLoading(false);
               }
             } catch (e) {
-              console.error(e);
+              console.error();
               setIsLoading(false);
             }
           } else {

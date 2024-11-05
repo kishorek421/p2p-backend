@@ -20,13 +20,14 @@ import { ServiceItemModel } from "@/models/ui/service_item_model";
 import AntDesign from "react-native-vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { RoleModel, RoleModulePermissionsModel } from "@/models/rbac";
+import { UserDetailsModel } from "@/models/users";
 
 const ContentLayout = ({
   customerDetails,
   authorizedModules,
   roleDetails,
 }: {
-  customerDetails: CustomerDetailsModel;
+  customerDetails: UserDetailsModel;
   authorizedModules: RoleModulePermissionsModel[];
   roleDetails: RoleModel;
 }) => {
@@ -69,7 +70,15 @@ const ContentLayout = ({
         });
       }
     }
-    if (roleDetails.code !== "CUSTOMER") {
+  }, [customerDetails]);
+
+  useEffect(() => {
+    const userTypeKey = customerDetails?.userTypeDetails?.key;
+
+    if (
+      userTypeKey !== undefined &&
+      customerDetails?.userTypeDetails?.key !== "CUSTOMER"
+    ) {
       const unauthorizedTabIndexes = ["DEVICES", "USERS"];
       setServiceTabs((prev) => {
         return [
@@ -79,7 +88,7 @@ const ContentLayout = ({
         ];
       });
     }
-  }, [customerDetails]);
+  }, [roleDetails]);
 
   return (
     <VStack className="mt-2">

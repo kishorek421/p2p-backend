@@ -10,6 +10,7 @@ import { UserDetailsModel } from "@/models/users";
 import api from "@/services/api";
 import { AssetMasterListItemModel } from "@/models/assets";
 import DeviceListItemLayout from "@/components/devices/DeviceListItemLayout";
+import Feather from "@expo/vector-icons/Feather";
 
 const UserDetails = () => {
   const { userId } = useLocalSearchParams();
@@ -21,23 +22,35 @@ const UserDetails = () => {
   const [userDetails, setUserDetails] = useState<UserDetailsModel>({});
 
   useEffect(() => {
-    fetchUserDetails();
-
-    function fetchUserDetails() {
+    const fetchUserDetails = () => {
       const params = `?userId=${userId}`;
 
-      api.get(GET_USER_DETAILS + params).then((response) => {
-        setUserDetails(response.data?.data ?? {});
-        fetchUserDevices();
-      });
-    }
+      api
+        .get(GET_USER_DETAILS + params)
+        .then((response) => {
+          setUserDetails(response.data?.data ?? {});
+          fetchUserDevices();
+        })
+        .catch((e) => {
+          console.error(e);
+          setUserDetails({});
+        });
+    };
 
     const fetchUserDevices = () => {
-      api.get(GET_ASSETS_LIST_BY_USER_ID).then((response) => {
-        console.log(response.data.data);
-        setAssignedDevicesList(response.data?.data?.content ?? []);
-      });
+      api
+        .get(GET_ASSETS_LIST_BY_USER_ID)
+        .then((response) => {
+          console.log("devicesList ~~~~~~~~~~~~~~~~~>", response.data.data);
+          setAssignedDevicesList(response.data?.data?.content ?? []);
+        })
+        .catch((e) => {
+          console.error(e);
+          setAssignedDevicesList([]);
+        });
     };
+
+    fetchUserDetails();
   }, [userId]);
 
   return (
@@ -45,14 +58,17 @@ const UserDetails = () => {
       <View className="flex rounded-lg  shadow-sm p-4 bg-white">
         <View className="flex-row justify-between w-full">
           <View className="flex-row items-center">
-            <Image
+            {/* <Image
               source={{
                 uri: "https://images.unsplash.com/photo-1445053023192-8d45cb66099d?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
               }}
               width={35}
               height={35}
               className="rounded-full"
-            />
+            /> */}
+            <View className="bg-gray-100 p-2 rounded-full">
+              <Feather name="user" size={24} color="#9ca3af" />
+            </View>
             <View className="ms-2">
               <Text className="font-bold">
                 {userDetails.firstName ?? "-"} {userDetails.lastName ?? ""}
@@ -124,7 +140,7 @@ const UserDetails = () => {
           </View>
         </View>
       </View>
-      {/* <View className="mt-6">
+      <View className="mt-6">
         <Text className="text-[16px] font-bold">Assigned Assets</Text>
       </View>
       <View>
@@ -140,7 +156,7 @@ const UserDetails = () => {
             onEndReached={() => {}}
           />
         )}
-      </View> */}
+      </View>
     </View>
   );
 };

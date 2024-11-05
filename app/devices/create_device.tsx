@@ -25,6 +25,7 @@ import PrimaryDatetimePickerFormField from "@/components/fields/PrimaryDatetimeP
 import SubmitButton from "@/components/SubmitButton";
 import { router } from "expo-router";
 import Toast from "react-native-toast-message";
+import useRefresh from "@/hooks/useRefresh";
 
 const CreateDevice = () => {
   const [errors, setErrors] = useState<ErrorModel[]>([]);
@@ -56,6 +57,8 @@ const CreateDevice = () => {
   const [asWarranty, setAsWarranty] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const { triggerRefresh } = useRefresh();
 
   useEffect(() => {
     const fetchAssetTypes = () => {
@@ -152,6 +155,7 @@ const CreateDevice = () => {
             // text2: "Crendential have been sent to your email",
           });
           setIsLoading(false);
+          triggerRefresh();
           router.push({ pathname: "/devices/devices_list" });
         })
         .catch((e) => {

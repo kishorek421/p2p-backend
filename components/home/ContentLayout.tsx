@@ -69,26 +69,24 @@ const ContentLayout = ({
           return prev;
         });
       }
-    }
-  }, [customerDetails]);
 
-  useEffect(() => {
-    const userTypeKey = customerDetails?.userTypeDetails?.key;
+      const userTypeKey = customerDetails?.userTypeDetails?.key;
 
-    if (
-      userTypeKey !== undefined &&
-      customerDetails?.userTypeDetails?.key !== "CUSTOMER"
-    ) {
-      const unauthorizedTabIndexes = ["DEVICES", "USERS"];
-      setServiceTabs((prev) => {
-        return [
-          ...prev.filter(
-            (tab) => !unauthorizedTabIndexes.includes(tab.code ?? ""),
-          ),
-        ];
-      });
+      if (
+        userTypeKey !== undefined &&
+        customerDetails?.userTypeDetails?.key !== "CUSTOMER"
+      ) {
+        const unauthorizedTabIndexes = ["DEVICES", "USERS"];
+        setServiceTabs((prev) => {
+          return [
+            ...prev.filter(
+              (tab) => !unauthorizedTabIndexes.includes(tab.code ?? ""),
+            ),
+          ];
+        });
+      }
     }
-  }, [roleDetails]);
+  }, [customerDetails, roleDetails]);
 
   return (
     <VStack className="mt-2">

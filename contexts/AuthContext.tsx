@@ -6,6 +6,7 @@ import {
   IS_LEAD,
   IS_WELCOMED,
   REFRESH_TOKEN_KEY,
+  USER_ID,
 } from "@/constants/storage_keys";
 import { getItem, removeItem } from "@/utils/secure_store";
 import { ThemeProvider } from "@react-navigation/native";
@@ -42,6 +43,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         const isLead = await getItem(IS_LEAD);
         console.log("isLead", isLead);
         if (isLead === undefined) {
+          removeItem(IS_LEAD);
+          removeItem(IS_WELCOMED);
+          removeItem(CUSTOMER_LEAD_ID);
+          removeItem(USER_ID);
           removeItem(REFRESH_TOKEN_KEY);
           removeItem(AUTH_TOKEN_KEY);
           router.replace({ pathname: "/(auth)/login" });
@@ -56,6 +61,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             });
           } else {
             removeItem(IS_LEAD);
+            removeItem(IS_WELCOMED);
+            removeItem(CUSTOMER_LEAD_ID);
+            removeItem(USER_ID);
             removeItem(REFRESH_TOKEN_KEY);
             removeItem(AUTH_TOKEN_KEY);
             router.replace({ pathname: "/(auth)/login" });
@@ -64,15 +72,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           try {
             const response = await api.get(GET_USER_DETAILS);
             setUser(response.data);
+            router.replace({ pathname: "/(root)/home" });
           } catch (error) {
             console.error("Failed to fetch user:", error);
+            removeItem(IS_LEAD);
+            removeItem(IS_WELCOMED);
+            removeItem(CUSTOMER_LEAD_ID);
+            removeItem(USER_ID);
+            removeItem(REFRESH_TOKEN_KEY);
+            removeItem(AUTH_TOKEN_KEY);
+            router.replace({ pathname: "/(auth)/login" });
           }
-          router.replace({ pathname: "/(root)/home" });
         }
       } else {
         const isWelcomed = await getItem(IS_WELCOMED);
         console.log("isWelcomed", isWelcomed);
         if (isWelcomed === "true") {
+          removeItem(IS_LEAD);
+          removeItem(IS_WELCOMED);
+          removeItem(CUSTOMER_LEAD_ID);
+          removeItem(USER_ID);
+          removeItem(REFRESH_TOKEN_KEY);
+          removeItem(AUTH_TOKEN_KEY);
           router.replace({ pathname: "/(auth)/login" });
         } else {
           router.replace({ pathname: "/welcome" });

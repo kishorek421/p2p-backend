@@ -1,7 +1,6 @@
 import { Pressable, View, Text } from "react-native";
 import DatePicker from "react-native-date-picker";
-import { Input, InputField } from "../ui/input";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import moment from "moment";
 

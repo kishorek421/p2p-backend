@@ -11,13 +11,21 @@ const UsersList = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isLastPage, setIsLastPage] = useState(false);
-  const { refreshFlag } = useRefresh();
+  const { refreshFlag, setRefreshFlag } = useRefresh();
+
+  useEffect(() => {
+    setUsersList([]);
+    fetchUsersList(1);
+  }, []);
+
+  useEffect(() => {
+    setUsersList([]);
+    if (refreshFlag) {
+      fetchUsersList(1);
+    }
+  }, [refreshFlag]);
 
   function fetchUsersList(nextPageNumber: number) {
-    if (nextPageNumber === 1) {
-      setUsersList([]);
-    }
-
     api
       .get(GET_USERS_LIST, {
         params: {
@@ -28,7 +36,11 @@ const UsersList = () => {
       .then((response) => {
         let content = response.data?.data?.content ?? [];
         if (content && content.length > 0) {
-          setUsersList((prevState) => [...prevState, ...content]);
+          if (nextPageNumber === 1) {
+            setUsersList(content);
+          } else {
+            setUsersList((prevState) => [...prevState, ...content]);
+          }
         }
         let paginator = response.data?.data?.paginator;
         if (paginator) {
@@ -39,17 +51,17 @@ const UsersList = () => {
             setIsLastPage(iLastPage);
           }
         }
+        setRefreshFlag(false);
+      })
+      .catch((e) => {
+        console.error(e);
       });
   }
-
-  useEffect(() => {
-    fetchUsersList(1);
-  }, [refreshFlag]);
 
   return (
     <View className="bg-white h-full">
       {usersList.length === 0 ? (
-        <View className="w-full h-full flex justify-center items-center mt-2">
+        <View className="w-full h-full flex justify-center items-center mt-2 ">
           <Text className="text-gray-500">No Users Found</Text>
         </View>
       ) : (

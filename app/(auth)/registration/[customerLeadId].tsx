@@ -16,6 +16,7 @@ import {
   GET_AREAS_LIST_BY_NAME_SEARCH,
   GET_CUSTOMER_LEAD_DETAILS,
   GET_PINCODES_LIST_BY_PINCODE_SEARCH,
+  GET_USER_DETAILS,
 } from "@/constants/api_endpoints";
 import {
   CATEGORY_OF_ORG,
@@ -24,7 +25,6 @@ import {
   TYPE_OF_ORG,
 } from "@/constants/configuration_keys";
 import ConfigurationDropdownFormField from "@/components/fields/ConfigurationDropdownFormField";
-import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { AreaListItemModel, PincodeListItemModel } from "@/models/geolocations";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
 import { CustomerLeadDetailsModel } from "@/models/customers";
@@ -45,8 +45,6 @@ import { getItem } from "expo-secure-store";
 import Toast from "react-native-toast-message";
 
 const RegistrationScreen = () => {
-  const { customerLeadId } = useLocalSearchParams();
-
   // geolocations
   const [pincodes, setPincodes] = useState<DropdownItemModel[]>([]);
   const [areas, setAreas] = useState<DropdownItemModel[]>([]);
@@ -94,15 +92,26 @@ const RegistrationScreen = () => {
   };
 
   const getSuggestions = useCallback(
-    async (q: string, type: GeoLocationType, setLoading: any) => {
+    async (
+      q: string,
+      type: GeoLocationType,
+      setLoading: any,
+      param?: string,
+    ) => {
       if (typeof q !== "string" || q.length < 3) {
         onClearPress(type);
         return;
       }
       setLoading(true);
 
+      const url =
+        getGeoLocationSuggestionsUrl(type) +
+        `?q=${q}${(param ?? "").length > 0 ? `&${param}` : ""}`;
+
+      console.log("url", url);
+
       api
-        .get(getGeoLocationSuggestionsUrl(type) + `?q=${q}`)
+        .get(url)
         .then((response) => {
           setGeolocationSuggestions(type, response.data?.data ?? []);
           setLoading(false);
@@ -111,8 +120,6 @@ const RegistrationScreen = () => {
           console.error(e);
           setLoading(false);
         });
-
-      setLoading(false);
     },
     [],
   );
@@ -224,9 +231,7 @@ const RegistrationScreen = () => {
     // customer lead details
     const loadCustomerLeadDetails = () => {
       api
-        .get<ApiResponseModel<CustomerLeadDetailsModel>>(
-          GET_CUSTOMER_LEAD_DETAILS,
-        )
+        .get<ApiResponseModel<CustomerLeadDetailsModel>>(GET_USER_DETAILS)
         .then((response) => {
           let data = response.data.data ?? {};
           if (data && data.id) {
@@ -811,7 +816,16 @@ const RegistrationScreen = () => {
                   onClearPress={onClearPress}
                   selectedValue={selectedArea}
                   suggestions={areas}
-                  getSuggestions={getSuggestions}
+                  getSuggestions={(q, type, setLoading) => {
+                    if (selectedPincode?.id) {
+                      getSuggestions(
+                        q,
+                        type,
+                        setLoading,
+                        `pincodeIds=${selectedPincode?.id}`,
+                      );
+                    }
+                  }}
                   setSelectedValue={setSelectedArea}
                   placeholder="Search area"
                   fieldName="areaId"

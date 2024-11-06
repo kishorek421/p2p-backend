@@ -1,4 +1,10 @@
-import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/storage_keys";
+import {
+  AUTH_TOKEN_KEY,
+  CUSTOMER_LEAD_ID,
+  IS_LEAD,
+  IS_WELCOMED,
+  REFRESH_TOKEN_KEY,
+} from "@/constants/storage_keys";
 import { removeItem } from "@/utils/secure_store";
 import {
   DrawerContentScrollView,
@@ -32,6 +38,9 @@ const CustomDrawerContent = (props: any) => {
             onPress={async () => {
               await removeItem(AUTH_TOKEN_KEY);
               await removeItem(REFRESH_TOKEN_KEY);
+              await removeItem(CUSTOMER_LEAD_ID);
+              await removeItem(IS_LEAD);
+              await removeItem(IS_WELCOMED);
               router.replace("/(auth)/login");
             }}
           >

@@ -11,7 +11,6 @@ interface DeviceListItemLayoutProps {
 }
 
 const DeviceListItemLayout = ({ data }: DeviceListItemLayoutProps) => {
-  console.log(data);
   return (
     <View className="px-4 py-2">
       <View className="w-full bg-white px-3 py-3 rounded-lg shadow-sm">

@@ -119,10 +119,12 @@ const CreateUser = () => {
     if (allValid) {
       setIsLoading(true);
 
-      let userModel: CreateUserModel = {
-        departmentId: selectedDepartment?.value,
-        designationId: selectedDesignation?.value,
-      };
+      setUserModel((prev) => {
+        prev.departmentId = selectedDepartment?.value;
+        prev.designationId = selectedDesignation?.value;
+        prev.branchId = selectedBranch?.value;
+        return prev;
+      });
 
       setErrors([]);
 
@@ -137,8 +139,9 @@ const CreateUser = () => {
             // text2: "Crendential have been sent to your email",
           });
           setIsLoading(false);
+          setUserModel({});
           triggerRefresh();
-          router.push({ pathname: "/users/users_list" });
+          router.back();
         })
         .catch((e) => {
           console.error(e.response?.data);

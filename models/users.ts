@@ -12,6 +12,7 @@ export interface CreateUserModel {
   email?: string;
   departmentId?: string;
   designationId?: string;
+  branchId?: string;
   orgId?: string;
 }
 
@@ -35,4 +36,9 @@ export interface UserTicketDetailsModel {
   lastTicketStatus?: string;
   raisedTicketCount?: number;
   closedTicketCount?: number;
+}
+
+export interface OrgUserListItemModel {
+  id?: string;
+  name?: string;
 }

@@ -117,12 +117,12 @@ const TicketDetails = () => {
               <View>
                 <Text className="text-gray-500 text-md ">Assinged To</Text>
                 <Text className="text-md text-gray-900 font-semibold  mt-[2px]">
-                  {ticketModel?.assignedToDetails?.userRoleDetails?.roleDetails
-                    ?.name ?? "-"}
+                  {ticketModel?.lastAssignedToDetails?.firstName ??
+                    "-" + (ticketModel?.lastAssignedToDetails?.lastName ?? "")}
                 </Text>
               </View>
             </View>
-            <View className="w-full mt-3">
+            {/* <View className="w-full mt-3">
               <View>
                 <Text className="text-gray-500 text-md ">
                   Assinged Engineer
@@ -132,7 +132,7 @@ const TicketDetails = () => {
                   {ticketModel?.assignedToDetails?.lastName}
                 </Text>
               </View>
-            </View>
+            </View> */}
           </View>
         </View>
       </View>

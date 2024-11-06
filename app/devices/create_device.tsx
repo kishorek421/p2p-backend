@@ -7,7 +7,11 @@ import {
   AssetModelListItemModel,
   AssetTypeListItemModel,
 } from "@/models/assets";
-import { AssetsDropdownType, TextCase } from "@/enums/enums";
+import {
+  AssetsDropdownType,
+  CommonDropdownType,
+  TextCase,
+} from "@/enums/enums";
 import ConfigurationDropdownFormField from "@/components/fields/ConfigurationDropdownFormField";
 import {
   ASSET_IMPACT,
@@ -19,6 +23,7 @@ import {
   CREATE_ASSET,
   GET_ASSET_MODELS_BY_ASSET_TYPE,
   GET_ASSET_TYPES_BY_NAME_SEARCH,
+  GET_ORG_USERS,
 } from "@/constants/api_endpoints";
 import api from "@/services/api";
 import PrimaryDatetimePickerFormField from "@/components/fields/PrimaryDatetimePickerFormField";
@@ -26,6 +31,8 @@ import SubmitButton from "@/components/SubmitButton";
 import { router } from "expo-router";
 import Toast from "react-native-toast-message";
 import useRefresh from "@/hooks/useRefresh";
+import { OrgUserListItemModel, UserDetailsModel } from "@/models/users";
+import { EmployeeDetailsModel } from "@/models/employees";
 
 const CreateDevice = () => {
   const [errors, setErrors] = useState<ErrorModel[]>([]);
@@ -54,6 +61,10 @@ const CreateDevice = () => {
     {},
   );
 
+  const [usersList, setUsersList] = useState<EmployeeDetailsModel[]>([]);
+  const [selectedAssignToUser, setSelectedAssignToUser] =
+    useState<DropdownModel>({});
+
   const [asWarranty, setAsWarranty] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +83,19 @@ const CreateDevice = () => {
         });
     };
     fetchAssetTypes();
+    fetchOrgUsers();
   }, []);
+
+  const fetchOrgUsers = () => {
+    api
+      .get(GET_ORG_USERS, {})
+      .then((response) => {
+        setUsersList(response.data?.data ?? []);
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  };
 
   const fetchAssetModels = (assetTypeId: string) => {
     api
@@ -109,6 +132,16 @@ const CreateDevice = () => {
           value: iSelectedAssetModel?.id,
         });
         break;
+      case CommonDropdownType.org_user:
+        let iSelectedAssignToUser = usersList.find((user) => user.id === e);
+        setSelectedAssignToUser({
+          label:
+            iSelectedAssignToUser?.firstName ??
+            "-" + iSelectedAssignToUser?.lastName ??
+            "",
+          value: iSelectedAssignToUser?.id,
+        });
+        break;
     }
   };
 
@@ -137,6 +170,7 @@ const CreateDevice = () => {
       setAssetModel((prev) => {
         prev.assetTypeId = selectedAssetType.value;
         prev.assetModelId = selectedAssetModel.value;
+        prev.asWarranty = asWarranty;
         return prev;
       });
 
@@ -156,7 +190,8 @@ const CreateDevice = () => {
           });
           setIsLoading(false);
           triggerRefresh();
-          router.push({ pathname: "/devices/devices_list" });
+          setAssetModel({});
+          router.back();
         })
         .catch((e) => {
           console.error(e.response?.data);
@@ -183,7 +218,7 @@ const CreateDevice = () => {
           placeholder="Enter here"
           errors={errors}
           setErrors={setErrors}
-          min={4}
+          min={5}
           max={50}
           defaultValue={assetModel.serialNo}
           textCase={TextCase.uppercase}
@@ -206,7 +241,7 @@ const CreateDevice = () => {
           placeholder="Enter here"
           errors={errors}
           setErrors={setErrors}
-          min={4}
+          min={5}
           max={50}
           defaultValue={assetModel.purchaseId}
           textCase={TextCase.uppercase}
@@ -388,10 +423,10 @@ const CreateDevice = () => {
             ios_backgroundColor="#e5e7eb"
             onValueChange={() => {
               setAsWarranty((previousState) => !previousState);
-              setAssetModel((prev) => {
-                prev.asWarranty = !asWarranty;
-                return prev;
-              });
+              // setAssetModel((prev) => {
+              //   prev.asWarranty = !asWarranty;
+              //   return prev;
+              // });
             }}
             value={asWarranty}
             className="ms-2"
@@ -399,6 +434,26 @@ const CreateDevice = () => {
         </View>
         <View className="mt-6">
           <Text className="font-bold text-lg">Assignment Details</Text>
+          <PrimaryDropdownFormField
+            className="my-3"
+            options={usersList.map((user) => ({
+              label: user.firstName ?? "-" + user.lastName ?? "",
+              value: user.id,
+            }))}
+            selectedValue={selectedAssignToUser}
+            setSelectedValue={setSelectedAssignToUser}
+            type={CommonDropdownType.org_user}
+            placeholder="Select assign to"
+            fieldName="assignedTo"
+            label="Assign To"
+            canValidateField={canValidateField}
+            setCanValidateField={setCanValidateField}
+            setFieldValidationStatus={setFieldValidationStatus}
+            validateFieldFunc={setFieldValidationStatusFunc}
+            errors={errors}
+            setErrors={setErrors}
+            onItemSelect={onItemSelect}
+          />
         </View>
         <SubmitButton
           isLoading={isLoading}

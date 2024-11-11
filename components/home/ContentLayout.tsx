@@ -169,7 +169,7 @@ const ContentLayout = ({
             }}
           />
         </VStack>
-        <HStack className="justify-between mt-2">
+        <HStack className="justify-between mt-4">
           <View className="flex-row items-center">
             <Text className="text-[16px] font-bold">Recent Tickets</Text>
             <Ionicons

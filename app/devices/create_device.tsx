@@ -1,5 +1,5 @@
 import { View, ScrollView, Text, Switch } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
 import { DropdownModel, ErrorModel } from "@/models/common";
 import {
@@ -33,6 +33,8 @@ import Toast from "react-native-toast-message";
 import useRefresh from "@/hooks/useRefresh";
 import { OrgUserListItemModel, UserDetailsModel } from "@/models/users";
 import { EmployeeDetailsModel } from "@/models/employees";
+import PrimaryTypeheadFormField from "@/components/fields/PrimaryTypeheadFormField";
+import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 
 const CreateDevice = () => {
   const [errors, setErrors] = useState<ErrorModel[]>([]);
@@ -63,7 +65,7 @@ const CreateDevice = () => {
 
   const [usersList, setUsersList] = useState<EmployeeDetailsModel[]>([]);
   const [selectedAssignToUser, setSelectedAssignToUser] =
-    useState<DropdownModel>({});
+    useState<AutocompleteDropdownItem>();
 
   const [asWarranty, setAsWarranty] = useState(false);
 
@@ -83,19 +85,75 @@ const CreateDevice = () => {
         });
     };
     fetchAssetTypes();
-    fetchOrgUsers();
   }, []);
 
-  const fetchOrgUsers = () => {
-    api
-      .get(GET_ORG_USERS, {})
-      .then((response) => {
-        setUsersList(response.data?.data ?? []);
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+  const getSuggestionsUrl = (type: CommonDropdownType) => {
+    switch (type) {
+      case CommonDropdownType.org_user:
+        return GET_ORG_USERS;
+    }
   };
+
+  const onClearPress = useCallback((type: CommonDropdownType) => {
+    switch (type) {
+      case CommonDropdownType.org_user:
+        setUsersList([]);
+        break;
+    }
+  }, []);
+
+  const setSuggestions = (type: CommonDropdownType, suggestionsList: any) => {
+    switch (type) {
+      case CommonDropdownType.org_user:
+        setUsersList(
+          suggestionsList.map((item: EmployeeDetailsModel) => {
+            const id = item.id;
+            const title = item.firstName ?? "-" + item.lastName ?? "";
+            if (id && title) {
+              return {
+                id: id,
+                title: title.toString(),
+                data: item,
+              };
+            }
+          }),
+        );
+        break;
+    }
+  };
+
+  const getSuggestions = useCallback(
+    async (
+      q: string,
+      type: CommonDropdownType,
+      setLoading: any,
+      param?: string,
+    ) => {
+      if (typeof q !== "string" || q.length < 3) {
+        onClearPress(type);
+        return;
+      }
+      setLoading(true);
+
+      const url =
+        getSuggestionsUrl(type) +
+        `?name=${q}${(param ?? "").length > 0 ? `&${param}` : ""}`;
+
+      console.log("url", url);
+
+      api
+        .get(url)
+        .then((response) => {
+          setSuggestions(type, response.data?.data ?? []);
+          setLoading(false);
+        })
+        .catch((e) => {
+          console.error(e);
+          setLoading(false);
+        });
+    },
+    [],
+  );
 
   const fetchAssetModels = (assetTypeId: string) => {
     api
@@ -132,16 +190,6 @@ const CreateDevice = () => {
           value: iSelectedAssetModel?.id,
         });
         break;
-      case CommonDropdownType.org_user:
-        let iSelectedAssignToUser = usersList.find((user) => user.id === e);
-        setSelectedAssignToUser({
-          label:
-            iSelectedAssignToUser?.firstName ??
-            "-" + iSelectedAssignToUser?.lastName ??
-            "",
-          value: iSelectedAssignToUser?.id,
-        });
-        break;
     }
   };
 
@@ -171,6 +219,7 @@ const CreateDevice = () => {
         prev.assetTypeId = selectedAssetType.value;
         prev.assetModelId = selectedAssetModel.value;
         prev.asWarranty = asWarranty;
+        prev.assignedTo = selectedAssignToUser?.id;
         return prev;
       });
 
@@ -434,7 +483,7 @@ const CreateDevice = () => {
         </View>
         <View className="mt-6">
           <Text className="font-bold text-lg">Assignment Details</Text>
-          <PrimaryDropdownFormField
+          {/* <PrimaryDropdownFormField
             className="my-3"
             options={usersList.map((user) => ({
               label: user.firstName ?? "-" + user.lastName ?? "",
@@ -453,6 +502,25 @@ const CreateDevice = () => {
             errors={errors}
             setErrors={setErrors}
             onItemSelect={onItemSelect}
+          /> */}
+          <View className="mt-2" />
+          <PrimaryTypeheadFormField
+            type={CommonDropdownType.org_user}
+            onClearPress={onClearPress}
+            selectedValue={selectedAssignToUser}
+            suggestions={usersList}
+            getSuggestions={getSuggestions}
+            setSelectedValue={setSelectedAssignToUser}
+            placeholder="Search assign to"
+            fieldName="assignedTo"
+            label="Assign To"
+            errors={errors}
+            setErrors={setErrors}
+            canValidateField={canValidateField}
+            setCanValidateField={setCanValidateField}
+            setFieldValidationStatus={setFieldValidationStatus}
+            validateFieldFunc={setFieldValidationStatusFunc}
+            backgroundColor="#fff"
           />
         </View>
         <SubmitButton

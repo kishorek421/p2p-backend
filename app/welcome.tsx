@@ -4,8 +4,8 @@ import { Button, ButtonText } from "@/components/ui/button";
 import { router } from "expo-router";
 import LottieView from "lottie-react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { setItem } from "expo-secure-store";
 import { IS_WELCOMED } from "@/constants/storage_keys";
+import { setItem } from "@/utils/secure_store";
 
 const WelcomePage = () => {
   const animationRef = useRef<LottieView>(null);
@@ -34,7 +34,7 @@ const WelcomePage = () => {
           <Button
             className="mt-28 bg-primary-900 h-14 rounded-lg shadow-sm"
             onPress={async () => {
-              setItem(IS_WELCOMED, "true");
+              await setItem(IS_WELCOMED, "true");
               router.push("/(auth)/login");
             }}
           >

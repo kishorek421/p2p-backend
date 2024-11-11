@@ -72,9 +72,9 @@ export const getDeviceStatusColor = (status?: string) => {
     case "IN_USE":
       return "text-primary-900 bg-primary-200 ";
     case "NOT_IN_USE":
-      return "text-red-500 bg-red-200";
+      return "text-red-500 bg-red-100";
     default:
-      return "text-grey-500";
+      return "text-grey-400 bg-gray-100";
   }
 };
 
@@ -83,7 +83,6 @@ export const getStatusColor = (statusKey?: string): string => {
     case ESCALATED:
       return "text-red-500 bg-red-100";
     case RAISED:
-      console.log("statusKey", statusKey);
       return "text-blue-500 bg-blue-100";
     case IN_PROGRESS:
       return "text-secondary-950 bg-secondary-100";

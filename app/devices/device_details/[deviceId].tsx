@@ -32,16 +32,7 @@ const DeviceDetailsScreen = () => {
         setIsLoading(false);
       });
   };
-  const getColor = (status?: string) => {
-    switch (status) {
-      case "IN_USE":
-        return "text-primary-900 bg-primary-200 ";
-      case "NOT_IN_USE":
-        return "text-red-500 bg-red-200";
-      default:
-        return "text-grey-500";
-    }
-  };
+
   return (
     <View className="px-4 mt-4">
       <View className="w-full bg-white px-3 py-3 rounded-lg shadow-sm">

@@ -74,6 +74,7 @@ export interface AssetMasterListItemModel {
   licensedTypeDetails?: ConfigurationModel;
   userAssignedToDetails?: AssignedToUserDetails;
   customerDetails?: AssignedToUserDetails;
+  assignedTo?: string;
 }
 
 export interface IssueTypeListItemModel {

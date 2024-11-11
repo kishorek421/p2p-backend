@@ -1,6 +1,6 @@
-import { ScrollView, Text, View, Image } from "react-native";
+import { ScrollView, Text, View, Image, Pressable } from "react-native";
 import React, { useEffect, useState } from "react";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { TicketListItemModel } from "@/models/tickets";
 import api from "@/services/api";
 import { GET_TICKET_DETAILS } from "@/constants/api_endpoints";
@@ -104,10 +104,21 @@ const TicketDetails = () => {
               <Text className="text-gray-500 text-md ">Issue Images</Text>
               {(ticketModel.ticketImages ?? []).length > 0 ? (
                 ticketModel.ticketImages?.map((uri, index) => (
-                  <Image
-                    source={{ uri: uri }}
-                    className="w-24 h-24 rounded-xl mt-2"
-                  />
+                  <Pressable
+                    onPress={() => {
+                      router.push({
+                        pathname: "/image_viewer/[uri]",
+                        params: {
+                          uri: uri,
+                        },
+                      });
+                    }}
+                  >
+                    <Image
+                      source={{ uri: uri }}
+                      className="w-24 h-24 rounded-xl mt-2"
+                    />
+                  </Pressable>
                 ))
               ) : (
                 <Text>-</Text>
@@ -122,17 +133,18 @@ const TicketDetails = () => {
                 </Text>
               </View>
             </View>
-            {/* <View className="w-full mt-3">
+            <View className="w-full mt-3">
               <View>
-                <Text className="text-gray-500 text-md ">
-                  Assinged Engineer
-                </Text>
+                <Text className="text-gray-500 text-md ">Assinged At</Text>
                 <Text className="text-md text-gray-900 font-semibold  mt-[2px]">
-                  {ticketModel?.assignedToDetails?.firstName ?? "-"}{" "}
-                  {ticketModel?.assignedToDetails?.lastName}
+                  {ticketModel.lastAssignedToDetails?.assignedAt
+                    ? moment(
+                        ticketModel.lastAssignedToDetails?.assignedAt,
+                      ).fromNow()
+                    : "-"}
                 </Text>
               </View>
-            </View> */}
+            </View>
           </View>
         </View>
       </View>

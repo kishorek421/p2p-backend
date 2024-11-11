@@ -16,12 +16,10 @@ const DevicesList = () => {
   const { refreshFlag, setRefreshFlag } = useRefresh();
 
   useEffect(() => {
-    setDevicesList([]);
     fetchMyDevices(1);
   }, []);
 
   useEffect(() => {
-    setDevicesList([]);
     if (refreshFlag) {
       fetchMyDevices(1);
     }
@@ -63,7 +61,7 @@ const DevicesList = () => {
       <Text className="text-gray-500">No Devices Found</Text>
     </View>
   ) : (
-    <View className="pt-2 bg-white">
+    <View className="pt-2 bg-white h-full">
       <FlatList
         data={devicesList}
         renderItem={({ item }) => <DeviceListItemLayout data={item} />}

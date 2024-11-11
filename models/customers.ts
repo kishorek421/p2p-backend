@@ -56,6 +56,32 @@ export interface CustomerLeadDetailsModel {
   customerLeadId?: string;
 }
 
+export interface CreateCustomerLeadDetailsModel {
+  id?: string;
+  firstName?: string;
+  lastName?: string;
+  orgName?: string;
+  description?: string;
+  msmeNo?: string;
+  orgMobile?: string;
+  mobile?: string;
+  alternateMobile?: string;
+  email?: string;
+  gstin?: string;
+  address?: string;
+  orgImage?: string;
+  categoryOfOrg?: string;
+  sizeOfOrg?: string;
+  typeOfOrg?: string;
+  cityId?: string;
+  stateId?: string;
+  countryId?: string;
+  pincodeId?: string;
+  areaId?: string;
+  isCustomerLead?: boolean;
+  customerLeadId?: string;
+}
+
 export interface CustomerDetailsModel {
   id?: string;
   firstName?: string;

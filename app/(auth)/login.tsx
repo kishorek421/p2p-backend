@@ -4,7 +4,6 @@ import { VStack } from "@/components/ui/vstack";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import {
-  GET_CUSTOMER_DETAILS,
   GET_CUSTOMER_LEAD_DETAILS,
   GET_USER_DETAILS,
   LOGIN,
@@ -17,9 +16,8 @@ import {
   CUSTOMER_LEAD_ID,
   IS_LEAD,
   REFRESH_TOKEN_KEY,
-  USER_ID,
 } from "@/constants/storage_keys";
-import { setItem } from "@/utils/secure_store";
+import { getItem, setItem } from "@/utils/secure_store";
 import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import Toast from "react-native-toast-message";
@@ -78,37 +76,30 @@ const LoginScreen = () => {
           let loginData = response.data.data;
           console.log("loginData ", loginData);
 
+          await setItem(AUTH_TOKEN_KEY, loginData.token);
+          await setItem(REFRESH_TOKEN_KEY, loginData.refreshToken);
+
           if (loginData) {
             try {
               let leadResponse =
                 await api.get<ApiResponseModel<UserDetailsModel>>(
                   GET_USER_DETAILS,
                 );
-              let customerLeadResponse = await api.get<
-                ApiResponseModel<CustomerLeadDetailsModel>
-              >(GET_CUSTOMER_LEAD_DETAILS);
-
               let data = leadResponse.data.data ?? {};
               console.log("customerData", data);
 
               if (data && data.id) {
                 let leadStatus = data.statusDetails?.key;
+                console.log("=+++_+_+_)+_+_+_+_", leadStatus);
 
-                let customerLeadData = customerLeadResponse?.data?.data ?? {};
+                await setItem(CUSTOMER_LEAD_ID, data.id);
+
                 if (leadStatus === CUSTOMER_LEAD_ACTIVE) {
-                  await setItem(CUSTOMER_LEAD_ID, customerLeadData.id ?? "");
-                  await setItem(USER_ID, data.id ?? "");
-                  await setItem(AUTH_TOKEN_KEY, loginData.token);
-                  await setItem(REFRESH_TOKEN_KEY, loginData.refreshToken);
                   await setItem(IS_LEAD, "false");
                   router.replace({ pathname: "/home" });
                 } else {
                   let userType = data.userTypeDetails?.key;
                   if (userType === "CUSTOMER") {
-                    await setItem(CUSTOMER_LEAD_ID, customerLeadData.id ?? "");
-                    await setItem(USER_ID, data.id ?? "");
-                    await setItem(AUTH_TOKEN_KEY, loginData.token);
-                    await setItem(REFRESH_TOKEN_KEY, loginData.refreshToken);
                     await setItem(IS_LEAD, "true");
                     router.replace({
                       pathname: "/(auth)/registration/[customerLeadId]",
@@ -124,9 +115,40 @@ const LoginScreen = () => {
                   }
                 }
                 setIsLoading(false);
+              } else {
+                const customerLeadResponse = await api.get<
+                  ApiResponseModel<CustomerLeadDetailsModel>
+                >(GET_CUSTOMER_LEAD_DETAILS);
+                const customerData = customerLeadResponse.data?.data;
+                if (customerData) {
+                  const customerLeadStatus =
+                    customerData.onBoardingStatusDetails?.key;
+                  await setItem(CUSTOMER_LEAD_ID, customerData.id ?? "");
+                  if (customerLeadStatus === CUSTOMER_LEAD_ACTIVE) {
+                    await setItem(IS_LEAD, "false");
+                    router.replace({ pathname: "/home" });
+                  } else {
+                    await setItem(IS_LEAD, "true");
+                    Toast.show({
+                      type: "error",
+                      text1: "Complete Registration",
+                    });
+                    router.replace({
+                      pathname: "/(auth)/registration/[customerLeadId]",
+                      params: { customerLeadId: customerData.id ?? "" },
+                    });
+                  }
+                } else {
+                  Toast.show({
+                    type: "error",
+                    text1: "Invalid credentials",
+                    text2: "Enter a valid email and password",
+                  });
+                }
+                setIsLoading(false);
               }
             } catch (e) {
-              console.error(e);
+              console.error();
               setIsLoading(false);
             }
           } else {

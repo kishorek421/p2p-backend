@@ -14,12 +14,10 @@ const UsersList = () => {
   const { refreshFlag, setRefreshFlag } = useRefresh();
 
   useEffect(() => {
-    setUsersList([]);
     fetchUsersList(1);
   }, []);
 
   useEffect(() => {
-    setUsersList([]);
     if (refreshFlag) {
       fetchUsersList(1);
     }

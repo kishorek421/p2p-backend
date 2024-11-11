@@ -1,4 +1,4 @@
-import { ScrollView, Text, View } from "react-native";
+import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import {
@@ -27,7 +27,10 @@ import {
 import ConfigurationDropdownFormField from "@/components/fields/ConfigurationDropdownFormField";
 import { AreaListItemModel, PincodeListItemModel } from "@/models/geolocations";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
-import { CustomerLeadDetailsModel } from "@/models/customers";
+import {
+  CreateCustomerLeadDetailsModel,
+  CustomerLeadDetailsModel,
+} from "@/models/customers";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { getFileName, isFormFieldInValid } from "@/utils/helper";
@@ -41,8 +44,8 @@ import { DropdownItemModel } from "@/models/ui/dropdown_item_model";
 import ImageFormField from "@/components/fields/ImageFormField";
 import PrimaryTextareaFormField from "@/components/fields/PrimaryTextareaFormField";
 import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
-import { getItem } from "expo-secure-store";
 import Toast from "react-native-toast-message";
+import { getItem } from "@/utils/secure_store";
 
 const RegistrationScreen = () => {
   // geolocations
@@ -69,7 +72,7 @@ const RegistrationScreen = () => {
 
   const [isLead, setIsLead] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [errors, setErrors] = useState<ErrorModel[]>([]);
 
@@ -231,7 +234,9 @@ const RegistrationScreen = () => {
     // customer lead details
     const loadCustomerLeadDetails = () => {
       api
-        .get<ApiResponseModel<CustomerLeadDetailsModel>>(GET_USER_DETAILS)
+        .get<ApiResponseModel<CustomerLeadDetailsModel>>(
+          GET_CUSTOMER_LEAD_DETAILS,
+        )
         .then((response) => {
           let data = response.data.data ?? {};
           if (data && data.id) {
@@ -310,7 +315,7 @@ const RegistrationScreen = () => {
 
     // load customer lead details
     loadCustomerLeadDetails();
-  }, [router]);
+  }, []);
 
   const updateCustomerLeadDetails = async () => {
     const validationPromises = Object.keys(fieldValidationStatus).map(
@@ -336,27 +341,58 @@ const RegistrationScreen = () => {
     if (allValid) {
       setIsLoading(true);
 
-      customerLeadDetailsModel.pincodeId = selectedPincode?.id ?? "";
-      customerLeadDetailsModel.areaId = selectedArea?.id ?? "";
-      customerLeadDetailsModel.cityId = selectedCity?.id ?? "";
-      customerLeadDetailsModel.stateId = selectedState?.id ?? "";
-      customerLeadDetailsModel.countryId = selectedCountry?.id ?? "";
-      customerLeadDetailsModel.isCustomerLead = isLead;
-      customerLeadDetailsModel.customerLeadId = customerLeadDetailsModel.id;
+      const createCustomerLeadDetailsModel: CreateCustomerLeadDetailsModel = {};
+
+      // createCustomerLeadDetailsModel.id = customerLeadDetailsModel.id;
+      createCustomerLeadDetailsModel.firstName =
+        customerLeadDetailsModel.firstName;
+      createCustomerLeadDetailsModel.lastName =
+        customerLeadDetailsModel.lastName;
+      createCustomerLeadDetailsModel.orgName = customerLeadDetailsModel.orgName;
+      createCustomerLeadDetailsModel.description =
+        customerLeadDetailsModel.description;
+      createCustomerLeadDetailsModel.msmeNo = customerLeadDetailsModel.msmeNo;
+      createCustomerLeadDetailsModel.orgMobile =
+        customerLeadDetailsModel.orgMobile;
+      createCustomerLeadDetailsModel.mobile = customerLeadDetailsModel.mobile;
+      createCustomerLeadDetailsModel.alternateMobile =
+        customerLeadDetailsModel.alternateMobile;
+      createCustomerLeadDetailsModel.email = customerLeadDetailsModel.email;
+      createCustomerLeadDetailsModel.gstin = customerLeadDetailsModel.gstin;
+      createCustomerLeadDetailsModel.address = customerLeadDetailsModel.address;
+      createCustomerLeadDetailsModel.orgImage =
+        customerLeadDetailsModel.orgImage;
+      createCustomerLeadDetailsModel.categoryOfOrg =
+        customerLeadDetailsModel.categoryOfOrg ??
+        customerLeadDetailsModel.categoryOfOrgDetails?.id;
+      createCustomerLeadDetailsModel.sizeOfOrg =
+        customerLeadDetailsModel.sizeOfOrg ??
+        customerLeadDetailsModel.sizeOfOrgDetails?.id;
+      createCustomerLeadDetailsModel.typeOfOrg =
+        customerLeadDetailsModel.typeOfOrg ??
+        customerLeadDetailsModel.typeOfOrgDetails?.id;
+      createCustomerLeadDetailsModel.pincodeId = selectedPincode?.id ?? "";
+      createCustomerLeadDetailsModel.areaId = selectedArea?.id ?? "";
+      createCustomerLeadDetailsModel.cityId = selectedCity?.id ?? "";
+      createCustomerLeadDetailsModel.stateId = selectedState?.id ?? "";
+      createCustomerLeadDetailsModel.countryId = selectedCountry?.id ?? "";
+      createCustomerLeadDetailsModel.isCustomerLead = isLead;
+      createCustomerLeadDetailsModel.customerLeadId =
+        customerLeadDetailsModel.id;
 
       const formData = new FormData();
       (
         Object.keys(
-          customerLeadDetailsModel,
-        ) as (keyof CustomerLeadDetailsModel)[]
+          createCustomerLeadDetailsModel,
+        ) as (keyof CreateCustomerLeadDetailsModel)[]
       ).forEach((key) => {
-        const value = customerLeadDetailsModel[key];
+        const value = createCustomerLeadDetailsModel[key];
         if (value !== undefined && value !== null) {
           formData.append(key as string, value as any); // Type assertion here
         }
       });
 
-      if (orgImage) {
+      if (orgImage && orgImage.length > 0 && !orgImage.startsWith("https://")) {
         // --@ts-ignore --
         formData.append("orgImageFile", {
           uri: orgImage,
@@ -367,6 +403,13 @@ const RegistrationScreen = () => {
 
       setErrors([]);
 
+      console.log(
+        "createCustomerLeadDetailsModel ------------~~~~~~~~~~~~~~~~~~~>",
+        createCustomerLeadDetailsModel,
+      );
+
+      console.log("formDara", formData);
+
       api
         .post(CREATE_CUSTOMER, formData, {
           headers: {
@@ -375,8 +418,8 @@ const RegistrationScreen = () => {
         })
         .then(async (response) => {
           // router.push({pathname: ""});
-          console.log(response.data.data);
-          const token = getItem(AUTH_TOKEN_KEY);
+          // console.log(response.data.data);
+          const token = await getItem(AUTH_TOKEN_KEY);
           if (token) {
             router.replace("/(root)/home");
             Toast.show({
@@ -427,7 +470,7 @@ const RegistrationScreen = () => {
         <LoadingBar />
       ) : (
         <ScrollView automaticallyAdjustKeyboardInsets={true}>
-          <Box className="px-4  mb-12">
+          <Box className="px-4 mb-12">
             <VStack>
               {/* <Text className="text-2xl font-bold">
                 Register Your Organization 🚀
@@ -483,6 +526,7 @@ const RegistrationScreen = () => {
                   max={10}
                   keyboardType="phone-pad"
                   filterExp={/^[0-9]*$/}
+                  isRequired={false}
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
@@ -507,6 +551,7 @@ const RegistrationScreen = () => {
                   configurationCategory={TYPE_OF_ORG}
                   placeholder="Select type"
                   label="Type of organization"
+                  defaultValue={customerLeadDetailsModel?.typeOfOrgDetails}
                   errors={errors}
                   setErrors={setErrors}
                   fieldName="typeOfOrgId"
@@ -525,6 +570,7 @@ const RegistrationScreen = () => {
                   configurationCategory={CATEGORY_OF_ORG}
                   placeholder="Select category"
                   label="Category of organization"
+                  defaultValue={customerLeadDetailsModel?.categoryOfOrgDetails}
                   errors={errors}
                   setErrors={setErrors}
                   fieldName="categoryOfOrgId"
@@ -543,6 +589,7 @@ const RegistrationScreen = () => {
                   configurationCategory={SIZE_OF_ORG}
                   placeholder="Select size"
                   label="Size of organization"
+                  defaultValue={customerLeadDetailsModel?.sizeOfOrgDetails}
                   errors={errors}
                   setErrors={setErrors}
                   fieldName="sizeOfOrgId"
@@ -618,7 +665,7 @@ const RegistrationScreen = () => {
                   placeholder="Enter here"
                   errors={errors}
                   setErrors={setErrors}
-                  min={4}
+                  min={3}
                   defaultValue={customerLeadDetailsModel.firstName}
                   filterExp={/^[a-zA-Z ]*$/}
                   canValidateField={canValidateField}
@@ -720,6 +767,7 @@ const RegistrationScreen = () => {
                   min={10}
                   max={10}
                   keyboardType="phone-pad"
+                  isRequired={false}
                   filterExp={/^[0-9]*$/}
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
@@ -734,6 +782,7 @@ const RegistrationScreen = () => {
                     return undefined;
                   }}
                   onChangeText={(value) => {
+                    console.log("alternate mobile", value);
                     setCustomerLeadDetailsModel((prevState) => {
                       prevState.alternateMobile = value;
                       return prevState;

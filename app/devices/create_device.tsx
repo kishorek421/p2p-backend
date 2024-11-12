@@ -336,7 +336,7 @@ const CreateDevice = () => {
           max={50}
           defaultValue={assetModel.uniqueIdentifier}
           textCase={TextCase.uppercase}
-          filterExp={/^[a-zA-Z0-9]*$/}
+          filterExp={/^[a-zA-Z0-9._:-]*$/}
           canValidateField={canValidateField}
           setCanValidateField={setCanValidateField}
           setFieldValidationStatus={setFieldValidationStatus}

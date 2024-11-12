@@ -43,9 +43,15 @@ import PrimaryTypeheadFormField from "@/components/fields/PrimaryTypeheadFormFie
 import { DropdownItemModel } from "@/models/ui/dropdown_item_model";
 import ImageFormField from "@/components/fields/ImageFormField";
 import PrimaryTextareaFormField from "@/components/fields/PrimaryTextareaFormField";
-import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
+import {
+  AUTH_TOKEN_KEY,
+  IS_LEAD,
+  REFRESH_TOKEN_KEY,
+} from "@/constants/storage_keys";
 import Toast from "react-native-toast-message";
-import { getItem } from "@/utils/secure_store";
+import { clearStorage, getItem, setItem } from "@/utils/secure_store";
+import { BASE_URL } from "@/config/env";
+import axios from "axios";
 
 const RegistrationScreen = () => {
   // geolocations
@@ -243,7 +249,10 @@ const RegistrationScreen = () => {
             let leadStatus = data.onBoardingStatusDetails?.key;
 
             if (leadStatus === CUSTOMER_LEAD_ACTIVE) {
-              router.replace({ pathname: "./home" });
+              console.log("leadStatus", leadStatus);
+              setItem(IS_LEAD, "false").then(() => {
+                router.replace({ pathname: "./home" });
+              });
             }
 
             if (data.orgImage) {
@@ -419,15 +428,41 @@ const RegistrationScreen = () => {
         .then(async (response) => {
           // router.push({pathname: ""});
           // console.log(response.data.data);
-          const token = await getItem(AUTH_TOKEN_KEY);
-          if (token) {
-            router.replace("/(root)/home");
-            Toast.show({
-              type: "success",
-              text1: "Registration Completed",
-              text2: "Your organization registered successfully",
-            });
-          } else {
+          await setItem(IS_LEAD, "true");
+          // const token = await getItem(AUTH_TOKEN_KEY);
+          try {
+            const refreshToken = await getItem(REFRESH_TOKEN_KEY);
+            console.log("refreshToken", refreshToken);
+            const response = await axios.post(
+              BASE_URL + "/auth/refresh-token",
+              {
+                token: refreshToken,
+              },
+            );
+            console.log("refresh token", response.data.data);
+            const newToken = response.data.token;
+            console.log("new token", newToken);
+            await setItem(AUTH_TOKEN_KEY, newToken);
+            if (newToken) {
+              router.replace("/(root)/home");
+              Toast.show({
+                type: "success",
+                text1: "Registration Completed",
+                text2: "Your organization registered successfully",
+              });
+            } else {
+              await clearStorage();
+              Toast.show({
+                type: "success",
+                text1: "Check your email",
+                text2: "Your login crendentials has sent to your email",
+              });
+              router.replace("/(auth)/login");
+            }
+          } catch (e) {
+            console.error(e);
+            console.error("refresh token error");
+            await clearStorage();
             Toast.show({
               type: "success",
               text1: "Check your email",
@@ -798,7 +833,7 @@ const RegistrationScreen = () => {
                   min={10}
                   max={200}
                   defaultValue={customerLeadDetailsModel.description}
-                  filterExp={/^[a-zA-Z0-9 ]*$/}
+                  filterExp={/^[a-zA-Z0-9,.-?/'$#& ]*$/}
                   onChangeText={(value) => {
                     setCustomerLeadDetailsModel((prevState) => {
                       prevState.description = value;
@@ -823,7 +858,7 @@ const RegistrationScreen = () => {
                   setErrors={setErrors}
                   min={4}
                   defaultValue={customerLeadDetailsModel.address}
-                  filterExp={/^[a-zA-Z0-9 \/#.]*$/}
+                  filterExp={/^[a-zA-Z0-9 \/#.,-/'&$]*$/}
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}

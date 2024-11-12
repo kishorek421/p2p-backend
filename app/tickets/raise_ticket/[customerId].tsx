@@ -325,7 +325,7 @@ const RaiseTicketScreen = () => {
           min={10}
           max={200}
           defaultValue={raiseTicketModel.description}
-          filterExp={/^[a-zA-Z0-9 ]*$/}
+          filterExp={/^[a-zA-Z0-9,.-/'#$& ]*$/}
           onChangeText={(value: any) => {
             setRaiseTicketModel((prevState) => {
               prevState.description = value;

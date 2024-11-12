@@ -78,6 +78,7 @@ const LoginScreen = () => {
 
           await setItem(AUTH_TOKEN_KEY, loginData.token);
           await setItem(REFRESH_TOKEN_KEY, loginData.refreshToken);
+          await setItem(IS_LEAD, "false");
 
           if (loginData) {
             try {
@@ -149,6 +150,35 @@ const LoginScreen = () => {
               }
             } catch (e) {
               console.error();
+              const customerLeadResponse = await api.get<
+                ApiResponseModel<CustomerLeadDetailsModel>
+              >(GET_CUSTOMER_LEAD_DETAILS);
+              const customerData = customerLeadResponse.data?.data;
+              if (customerData) {
+                const customerLeadStatus =
+                  customerData.onBoardingStatusDetails?.key;
+                await setItem(CUSTOMER_LEAD_ID, customerData.id ?? "");
+                if (customerLeadStatus === CUSTOMER_LEAD_ACTIVE) {
+                  await setItem(IS_LEAD, "false");
+                  router.replace({ pathname: "/home" });
+                } else {
+                  await setItem(IS_LEAD, "true");
+                  Toast.show({
+                    type: "error",
+                    text1: "Complete Registration",
+                  });
+                  router.replace({
+                    pathname: "/(auth)/registration/[customerLeadId]",
+                    params: { customerLeadId: customerData.id ?? "" },
+                  });
+                }
+              } else {
+                Toast.show({
+                  type: "error",
+                  text1: "Invalid credentials",
+                  text2: "Enter a valid email and password",
+                });
+              }
               setIsLoading(false);
             }
           } else {

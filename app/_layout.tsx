@@ -11,6 +11,14 @@ import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-d
 import { Pressable } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { RefreshProvider } from "@/contexts/RefreshContext";
+import * as Sentry from "@sentry/react-native";
+
+Sentry.init({
+  dsn: "https://9b8011450eb32dee8a2117d18cf8ba4f@o4508280019484672.ingest.us.sentry.io/4508280028004352",
+
+  // uncomment the line below to enable Spotlight (https://spotlightjs.com)
+  // enableSpotlight: __DEV__,
+});
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 

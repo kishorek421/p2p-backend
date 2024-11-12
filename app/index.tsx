@@ -1,11 +1,6 @@
 import LoadingBar from "@/components/LoadingBar";
-import {
-  REFRESH_TOKEN_KEY,
-  AUTH_TOKEN_KEY,
-  IS_LEAD,
-  IS_WELCOMED,
-} from "@/constants/storage_keys";
-import { removeItem } from "@/utils/secure_store";
+// import { REFRESH_TOKEN_KEY, AUTH_TOKEN_KEY, IS_LEAD, IS_WELCOMED } from "@/constants/storage_keys";
+// import { removeItem } from "@/utils/secure_store";
 import { useEffect } from "react";
 import { View } from "react-native";
 

@@ -67,7 +67,7 @@ const PrimaryTypeheadField = ({
         dropdownController.current = controller;
       }}
       initialValue={{ id: selectedValue?.id ?? "" }}
-      direction={Platform.select({ ios: "down" })}
+      // direction={Platform.select({ ios: "down" })}
       dataSet={suggestions}
       onChangeText={(text: string) => {
         console.log("txext", text);
@@ -85,8 +85,8 @@ const PrimaryTypeheadField = ({
           }
         }
       }}
-      debounce={600}
-      suggestionsListMaxHeight={Dimensions.get("window").height * 0.4}
+      // debounce={600}
+      // suggestionsListMaxHeight={Dimensions.get("window").height * 0.4}
       onClear={() => {
         onClearPress(type);
       }}

@@ -47,6 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           router.replace({ pathname: "/(auth)/login" });
         } else if (isLead === "true") {
           const customerLeadId = await getItem(CUSTOMER_LEAD_ID);
+          console.log("customerLeadId", customerLeadId);
           if (customerLeadId) {
             router.replace({
               pathname: "/(auth)/registration/[customerLeadId]",

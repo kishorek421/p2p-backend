@@ -31,6 +31,7 @@ interface PrimaryTypeheadFieldProps {
   keyboardType?: KeyboardTypeOptions;
   errors: ErrorModel[];
   fieldName: string;
+  backgroundColor?: string;
 }
 
 const PrimaryTypeheadField = ({
@@ -47,6 +48,7 @@ const PrimaryTypeheadField = ({
   keyboardType = "default",
   errors,
   fieldName,
+  backgroundColor = "#f2f2f2",
 }: PrimaryTypeheadFieldProps) => {
   const [searchText, setSearchText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,7 +67,7 @@ const PrimaryTypeheadField = ({
         dropdownController.current = controller;
       }}
       initialValue={{ id: selectedValue?.id ?? "" }}
-      direction={Platform.select({ ios: "down" })}
+      // direction={Platform.select({ ios: "down" })}
       dataSet={suggestions}
       onChangeText={(text: string) => {
         console.log("txext", text);
@@ -83,8 +85,8 @@ const PrimaryTypeheadField = ({
           }
         }
       }}
-      debounce={600}
-      suggestionsListMaxHeight={Dimensions.get("window").height * 0.4}
+      // debounce={600}
+      // suggestionsListMaxHeight={Dimensions.get("window").height * 0.4}
       onClear={() => {
         onClearPress(type);
       }}
@@ -102,7 +104,7 @@ const PrimaryTypeheadField = ({
           // borderRadius: 5,
           borderTopLeftRadius: 5,
           borderBottomLeftRadius: 5,
-          backgroundColor: "#f2f2f2",
+          backgroundColor: backgroundColor,
           // borderColor: "#8c8c8c",
           color: "#000000",
           paddingLeft: 12,
@@ -112,7 +114,7 @@ const PrimaryTypeheadField = ({
       rightButtonsContainerStyle={{
         right: 0,
         paddingRight: 5,
-        backgroundColor: "#f2f2f2",
+        backgroundColor: backgroundColor,
         borderTopRightRadius: 5,
         borderBottomRightRadius: 5,
         alignSelf: "center",

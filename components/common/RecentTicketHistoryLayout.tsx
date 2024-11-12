@@ -3,9 +3,7 @@ import { TicketListItemModel } from "@/models/tickets";
 import { FlatList, View, Text } from "react-native";
 import api from "@/services/api";
 import { GET_TICKETS_BY_STATUS_KEY } from "@/constants/api_endpoints";
-import TicketStatusComponent from "../tickets/TicketStatusComponent";
 import TicketListItemLayout from "../tickets/TicketListItemLayout";
-import { useFocusEffect } from "expo-router";
 import React from "react";
 import useRefresh from "@/hooks/useRefresh";
 
@@ -14,27 +12,33 @@ const RecentTicketHistoryLayout = ({ placing }: { placing: string }) => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [isLastPage, setIsLastPage] = useState(false);
-  const { refreshFlag } = useRefresh();
+  const { refreshFlag, setRefreshFlag } = useRefresh();
 
   useEffect(() => {
     fetchTickets(1);
+  }, []);
+
+  useEffect(() => {
+    if (refreshFlag) {
+      fetchTickets(1);
+    }
   }, [refreshFlag]);
 
-  const fetchTickets = (currentPage: number) => {
-    if (currentPage === 1) {
-      setRecentTickets([]);
-    }
+  const fetchTickets = (nextPageNumber: number) => {
     api
       .get(GET_TICKETS_BY_STATUS_KEY, {
         params: {
           status: "",
-          pageNo: currentPage,
-          pageSize: placing === "home" ? 3 : 10,
+          pageNo: nextPageNumber,
+          pageSize: 10,
         },
       })
       .then((response) => {
         let content = response.data?.data?.content ?? [];
-        if (content && content.length > 0) {
+        console.log("content ticket////////////------------>", content);
+        if (nextPageNumber === 1) {
+          setRecentTickets(content);
+        } else {
           setRecentTickets((prevState) => [...prevState, ...content]);
         }
         let paginator = response.data?.data?.paginator;
@@ -46,6 +50,7 @@ const RecentTicketHistoryLayout = ({ placing }: { placing: string }) => {
             setIsLastPage(iLastPage);
           }
         }
+        setRefreshFlag(false);
       })
       .catch((e) => {
         console.error(e);
@@ -54,8 +59,8 @@ const RecentTicketHistoryLayout = ({ placing }: { placing: string }) => {
 
   return recentTickets.length === 0 ? (
     <View
-      className={`mt-4 bg-gray-200 flex justify-center items-center rounded-lg h-36 ${
-        placing === "home" ? "mx-0" : "mx-4"
+      className={` bg-gray-200 flex justify-center items-center rounded-lg h-36 ${
+        placing === "home" ? "mx-4 mt-0" : "mx-4 mt-4"
       }`}
     >
       <Text className="text-gray-500 text-sm text-center">
@@ -65,19 +70,19 @@ const RecentTicketHistoryLayout = ({ placing }: { placing: string }) => {
   ) : (
     <FlatList
       data={recentTickets}
-      renderItem={({ item }) => (
-        <TicketListItemLayout
-          cn={`${placing !== "home" ? "m-3" : "mb-4"} `}
-          ticketModel={item}
-        />
+      renderItem={({ item, index }) => (
+        <TicketListItemLayout cn={`my-2 px-4`} ticketModel={item} />
       )}
-      className={`my-4 ${placing === "home" ? "h-96 pb-16" : ""}`}
+      className={`${placing === "home" ? "h-96 mb-16" : ""}`}
       keyExtractor={(_, index) => index.toString()}
       onEndReached={() => {
         if (placing !== "home" && !isLastPage) {
           fetchTickets(currentPage + 1);
         }
       }}
+      ListFooterComponent={
+        <View style={{ height: placing === "home" ? 30 : 140 }} />
+      }
     />
   );
 };

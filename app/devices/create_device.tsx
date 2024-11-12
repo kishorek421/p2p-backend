@@ -1,5 +1,5 @@
 import { View, ScrollView, Text, Switch } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
 import { DropdownModel, ErrorModel } from "@/models/common";
 import {
@@ -7,7 +7,11 @@ import {
   AssetModelListItemModel,
   AssetTypeListItemModel,
 } from "@/models/assets";
-import { AssetsDropdownType, TextCase } from "@/enums/enums";
+import {
+  AssetsDropdownType,
+  CommonDropdownType,
+  TextCase,
+} from "@/enums/enums";
 import ConfigurationDropdownFormField from "@/components/fields/ConfigurationDropdownFormField";
 import {
   ASSET_IMPACT,
@@ -19,12 +23,18 @@ import {
   CREATE_ASSET,
   GET_ASSET_MODELS_BY_ASSET_TYPE,
   GET_ASSET_TYPES_BY_NAME_SEARCH,
+  GET_ORG_USERS,
 } from "@/constants/api_endpoints";
 import api from "@/services/api";
 import PrimaryDatetimePickerFormField from "@/components/fields/PrimaryDatetimePickerFormField";
 import SubmitButton from "@/components/SubmitButton";
 import { router } from "expo-router";
 import Toast from "react-native-toast-message";
+import useRefresh from "@/hooks/useRefresh";
+import { OrgUserListItemModel, UserDetailsModel } from "@/models/users";
+import { EmployeeDetailsModel } from "@/models/employees";
+import PrimaryTypeheadFormField from "@/components/fields/PrimaryTypeheadFormField";
+import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 
 const CreateDevice = () => {
   const [errors, setErrors] = useState<ErrorModel[]>([]);
@@ -53,9 +63,15 @@ const CreateDevice = () => {
     {},
   );
 
+  const [usersList, setUsersList] = useState<EmployeeDetailsModel[]>([]);
+  const [selectedAssignToUser, setSelectedAssignToUser] =
+    useState<AutocompleteDropdownItem>();
+
   const [asWarranty, setAsWarranty] = useState(false);
 
   const [isLoading, setIsLoading] = useState(false);
+
+  const { triggerRefresh } = useRefresh();
 
   useEffect(() => {
     const fetchAssetTypes = () => {
@@ -70,6 +86,74 @@ const CreateDevice = () => {
     };
     fetchAssetTypes();
   }, []);
+
+  const getSuggestionsUrl = (type: CommonDropdownType) => {
+    switch (type) {
+      case CommonDropdownType.org_user:
+        return GET_ORG_USERS;
+    }
+  };
+
+  const onClearPress = useCallback((type: CommonDropdownType) => {
+    switch (type) {
+      case CommonDropdownType.org_user:
+        setUsersList([]);
+        break;
+    }
+  }, []);
+
+  const setSuggestions = (type: CommonDropdownType, suggestionsList: any) => {
+    switch (type) {
+      case CommonDropdownType.org_user:
+        setUsersList(
+          suggestionsList.map((item: EmployeeDetailsModel) => {
+            const id = item.id;
+            const title = item.firstName ?? "-" + item.lastName ?? "";
+            if (id && title) {
+              return {
+                id: id,
+                title: title.toString(),
+                data: item,
+              };
+            }
+          }),
+        );
+        break;
+    }
+  };
+
+  const getSuggestions = useCallback(
+    async (
+      q: string,
+      type: CommonDropdownType,
+      setLoading: any,
+      param?: string,
+    ) => {
+      if (typeof q !== "string" || q.length < 3) {
+        onClearPress(type);
+        return;
+      }
+      setLoading(true);
+
+      const url =
+        getSuggestionsUrl(type) +
+        `?name=${q}${(param ?? "").length > 0 ? `&${param}` : ""}`;
+
+      console.log("url", url);
+
+      api
+        .get(url)
+        .then((response) => {
+          setSuggestions(type, response.data?.data ?? []);
+          setLoading(false);
+        })
+        .catch((e) => {
+          console.error(e);
+          setLoading(false);
+        });
+    },
+    [],
+  );
 
   const fetchAssetModels = (assetTypeId: string) => {
     api
@@ -134,6 +218,8 @@ const CreateDevice = () => {
       setAssetModel((prev) => {
         prev.assetTypeId = selectedAssetType.value;
         prev.assetModelId = selectedAssetModel.value;
+        prev.asWarranty = asWarranty;
+        prev.assignedTo = selectedAssignToUser?.id;
         return prev;
       });
 
@@ -152,7 +238,9 @@ const CreateDevice = () => {
             // text2: "Crendential have been sent to your email",
           });
           setIsLoading(false);
-          router.push({ pathname: "/devices/devices_list" });
+          triggerRefresh();
+          setAssetModel({});
+          router.back();
         })
         .catch((e) => {
           console.error(e.response?.data);
@@ -179,7 +267,7 @@ const CreateDevice = () => {
           placeholder="Enter here"
           errors={errors}
           setErrors={setErrors}
-          min={4}
+          min={5}
           max={50}
           defaultValue={assetModel.serialNo}
           textCase={TextCase.uppercase}
@@ -202,7 +290,7 @@ const CreateDevice = () => {
           placeholder="Enter here"
           errors={errors}
           setErrors={setErrors}
-          min={4}
+          min={5}
           max={50}
           defaultValue={assetModel.purchaseId}
           textCase={TextCase.uppercase}
@@ -248,7 +336,7 @@ const CreateDevice = () => {
           max={50}
           defaultValue={assetModel.uniqueIdentifier}
           textCase={TextCase.uppercase}
-          filterExp={/^[a-zA-Z0-9]*$/}
+          filterExp={/^[a-zA-Z0-9._:-]*$/}
           canValidateField={canValidateField}
           setCanValidateField={setCanValidateField}
           setFieldValidationStatus={setFieldValidationStatus}
@@ -384,10 +472,10 @@ const CreateDevice = () => {
             ios_backgroundColor="#e5e7eb"
             onValueChange={() => {
               setAsWarranty((previousState) => !previousState);
-              setAssetModel((prev) => {
-                prev.asWarranty = !asWarranty;
-                return prev;
-              });
+              // setAssetModel((prev) => {
+              //   prev.asWarranty = !asWarranty;
+              //   return prev;
+              // });
             }}
             value={asWarranty}
             className="ms-2"
@@ -395,6 +483,45 @@ const CreateDevice = () => {
         </View>
         <View className="mt-6">
           <Text className="font-bold text-lg">Assignment Details</Text>
+          {/* <PrimaryDropdownFormField
+            className="my-3"
+            options={usersList.map((user) => ({
+              label: user.firstName ?? "-" + user.lastName ?? "",
+              value: user.id,
+            }))}
+            selectedValue={selectedAssignToUser}
+            setSelectedValue={setSelectedAssignToUser}
+            type={CommonDropdownType.org_user}
+            placeholder="Select assign to"
+            fieldName="assignedTo"
+            label="Assign To"
+            canValidateField={canValidateField}
+            setCanValidateField={setCanValidateField}
+            setFieldValidationStatus={setFieldValidationStatus}
+            validateFieldFunc={setFieldValidationStatusFunc}
+            errors={errors}
+            setErrors={setErrors}
+            onItemSelect={onItemSelect}
+          /> */}
+          <View className="mt-2" />
+          <PrimaryTypeheadFormField
+            type={CommonDropdownType.org_user}
+            onClearPress={onClearPress}
+            selectedValue={selectedAssignToUser}
+            suggestions={usersList}
+            getSuggestions={getSuggestions}
+            setSelectedValue={setSelectedAssignToUser}
+            placeholder="Search assign to"
+            fieldName="assignedTo"
+            label="Assign To"
+            errors={errors}
+            setErrors={setErrors}
+            canValidateField={canValidateField}
+            setCanValidateField={setCanValidateField}
+            setFieldValidationStatus={setFieldValidationStatus}
+            validateFieldFunc={setFieldValidationStatusFunc}
+            backgroundColor="#fff"
+          />
         </View>
         <SubmitButton
           isLoading={isLoading}

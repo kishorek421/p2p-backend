@@ -20,6 +20,7 @@ import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
 import SubmitButton from "@/components/SubmitButton";
 import { DropdownModel, ErrorModel } from "@/models/common";
 import PrimaryDropdownFormField from "@/components/fields/PrimaryDropdownFormField";
+import useRefresh from "@/hooks/useRefresh";
 
 const CreateUser = () => {
   const [userModel, setUserModel] = useState<CreateUserModel>({});
@@ -42,6 +43,8 @@ const CreateUser = () => {
   const [selectedDesignation, setSelectedDesignation] = useState<DropdownModel>(
     {},
   );
+
+  const { triggerRefresh } = useRefresh();
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -116,10 +119,12 @@ const CreateUser = () => {
     if (allValid) {
       setIsLoading(true);
 
-      let userModel: CreateUserModel = {
-        departmentId: selectedDepartment?.value,
-        designationId: selectedDesignation?.value,
-      };
+      setUserModel((prev) => {
+        prev.departmentId = selectedDepartment?.value;
+        prev.designationId = selectedDesignation?.value;
+        prev.branchId = selectedBranch?.value;
+        return prev;
+      });
 
       setErrors([]);
 
@@ -134,7 +139,9 @@ const CreateUser = () => {
             // text2: "Crendential have been sent to your email",
           });
           setIsLoading(false);
-          router.push({ pathname: "/users/users_list" });
+          setUserModel({});
+          triggerRefresh();
+          router.back();
         })
         .catch((e) => {
           console.error(e.response?.data);

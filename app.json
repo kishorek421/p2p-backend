@@ -30,13 +30,20 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store",
       "expo-asset",
       [
         "expo-image-picker",
         {
           "photosPermission": "Allow access to your photos to upload your organization’s image and damaged asset images for reporting purposes.",
           "cameraPermission": "Allow access to your camera to capture your organization’s image and photos of damaged assets for reporting purposes."
+        }
+      ],
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "godesk_workplace",
+          "organization": "bellwether-business-solutions"
         }
       ]
     ],

@@ -1,4 +1,4 @@
-import { ScrollView, Text, View } from "react-native";
+import { KeyboardAvoidingView, ScrollView, Text, View } from "react-native";
 import { Box } from "@/components/ui/box";
 import { VStack } from "@/components/ui/vstack";
 import {
@@ -16,6 +16,7 @@ import {
   GET_AREAS_LIST_BY_NAME_SEARCH,
   GET_CUSTOMER_LEAD_DETAILS,
   GET_PINCODES_LIST_BY_PINCODE_SEARCH,
+  GET_USER_DETAILS,
 } from "@/constants/api_endpoints";
 import {
   CATEGORY_OF_ORG,
@@ -24,10 +25,12 @@ import {
   TYPE_OF_ORG,
 } from "@/constants/configuration_keys";
 import ConfigurationDropdownFormField from "@/components/fields/ConfigurationDropdownFormField";
-import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { AreaListItemModel, PincodeListItemModel } from "@/models/geolocations";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
-import { CustomerLeadDetailsModel } from "@/models/customers";
+import {
+  CreateCustomerLeadDetailsModel,
+  CustomerLeadDetailsModel,
+} from "@/models/customers";
 import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { getFileName, isFormFieldInValid } from "@/utils/helper";
@@ -40,13 +43,17 @@ import PrimaryTypeheadFormField from "@/components/fields/PrimaryTypeheadFormFie
 import { DropdownItemModel } from "@/models/ui/dropdown_item_model";
 import ImageFormField from "@/components/fields/ImageFormField";
 import PrimaryTextareaFormField from "@/components/fields/PrimaryTextareaFormField";
-import { AUTH_TOKEN_KEY } from "@/constants/storage_keys";
-import { getItem } from "expo-secure-store";
+import {
+  AUTH_TOKEN_KEY,
+  IS_LEAD,
+  REFRESH_TOKEN_KEY,
+} from "@/constants/storage_keys";
 import Toast from "react-native-toast-message";
+import { clearStorage, getItem, setItem } from "@/utils/secure_store";
+import { BASE_URL } from "@/config/env";
+import axios from "axios";
 
 const RegistrationScreen = () => {
-  const { customerLeadId } = useLocalSearchParams();
-
   // geolocations
   const [pincodes, setPincodes] = useState<DropdownItemModel[]>([]);
   const [areas, setAreas] = useState<DropdownItemModel[]>([]);
@@ -71,7 +78,7 @@ const RegistrationScreen = () => {
 
   const [isLead, setIsLead] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [errors, setErrors] = useState<ErrorModel[]>([]);
 
@@ -94,15 +101,26 @@ const RegistrationScreen = () => {
   };
 
   const getSuggestions = useCallback(
-    async (q: string, type: GeoLocationType, setLoading: any) => {
+    async (
+      q: string,
+      type: GeoLocationType,
+      setLoading: any,
+      param?: string,
+    ) => {
       if (typeof q !== "string" || q.length < 3) {
         onClearPress(type);
         return;
       }
       setLoading(true);
 
+      const url =
+        getGeoLocationSuggestionsUrl(type) +
+        `?q=${q}${(param ?? "").length > 0 ? `&${param}` : ""}`;
+
+      console.log("url", url);
+
       api
-        .get(getGeoLocationSuggestionsUrl(type) + `?q=${q}`)
+        .get(url)
         .then((response) => {
           setGeolocationSuggestions(type, response.data?.data ?? []);
           setLoading(false);
@@ -111,8 +129,6 @@ const RegistrationScreen = () => {
           console.error(e);
           setLoading(false);
         });
-
-      setLoading(false);
     },
     [],
   );
@@ -233,7 +249,10 @@ const RegistrationScreen = () => {
             let leadStatus = data.onBoardingStatusDetails?.key;
 
             if (leadStatus === CUSTOMER_LEAD_ACTIVE) {
-              router.replace({ pathname: "./home" });
+              console.log("leadStatus", leadStatus);
+              setItem(IS_LEAD, "false").then(() => {
+                router.replace({ pathname: "./home" });
+              });
             }
 
             if (data.orgImage) {
@@ -305,7 +324,7 @@ const RegistrationScreen = () => {
 
     // load customer lead details
     loadCustomerLeadDetails();
-  }, [router]);
+  }, []);
 
   const updateCustomerLeadDetails = async () => {
     const validationPromises = Object.keys(fieldValidationStatus).map(
@@ -331,27 +350,58 @@ const RegistrationScreen = () => {
     if (allValid) {
       setIsLoading(true);
 
-      customerLeadDetailsModel.pincodeId = selectedPincode?.id ?? "";
-      customerLeadDetailsModel.areaId = selectedArea?.id ?? "";
-      customerLeadDetailsModel.cityId = selectedCity?.id ?? "";
-      customerLeadDetailsModel.stateId = selectedState?.id ?? "";
-      customerLeadDetailsModel.countryId = selectedCountry?.id ?? "";
-      customerLeadDetailsModel.isCustomerLead = isLead;
-      customerLeadDetailsModel.customerLeadId = customerLeadDetailsModel.id;
+      const createCustomerLeadDetailsModel: CreateCustomerLeadDetailsModel = {};
+
+      // createCustomerLeadDetailsModel.id = customerLeadDetailsModel.id;
+      createCustomerLeadDetailsModel.firstName =
+        customerLeadDetailsModel.firstName;
+      createCustomerLeadDetailsModel.lastName =
+        customerLeadDetailsModel.lastName;
+      createCustomerLeadDetailsModel.orgName = customerLeadDetailsModel.orgName;
+      createCustomerLeadDetailsModel.description =
+        customerLeadDetailsModel.description;
+      createCustomerLeadDetailsModel.msmeNo = customerLeadDetailsModel.msmeNo;
+      createCustomerLeadDetailsModel.orgMobile =
+        customerLeadDetailsModel.orgMobile;
+      createCustomerLeadDetailsModel.mobile = customerLeadDetailsModel.mobile;
+      createCustomerLeadDetailsModel.alternateMobile =
+        customerLeadDetailsModel.alternateMobile;
+      createCustomerLeadDetailsModel.email = customerLeadDetailsModel.email;
+      createCustomerLeadDetailsModel.gstin = customerLeadDetailsModel.gstin;
+      createCustomerLeadDetailsModel.address = customerLeadDetailsModel.address;
+      createCustomerLeadDetailsModel.orgImage =
+        customerLeadDetailsModel.orgImage;
+      createCustomerLeadDetailsModel.categoryOfOrg =
+        customerLeadDetailsModel.categoryOfOrg ??
+        customerLeadDetailsModel.categoryOfOrgDetails?.id;
+      createCustomerLeadDetailsModel.sizeOfOrg =
+        customerLeadDetailsModel.sizeOfOrg ??
+        customerLeadDetailsModel.sizeOfOrgDetails?.id;
+      createCustomerLeadDetailsModel.typeOfOrg =
+        customerLeadDetailsModel.typeOfOrg ??
+        customerLeadDetailsModel.typeOfOrgDetails?.id;
+      createCustomerLeadDetailsModel.pincodeId = selectedPincode?.id ?? "";
+      createCustomerLeadDetailsModel.areaId = selectedArea?.id ?? "";
+      createCustomerLeadDetailsModel.cityId = selectedCity?.id ?? "";
+      createCustomerLeadDetailsModel.stateId = selectedState?.id ?? "";
+      createCustomerLeadDetailsModel.countryId = selectedCountry?.id ?? "";
+      createCustomerLeadDetailsModel.isCustomerLead = isLead;
+      createCustomerLeadDetailsModel.customerLeadId =
+        customerLeadDetailsModel.id;
 
       const formData = new FormData();
       (
         Object.keys(
-          customerLeadDetailsModel,
-        ) as (keyof CustomerLeadDetailsModel)[]
+          createCustomerLeadDetailsModel,
+        ) as (keyof CreateCustomerLeadDetailsModel)[]
       ).forEach((key) => {
-        const value = customerLeadDetailsModel[key];
+        const value = createCustomerLeadDetailsModel[key];
         if (value !== undefined && value !== null) {
           formData.append(key as string, value as any); // Type assertion here
         }
       });
 
-      if (orgImage) {
+      if (orgImage && orgImage.length > 0 && !orgImage.startsWith("https://")) {
         // --@ts-ignore --
         formData.append("orgImageFile", {
           uri: orgImage,
@@ -362,6 +412,13 @@ const RegistrationScreen = () => {
 
       setErrors([]);
 
+      console.log(
+        "createCustomerLeadDetailsModel ------------~~~~~~~~~~~~~~~~~~~>",
+        createCustomerLeadDetailsModel,
+      );
+
+      console.log("formDara", formData);
+
       api
         .post(CREATE_CUSTOMER, formData, {
           headers: {
@@ -370,16 +427,42 @@ const RegistrationScreen = () => {
         })
         .then(async (response) => {
           // router.push({pathname: ""});
-          console.log(response.data.data);
-          const token = getItem(AUTH_TOKEN_KEY);
-          if (token) {
-            router.replace("/(root)/home");
-            Toast.show({
-              type: "success",
-              text1: "Registration Completed",
-              text2: "Your organization registered successfully",
-            });
-          } else {
+          // console.log(response.data.data);
+          await setItem(IS_LEAD, "true");
+          // const token = await getItem(AUTH_TOKEN_KEY);
+          try {
+            const refreshToken = await getItem(REFRESH_TOKEN_KEY);
+            console.log("refreshToken", refreshToken);
+            const response = await axios.post(
+              BASE_URL + "/auth/refresh-token",
+              {
+                token: refreshToken,
+              },
+            );
+            console.log("refresh token", response.data.data);
+            const newToken = response.data.token;
+            console.log("new token", newToken);
+            await setItem(AUTH_TOKEN_KEY, newToken);
+            if (newToken) {
+              router.replace("/(root)/home");
+              Toast.show({
+                type: "success",
+                text1: "Registration Completed",
+                text2: "Your organization registered successfully",
+              });
+            } else {
+              await clearStorage();
+              Toast.show({
+                type: "success",
+                text1: "Check your email",
+                text2: "Your login crendentials has sent to your email",
+              });
+              router.replace("/(auth)/login");
+            }
+          } catch (e) {
+            console.error(e);
+            console.error("refresh token error");
+            await clearStorage();
             Toast.show({
               type: "success",
               text1: "Check your email",
@@ -422,7 +505,7 @@ const RegistrationScreen = () => {
         <LoadingBar />
       ) : (
         <ScrollView automaticallyAdjustKeyboardInsets={true}>
-          <Box className="px-4  mb-12">
+          <Box className="px-4 mb-12">
             <VStack>
               {/* <Text className="text-2xl font-bold">
                 Register Your Organization 🚀
@@ -478,6 +561,7 @@ const RegistrationScreen = () => {
                   max={10}
                   keyboardType="phone-pad"
                   filterExp={/^[0-9]*$/}
+                  isRequired={false}
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
@@ -502,6 +586,7 @@ const RegistrationScreen = () => {
                   configurationCategory={TYPE_OF_ORG}
                   placeholder="Select type"
                   label="Type of organization"
+                  defaultValue={customerLeadDetailsModel?.typeOfOrgDetails}
                   errors={errors}
                   setErrors={setErrors}
                   fieldName="typeOfOrgId"
@@ -520,6 +605,7 @@ const RegistrationScreen = () => {
                   configurationCategory={CATEGORY_OF_ORG}
                   placeholder="Select category"
                   label="Category of organization"
+                  defaultValue={customerLeadDetailsModel?.categoryOfOrgDetails}
                   errors={errors}
                   setErrors={setErrors}
                   fieldName="categoryOfOrgId"
@@ -538,6 +624,7 @@ const RegistrationScreen = () => {
                   configurationCategory={SIZE_OF_ORG}
                   placeholder="Select size"
                   label="Size of organization"
+                  defaultValue={customerLeadDetailsModel?.sizeOfOrgDetails}
                   errors={errors}
                   setErrors={setErrors}
                   fieldName="sizeOfOrgId"
@@ -613,7 +700,7 @@ const RegistrationScreen = () => {
                   placeholder="Enter here"
                   errors={errors}
                   setErrors={setErrors}
-                  min={4}
+                  min={3}
                   defaultValue={customerLeadDetailsModel.firstName}
                   filterExp={/^[a-zA-Z ]*$/}
                   canValidateField={canValidateField}
@@ -715,6 +802,7 @@ const RegistrationScreen = () => {
                   min={10}
                   max={10}
                   keyboardType="phone-pad"
+                  isRequired={false}
                   filterExp={/^[0-9]*$/}
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
@@ -729,6 +817,7 @@ const RegistrationScreen = () => {
                     return undefined;
                   }}
                   onChangeText={(value) => {
+                    console.log("alternate mobile", value);
                     setCustomerLeadDetailsModel((prevState) => {
                       prevState.alternateMobile = value;
                       return prevState;
@@ -744,7 +833,7 @@ const RegistrationScreen = () => {
                   min={10}
                   max={200}
                   defaultValue={customerLeadDetailsModel.description}
-                  filterExp={/^[a-zA-Z0-9 ]*$/}
+                  filterExp={/^[a-zA-Z0-9,.-?/'$#& ]*$/}
                   onChangeText={(value) => {
                     setCustomerLeadDetailsModel((prevState) => {
                       prevState.description = value;
@@ -769,7 +858,7 @@ const RegistrationScreen = () => {
                   setErrors={setErrors}
                   min={4}
                   defaultValue={customerLeadDetailsModel.address}
-                  filterExp={/^[a-zA-Z0-9 \/#.]*$/}
+                  filterExp={/^[a-zA-Z0-9 \/#.,-/'&$]*$/}
                   canValidateField={canValidateField}
                   setCanValidateField={setCanValidateField}
                   setFieldValidationStatus={setFieldValidationStatus}
@@ -811,7 +900,16 @@ const RegistrationScreen = () => {
                   onClearPress={onClearPress}
                   selectedValue={selectedArea}
                   suggestions={areas}
-                  getSuggestions={getSuggestions}
+                  getSuggestions={(q, type, setLoading) => {
+                    if (selectedPincode?.id) {
+                      getSuggestions(
+                        q,
+                        type,
+                        setLoading,
+                        `pincodeIds=${selectedPincode?.id}`,
+                      );
+                    }
+                  }}
                   setSelectedValue={setSelectedArea}
                   placeholder="Search area"
                   fieldName="areaId"

@@ -1,14 +1,12 @@
 import { View, Text, Image } from "react-native";
 import React, { useEffect, useState } from "react";
-import { Card } from "@/components/ui/card";
-import { Button, ButtonText } from "@/components/ui/button";
-import Feather from "@expo/vector-icons/Feather";
 import { useLocalSearchParams } from "expo-router";
 import api from "@/services/api";
 import { GET_ASSET_DETAILS } from "@/constants/api_endpoints";
 import { AssetMasterListItemModel } from "@/models/assets";
-import TicketStatusComponent from "@/components/tickets/TicketStatusComponent";
 import { getDeviceStatusColor } from "@/utils/helper";
+import Feather from "@expo/vector-icons/Feather";
+import moment from "moment";
 
 const DeviceDetailsScreen = () => {
   const { deviceId } = useLocalSearchParams();
@@ -34,16 +32,7 @@ const DeviceDetailsScreen = () => {
         setIsLoading(false);
       });
   };
-  const getColor = (status?: string) => {
-    switch (status) {
-      case "IN_USE":
-        return "text-primary-900 bg-primary-200 ";
-      case "NOT_IN_USE":
-        return "text-red-500 bg-red-200";
-      default:
-        return "text-grey-500";
-    }
-  };
+
   return (
     <View className="px-4 mt-4">
       <View className="w-full bg-white px-3 py-3 rounded-lg shadow-sm">
@@ -102,8 +91,9 @@ const DeviceDetailsScreen = () => {
               </View>
             </View>
           </View>
+          {/*
           <View className="border-[.5px] border-gray-300 h-[1px] mt-3 mb-3 w-full" />
-          <View className="w-full">
+           <View className="w-full">
             <View className="flex-row items-center justify-between">
               <View className="flex">
                 <Text className="text-gray-500 text-md ">Raised Tickets</Text>
@@ -116,32 +106,31 @@ const DeviceDetailsScreen = () => {
                 <Text className="text-md text-gray-900 font-semibold ">
                   Raised
                 </Text>
-                {/* <View className="mt-1">
-                  <TicketStatusComponent
-                    statusKey={"RAISED"}
-                    statusValue={"Raised"}
-                  />
-                </View> */}
               </View>
             </View>
-          </View>
-
+          </View> */}
           <View className=" border-[.5px] border-gray-300 h-[1px] mt-3 mb-3 w-full" />
           <View className="flex-row justify-between w-full items-center">
             <View className="flex-row items-center">
-              <Image
+              {/* <Image
                 source={{
                   uri: "https://images.unsplash.com/photo-1445053023192-8d45cb66099d?q=80&w=2340&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
                 }}
                 width={35}
                 height={35}
                 className="rounded-full"
-              />
+              /> */}
+              <View className="bg-gray-100 p-2 rounded-full">
+                <Feather name="user" size={24} color="#9ca3af" />
+              </View>
               <View className="ms-2">
                 <Text className="text-gray-500 text-[13px] mt-[1px]">
                   Assigned To
                 </Text>
-                <Text className="font-bold ">Dharani Shree</Text>
+                <Text className="font-bold ">
+                  {(deviceDetails.userAssignedToDetails?.firstName ?? "- ") +
+                    (deviceDetails.userAssignedToDetails?.lastName ?? "")}
+                </Text>
               </View>
             </View>
             <View className="ms-2 flex items-end">
@@ -152,7 +141,11 @@ const DeviceDetailsScreen = () => {
                 {/* {item.createdAt
               ? moment(ticketModel.createdAt).fromNow()
               : "-"} */}
-                28-08-24
+                {deviceDetails.userAssignedToDetails?.createdAt
+                  ? moment(
+                      deviceDetails.userAssignedToDetails?.createdAt,
+                    ).format("DD-MM-YYYY")
+                  : "-"}
               </Text>
             </View>
             {/* <View className="flex items-end  ">
@@ -175,10 +168,3 @@ const DeviceDetailsScreen = () => {
 };
 
 export default DeviceDetailsScreen;
-
-function setIsLoading(arg0: boolean) {
-  throw new Error("Function not implemented.");
-}
-function setAssetModel(arg0: any) {
-  throw new Error("Function not implemented.");
-}

@@ -20,7 +20,7 @@ export const GET_PINCODES_LIST_BY_PINCODE_SEARCH =
   "/geolocations/pincodes/getPincodesListByPincodeSearch";
 export const GET_AREAS = "/geolocations/areas/getAllAreasForDropdown";
 export const GET_AREAS_LIST_BY_NAME_SEARCH =
-  "/geolocations/areas/getAreasListByNameSearch";
+  "/geolocations/areas/getAreasListByNameSearchAndPincodes";
 export const GET_CITIES = "/geolocations/cities/getAllCitiesForDropdown";
 export const GET_CITIES_LIST_BY_NAME_SEARCH =
   "/geolocations/cities/getCitiesListByNameSearch";
@@ -34,8 +34,7 @@ export const GET_COUNTRIES_LIST_BY_NAME_SEARCH =
 
 // tickets
 export const CREATE_TICKET = "/tickets/create";
-export const GET_TICKETS_BY_STATUS_KEY =
-  "tickets/customers/getTicketsByStatusKey";
+export const GET_TICKETS_BY_STATUS_KEY = "tickets/users/getTicketsByStatusKey";
 export const TICKET_UPLOADS = "/tickets/upload";
 export const GET_TICKET_DETAILS = "/tickets/getTicketById";
 
@@ -44,8 +43,6 @@ export const GET_ASSETS_IN_USE =
   "/assets/assetsInUse/getCustomerAssetsInUseListBySerialNoSearch";
 export const GET_ISSUE_TYPES = "/assets/assetIssueType/getIssueTypesList";
 export const GET_ASSET_MASTERS_LIST = "/assets/assetMaster/getAssetMastersList";
-export const GET_ASSETS_LIST_BY_USER_ID =
-  "assets/assetsInUse/getCustomerAssetsInUseListBySerialNoSearch";
 export const GET_ASSET_DETAILS =
   "/assets/assetMaster/getAssetMasterDetailsById";
 export const CREATE_ASSET = "/assets/assetMaster/createAssetMaster";
@@ -74,3 +71,8 @@ export const GET_BRANCHES_LIST = "/organisation/getBranchListByOrgId";
 export const CREATE_USER = "/users/create";
 export const GET_USERS_LIST = "/users/list";
 export const GET_USER_DETAILS = "/users/view";
+export const GET_ORG_USERS = "/customers/getCustomerByNameAndOrgId";
+
+// modules
+export const GET_LOGINED_USER_MODULES =
+  "/rbac/roles/getLoginedUserRoleModulePermissionsAsTree";

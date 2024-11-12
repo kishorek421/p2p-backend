@@ -5,12 +5,14 @@ import {
   CUSTOMER_LEAD_ID,
   IS_LEAD,
   IS_WELCOMED,
+  REFRESH_TOKEN_KEY,
 } from "@/constants/storage_keys";
 import { getItem, removeItem } from "@/utils/secure_store";
 import { ThemeProvider } from "@react-navigation/native";
-import { GET_CUSTOMER_DETAILS } from "@/constants/api_endpoints";
+import { GET_USER_DETAILS } from "@/constants/api_endpoints";
 import api from "@/services/api";
 import { CustomerDetailsModel } from "@/models/customers";
+import { UserDetailsModel } from "@/models/users";
 
 interface AuthContextProps {
   user: CustomerDetailsModel | undefined;
@@ -27,7 +29,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<CustomerDetailsModel | undefined>(undefined);
+  const [user, setUser] = useState<UserDetailsModel | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -38,10 +40,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       console.log("token", token);
       if (token) {
         const isLead = await getItem(IS_LEAD);
+        console.log("isLead", isLead);
         if (isLead === undefined) {
+          removeItem(REFRESH_TOKEN_KEY);
+          removeItem(AUTH_TOKEN_KEY);
           router.replace({ pathname: "/(auth)/login" });
         } else if (isLead === "true") {
           const customerLeadId = await getItem(CUSTOMER_LEAD_ID);
+          console.log("customerLeadId", customerLeadId);
           if (customerLeadId) {
             router.replace({
               pathname: "/(auth)/registration/[customerLeadId]",
@@ -50,11 +56,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
               },
             });
           } else {
+            removeItem(IS_LEAD);
+            removeItem(REFRESH_TOKEN_KEY);
+            removeItem(AUTH_TOKEN_KEY);
             router.replace({ pathname: "/(auth)/login" });
           }
         } else {
           try {
-            const response = await api.get(GET_CUSTOMER_DETAILS); // Replace with your own endpoint
+            const response = await api.get(GET_USER_DETAILS);
             setUser(response.data);
           } catch (error) {
             console.error("Failed to fetch user:", error);
@@ -90,6 +99,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // };
 
   const logout = async () => {
+    await removeItem(REFRESH_TOKEN_KEY);
     await removeItem(AUTH_TOKEN_KEY);
     setUser(undefined);
     // Redirect to the login screen after logout

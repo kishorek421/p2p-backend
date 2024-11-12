@@ -37,6 +37,7 @@ interface PrimaryTypeheadFormFieldProps {
   setCanValidateField: any;
   setFieldValidationStatus: any;
   validateFieldFunc: (fieldName: string, isValid: boolean) => void;
+  backgroundColor?: string;
 }
 
 const PrimaryTypeheadFormField = ({
@@ -62,6 +63,7 @@ const PrimaryTypeheadFormField = ({
   setCanValidateField,
   validateFieldFunc,
   setFieldValidationStatus,
+  backgroundColor,
 }: PrimaryTypeheadFormFieldProps) => {
   useEffect(() => {
     if (defaultValue && defaultValue.id !== undefined) {
@@ -120,6 +122,7 @@ const PrimaryTypeheadFormField = ({
         keyboardType={keyboardType}
         fieldName={fieldName}
         errors={errors}
+        backgroundColor={backgroundColor}
       />
       <FormControlError>
         <FormControlErrorText>

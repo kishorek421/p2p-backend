@@ -25,6 +25,7 @@ export interface TicketListItemModel {
   ticketNo?: string;
   assignedToDetails?: EmployeeDetailsModel;
   ticketImages?: string[];
+  lastAssignedToDetails?: AssignedToUserDetailsModel;
 }
 
 export interface RaiseTicketRequestModel {
@@ -38,4 +39,12 @@ export interface IssueTypeModel {
   id?: string;
   name?: string;
   code?: string;
+}
+
+export interface AssignedToUserDetailsModel {
+  assignedAt?: string;
+  assignedTo?: string;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string;
 }

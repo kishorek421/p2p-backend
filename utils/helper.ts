@@ -1,3 +1,10 @@
+import {
+  ESCALATED,
+  RAISED,
+  IN_PROGRESS,
+  TICKET_CLOSED,
+  ASSIGNED,
+} from "@/constants/configuration_keys";
 import { ErrorModel } from "@/models/common";
 
 export const isFormFieldInValid = (
@@ -65,9 +72,26 @@ export const getDeviceStatusColor = (status?: string) => {
     case "IN_USE":
       return "text-primary-900 bg-primary-200 ";
     case "NOT_IN_USE":
-      return "text-red-500 bg-red-200";
+      return "text-red-500 bg-red-100";
     default:
-      return "text-grey-500";
+      return "text-grey-400 bg-gray-100";
+  }
+};
+
+export const getStatusColor = (statusKey?: string): string => {
+  switch (statusKey) {
+    case ESCALATED:
+      return "text-red-500 bg-red-100";
+    case RAISED:
+      return "text-blue-500 bg-blue-100";
+    case IN_PROGRESS:
+      return "text-secondary-950 bg-secondary-100";
+    case TICKET_CLOSED:
+      return "text-primary-950 bg-primary-100";
+    case ASSIGNED:
+      return "text-[#040042] bg-[#d2cfff]";
+    default:
+      return "text-gray-600 bg-gray-200";
   }
 };
 

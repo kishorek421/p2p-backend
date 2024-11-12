@@ -5,4 +5,5 @@ export interface ServiceItemModel {
   icon?: ReactElement;
   path?: string;
   params?: {};
+  code?: string;
 }

@@ -1,5 +1,11 @@
-import { AUTH_TOKEN_KEY, REFRESH_TOKEN_KEY } from "@/constants/storage_keys";
-import { removeItem } from "@/utils/secure_store";
+import {
+  AUTH_TOKEN_KEY,
+  CUSTOMER_LEAD_ID,
+  IS_LEAD,
+  IS_WELCOMED,
+  REFRESH_TOKEN_KEY,
+} from "@/constants/storage_keys";
+import { clearStorage, removeItem } from "@/utils/secure_store";
 import {
   DrawerContentScrollView,
   DrawerItemList,
@@ -30,8 +36,12 @@ const CustomDrawerContent = (props: any) => {
         <View className="p-6 bg-slate-50">
           <TouchableOpacity
             onPress={async () => {
-              await removeItem(AUTH_TOKEN_KEY);
-              await removeItem(REFRESH_TOKEN_KEY);
+              // await removeItem(AUTH_TOKEN_KEY);
+              // await removeItem(REFRESH_TOKEN_KEY);
+              // await removeItem(CUSTOMER_LEAD_ID);
+              // await removeItem(IS_LEAD);
+              // await removeItem(IS_WELCOMED);
+              await clearStorage();
               router.replace("/(auth)/login");
             }}
           >

@@ -3,7 +3,11 @@ import { Linking, Text, View } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { GET_CUSTOMER_LEAD_DETAILS, LOGIN } from "@/constants/api_endpoints";
+import {
+  GET_CUSTOMER_LEAD_DETAILS,
+  GET_USER_DETAILS,
+  LOGIN,
+} from "@/constants/api_endpoints";
 import api from "@/services/api";
 import { ApiResponseModel, ErrorModel } from "@/models/common";
 import SubmitButton from "@/components/SubmitButton";
@@ -13,11 +17,12 @@ import {
   IS_LEAD,
   REFRESH_TOKEN_KEY,
 } from "@/constants/storage_keys";
-import { setItem } from "@/utils/secure_store";
+import { getItem, setItem } from "@/utils/secure_store";
 import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import Toast from "react-native-toast-message";
 import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
+import { UserDetailsModel } from "@/models/users";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -73,17 +78,20 @@ const LoginScreen = () => {
 
           await setItem(AUTH_TOKEN_KEY, loginData.token);
           await setItem(REFRESH_TOKEN_KEY, loginData.refreshToken);
+          await setItem(IS_LEAD, "false");
 
           if (loginData) {
             try {
-              let leadResponse = await api.get<
-                ApiResponseModel<CustomerLeadDetailsModel>
-              >(GET_CUSTOMER_LEAD_DETAILS);
+              let leadResponse =
+                await api.get<ApiResponseModel<UserDetailsModel>>(
+                  GET_USER_DETAILS,
+                );
               let data = leadResponse.data.data ?? {};
               console.log("customerData", data);
 
               if (data && data.id) {
-                let leadStatus = data.onBoardingStatusDetails?.key;
+                let leadStatus = data.statusDetails?.key;
+                console.log("=+++_+_+_)+_+_+_+_", leadStatus);
 
                 await setItem(CUSTOMER_LEAD_ID, data.id);
 
@@ -91,17 +99,86 @@ const LoginScreen = () => {
                   await setItem(IS_LEAD, "false");
                   router.replace({ pathname: "/home" });
                 } else {
-                  await setItem(IS_LEAD, "true");
-                  router.replace({
-                    pathname: "/(auth)/registration/[customerLeadId]",
-                    params: { customerLeadId: data.id },
+                  let userType = data.userTypeDetails?.key;
+                  if (userType === "CUSTOMER") {
+                    await setItem(IS_LEAD, "true");
+                    router.replace({
+                      pathname: "/(auth)/registration/[customerLeadId]",
+                      params: { customerLeadId: data.id },
+                    });
+                  } else {
+                    Toast.show({
+                      type: "error",
+                      text1: "Account activation",
+                      text2:
+                        "Your account is not activated to login, please contact your admin",
+                    });
+                  }
+                }
+                setIsLoading(false);
+              } else {
+                const customerLeadResponse = await api.get<
+                  ApiResponseModel<CustomerLeadDetailsModel>
+                >(GET_CUSTOMER_LEAD_DETAILS);
+                const customerData = customerLeadResponse.data?.data;
+                if (customerData) {
+                  const customerLeadStatus =
+                    customerData.onBoardingStatusDetails?.key;
+                  await setItem(CUSTOMER_LEAD_ID, customerData.id ?? "");
+                  if (customerLeadStatus === CUSTOMER_LEAD_ACTIVE) {
+                    await setItem(IS_LEAD, "false");
+                    router.replace({ pathname: "/home" });
+                  } else {
+                    await setItem(IS_LEAD, "true");
+                    Toast.show({
+                      type: "error",
+                      text1: "Complete Registration",
+                    });
+                    router.replace({
+                      pathname: "/(auth)/registration/[customerLeadId]",
+                      params: { customerLeadId: customerData.id ?? "" },
+                    });
+                  }
+                } else {
+                  Toast.show({
+                    type: "error",
+                    text1: "Invalid credentials",
+                    text2: "Enter a valid email and password",
                   });
                 }
-
                 setIsLoading(false);
               }
             } catch (e) {
-              console.error(e);
+              console.error();
+              const customerLeadResponse = await api.get<
+                ApiResponseModel<CustomerLeadDetailsModel>
+              >(GET_CUSTOMER_LEAD_DETAILS);
+              const customerData = customerLeadResponse.data?.data;
+              if (customerData) {
+                const customerLeadStatus =
+                  customerData.onBoardingStatusDetails?.key;
+                await setItem(CUSTOMER_LEAD_ID, customerData.id ?? "");
+                if (customerLeadStatus === CUSTOMER_LEAD_ACTIVE) {
+                  await setItem(IS_LEAD, "false");
+                  router.replace({ pathname: "/home" });
+                } else {
+                  await setItem(IS_LEAD, "true");
+                  Toast.show({
+                    type: "error",
+                    text1: "Complete Registration",
+                  });
+                  router.replace({
+                    pathname: "/(auth)/registration/[customerLeadId]",
+                    params: { customerLeadId: customerData.id ?? "" },
+                  });
+                }
+              } else {
+                Toast.show({
+                  type: "error",
+                  text1: "Invalid credentials",
+                  text2: "Enter a valid email and password",
+                });
+              }
               setIsLoading(false);
             }
           } else {

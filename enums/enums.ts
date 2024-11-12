@@ -24,3 +24,7 @@ export enum AssetsDropdownType {
   asset_type,
   asset_model,
 }
+
+export enum CommonDropdownType {
+  org_user,
+}

@@ -32,10 +32,42 @@ app.get('/', (req, res) => {
 
 wss.on('connection', (ws) => {
     console.log('New client connected');
+
+    // Listen for incoming messages
+    ws.on('message', (message) => {
+        try {
+            const data = JSON.parse(message);
+
+            if (data.type === 'SET_USER_ID') {
+                const userId = data.userId;
+
+                // Set the WebSocket connection in the clients dictionary
+                clients[userId] = ws;
+                console.log(`User ${userId} connected`);
+
+                // Optional: Confirm the user ID is set
+                ws.send(JSON.stringify({ type: 'USER_ID_SET', userId }));
+            }
+
+            // Additional message handling can go here
+
+        } catch (error) {
+            console.error('Error handling message:', error);
+        }
+    });
+
+    ws.on('close', () => {
+        // Remove the client from the clients dictionary on disconnect
+        for (const userId in clients) {
+            if (clients[userId] === ws) {
+                console.log(`User ${userId} disconnected`);
+                delete clients[userId];
+                break;
+            }
+        }
+    });
 });
 
 server.listen(5000, () => {
     console.log('Signaling Server is listening on port 5000');
 });
-
-

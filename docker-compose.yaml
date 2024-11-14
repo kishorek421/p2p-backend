@@ -15,7 +15,7 @@ services:
     build: ./p2p
     container_name: p2p
     ports:
-      - "5001:5000"
+      - "5000:5000"
     depends_on:
       - mongo
 

@@ -2,30 +2,25 @@ require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
-const { MongoClient, ObjectId } = require('mongodb');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const userRoutes = require('./routes/UserRoutes');
 
 const app = express();
+app.use(express.json());
+app.use(cors())
+
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
-const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/';
-const client = new MongoClient(uri);
+const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/p2p';
+mongoose.connect(uri, {
+}).then(() => console.log("Connected to MongoDB"))
+    .catch(err => console.error("MongoDB connection error:", err));
 
-let usersCollection;
-let usersContactsCollection;
-let callHistoryCollection;
-let callsSdpIceCollection;
 let clients = {};
 
-client.connect().then(() => {
-    console.log('Connected to MongoDB');
-    const db = client.db('webrtc');
-    usersCollection = db.collection('users');
-    usersContactsCollection = db.collection('users_contacts');
-    callHistoryCollection = db.collection('call_history');
-    callsSdpIceCollection = db.collection('calls_sdp_ice');
-}).catch(err => console.error('MongoDB connection error:', err));
-
+app.use('/api/user', userRoutes);
 app.get('/', (req, res) => {
     res.send('WebRTC Signaling Server');
 });

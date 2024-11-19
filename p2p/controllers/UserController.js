@@ -3,7 +3,8 @@ const { ObjectId } = require('mongodb');
 
 exports.getUserDetails = async (req, res) => {
     try {
-        const { id } = req.query;
+        // const { id } = req.query;
+        const id = "6736caf3987f91ea19b614b1";
         const userDetails = await User.findOne({ _id: ObjectId.createFromHexString(id) });
         res.status(200).json({ data: userDetails, success: true, status: 200 });
     } catch (err) {
@@ -14,7 +15,8 @@ exports.getUserDetails = async (req, res) => {
 
 exports.updateUserDetails = async (req, res) => {
     try {
-        const { id } = req.query;
+        // const { id } = req.query;
+        const id = "6736caf3987f91ea19b614b1";
         const userDetails = await User.findOneAndUpdate({ _id: ObjectId.createFromHexString(id) },
          { $set: { ...req.body } });
         res.status(200).json({ data: userDetails, success: true, status: 200 });

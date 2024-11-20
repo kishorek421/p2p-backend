@@ -8,5 +8,8 @@ const userController = require('../controllers/UserController');
 
 router.get('/getUserDetails', userController.getUserDetails);
 router.put('/updateUserDetails', userController.updateUserDetails);
+router.get('/searchUsers', userController.searchUsers);
+router.post('/requestUser', userController.requestUser);
+router.put('/changeUserRequestStatus', userController.changeUserRequestStatus);
 
 module.exports = router;

@@ -63,6 +63,57 @@ wss.on('connection', (ws) => {
     });
 });
 
+async function handleOffer(data, ws) {
+    const { callId, callerId, calleeId, sdp, ice } = data;
+    if (clients[calleeId]) {
+        await callsSdpIceCollection.insertOne({
+            callId: ObjectId.createFromHexString(callId),
+            userId: ObjectId.createFromHexString(callerId),
+            sdp,
+            ice,
+            type: 'offer',
+            timestamp: new Date(),
+        });
+
+        clients[calleeId].send(JSON.stringify({
+            type: 'offer',
+            callerId,
+            calleeId,
+            sdp,
+            ice,
+        }));
+        console.log(`Offer sent from ${callerId} to ${calleeId}`);
+    } else {
+        console.log(`Callee ${calleeId} not found or offline`);
+    }
+}
+
+async function handleAnswer(data, ws) {
+    const { callId, callerId, calleeId, sdp, ice } = data;
+
+    if (clients[callerId]) {
+        await callsSdpIceCollection.insertOne({
+            callId: ObjectId.createFromHexString(callId),
+            userId: ObjectId.createFromHexString(calleeId),
+            sdp,
+            ice,
+            type: 'answer',
+            timestamp: new Date(),
+        });
+
+        clients[callerId].send(JSON.stringify({
+            type: 'answer',
+            callerId,
+            calleeId,
+            sdp,
+            ice,
+        }));
+        console.log(`Answer sent from ${calleeId} to ${callerId}`);
+    } else {
+        console.log(`Caller ${callerId} not found or offline`);
+    }
+}
+
 server.listen(5000, () => {
     console.log('Signaling Server is listening on port 5000');
 });

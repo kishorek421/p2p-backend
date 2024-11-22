@@ -41,13 +41,9 @@ const PrimaryDropdownField = ({
         onItemSelect && onItemSelect(type, e);
       }}
     >
-      <SelectTrigger variant="outline" size="md">
-        <SelectInput
-          className="w-96"
-          placeholder={placeholder}
-          value={selectedValue.label}
-        />
-        <SelectIcon className="mr-3 " as={ChevronDownIcon} />
+      <SelectTrigger variant="outline" className="flex justify-between w-full">
+        <SelectInput placeholder={placeholder} value={selectedValue.label} />
+        <SelectIcon className="mr-3" as={ChevronDownIcon} />
       </SelectTrigger>
       <SelectPortal>
         <SelectBackdrop />

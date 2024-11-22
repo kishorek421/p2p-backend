@@ -1,5 +1,5 @@
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Linking, Text, View } from "react-native";
+import { Linking, Platform, Text, View } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
@@ -17,7 +17,7 @@ import {
   IS_LEAD,
   REFRESH_TOKEN_KEY,
 } from "@/constants/storage_keys";
-import { getItem, setItem } from "@/utils/secure_store";
+import { clearStorage, getItem, setItem } from "@/utils/secure_store";
 import { CUSTOMER_LEAD_ACTIVE } from "@/constants/configuration_keys";
 import { CustomerLeadDetailsModel } from "@/models/customers";
 import Toast from "react-native-toast-message";
@@ -107,6 +107,7 @@ const LoginScreen = () => {
                       params: { customerLeadId: data.id },
                     });
                   } else {
+                    await clearStorage();
                     Toast.show({
                       type: "error",
                       text1: "Account activation",
@@ -140,6 +141,7 @@ const LoginScreen = () => {
                     });
                   }
                 } else {
+                  await clearStorage();
                   Toast.show({
                     type: "error",
                     text1: "Invalid credentials",
@@ -173,6 +175,7 @@ const LoginScreen = () => {
                   });
                 }
               } else {
+                await clearStorage();
                 Toast.show({
                   type: "error",
                   text1: "Invalid credentials",
@@ -185,7 +188,7 @@ const LoginScreen = () => {
             setIsLoading(false);
           }
         })
-        .catch((e) => {
+        .catch(async (e) => {
           console.error(e);
           // console.error(e.response?.data);
           let errors = e.response?.data?.errors;
@@ -194,6 +197,7 @@ const LoginScreen = () => {
             setErrors(errors);
           }
           setIsLoading(false);
+          await clearStorage();
           Toast.show({
             type: "error",
             text1: "Invalid credentials",
@@ -270,15 +274,29 @@ const LoginScreen = () => {
               isLoading={isLoading}
               onPress={login}
             />
-            <Text className="mt-2 text-center text-sm">
-              Don't have a account?{" "}
-              <Link
-                href="/registration/null"
-                className="color-secondary-950 font-bold underline"
-              >
-                Register Now
-              </Link>
-            </Text>
+            {Platform.OS === "ios" ? (
+              <Text className=" text-sm text-center px-12 mt-4">
+                {/* To register your organization contact GoDesk Workplace Admin */}
+                {/* <Text
+                  onPress={() => {
+                    Linking.openURL("https://workplace.godesk.co.in/login");
+                  }}
+                  className="text-primary-950 font-bold"
+                >
+                  GoDesk Admin
+                </Text> */}
+              </Text>
+            ) : (
+              <Text className="mt-2 text-center text-sm">
+                Don't have a account?{" "}
+                <Link
+                  href="/registration/null"
+                  className="color-secondary-950 font-bold underline"
+                >
+                  Register Now
+                </Link>
+              </Text>
+            )}
           </VStack>
         </VStack>
         <Text className=" text-sm text-center px-12 ">

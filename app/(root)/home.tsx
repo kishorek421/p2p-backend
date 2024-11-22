@@ -2,16 +2,14 @@ import { View } from "react-native";
 import { VStack } from "@/components/ui/vstack";
 import ContentLayout from "@/components/home/ContentLayout";
 import React, { useEffect, useState } from "react";
-import { CustomerDetailsModel } from "@/models/customers";
 import api from "@/services/api";
 import {
-  GET_CUSTOMER_DETAILS,
   GET_LOGINED_USER_MODULES,
   GET_USER_DETAILS,
 } from "@/constants/api_endpoints";
 import { RoleModel, RoleModulePermissionsModel } from "@/models/rbac";
 import { UserDetailsModel } from "@/models/users";
-import { Button } from "react-native";
+import { requestTrackingPermissionsAsync } from "expo-tracking-transparency";
 
 const HomeScreen = () => {
   const [customerDetails, setCustomerDetails] = useState<UserDetailsModel>({});
@@ -50,6 +48,20 @@ const HomeScreen = () => {
       .catch((e) => {
         console.error(e);
       });
+
+    const requestPermission = async () => {
+      const { status } = await requestTrackingPermissionsAsync();
+      console.log("Tracking Permission Status:", status);
+      // Handle the status accordingly
+      if (status === "granted") {
+        // Proceed with tracking-related tasks
+      } else {
+        // Skip or limit tracking
+      }
+    };
+
+    // Request tracking permission before any data is collected
+    requestPermission();
   }, []);
 
   const convertTreeToFlat = (

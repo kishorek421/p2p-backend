@@ -34,8 +34,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Allow access to your photos to upload your organization’s image and damaged asset images for reporting purposes.",
-          "cameraPermission": "Allow access to your camera to capture your organization’s image and photos of damaged assets for reporting purposes."
+          "photosPermission": "Allow access to your photos to upload damaged asset images for reporting purposes.",
+          "cameraPermission": "Allow access to your camera to capture photos of damaged assets for reporting purposes."
         }
       ],
       [
@@ -45,6 +45,12 @@
           "project": "godesk_workplace",
           "organization": "bellwether-business-solutions"
         }
+      ],
+      [
+        "expo-tracking-transparency",
+        {
+          "userTrackingPermission": "We would like to track your activity to provide a better experience and personalized content."
+        }
       ]
     ],
     "experiments": {
@@ -53,7 +59,8 @@
     "ios": {
       "bundleIdentifier": "com.godesk.godeskworkplace",
       "infoPlist": {
-        "NSCameraUsageDescription": "Allow access to your camera to capture your organization’s image and photos of damaged assets for reporting purposes"
+        "NSCameraUsageDescription": "Allow access to your camera to capture photos of damaged assets for reporting purposes",
+        "NSUserTrackingUsageDescription": "We would like to track your activity to provide a better experience and personalized content."
       }
     },
     "extra": {

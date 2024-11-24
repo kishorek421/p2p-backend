@@ -99,7 +99,7 @@ async function handleCallUser(data, ws) {
     const callId = new ObjectId();
 
     if (clients[calleeId]) {
-        await CallHistoryModel.insertOne({
+        await CallHistoryModel.create({
             _id: callId,
             callerId: ObjectId.createFromHexString(callerId),
             calleeId: ObjectId.createFromHexString(calleeId),
@@ -146,7 +146,7 @@ async function handleOffer(data, ws) {
     const { callId, callerId, calleeId, sdp, ice } = data;
 
     if (clients[calleeId]) {
-        await CallSdpIceModel.insertOne({
+        await CallSdpIceModel.creaete({
             callId: ObjectId.createFromHexString(callId),
             callerId: ObjectId.createFromHexString(callerId),
             calleeId: ObjectId.createFromHexString(calleeId),
@@ -173,7 +173,7 @@ async function handleAnswer(data, ws) {
     const { callId, callerId, calleeId, sdp, ice } = data;
 
     if (clients[callerId]) {
-        await CallSdpIceModel.insertOne({
+        await CallSdpIceModel.create({
             callId: ObjectId.createFromHexString(callId),
             callerId: ObjectId.createFromHexString(callerId),
             calleeId: ObjectId.createFromHexString(calleeId),

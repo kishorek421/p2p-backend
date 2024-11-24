@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
     isMobileVerified: { type: Boolean },
     createdAt: { type: Date },
     isActive: { type: Boolean },
+    status: { type: String },
 });
 
 userSchema.pre('save', async function (next) {

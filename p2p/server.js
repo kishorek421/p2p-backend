@@ -5,6 +5,9 @@ const WebSocket = require('ws');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/UserRoutes');
+const UserModel = require('./models/UserModel');
+const CallHistoryModel = require('./models/CallHistoryModel');
+const CallSdpIceModel = require('./models/CallSdpIceModel');
 
 const app = express();
 app.use(express.json());
@@ -14,13 +17,15 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/p2p';
-mongoose.connect(uri, {
-}).then(() => console.log("Connected to MongoDB"))
-    .catch(err => console.error("MongoDB connection error:", err));
+
+mongoose.connect(uri, {}).then((client) => {
+    console.log("Connected to MongoDB");
+}).catch(err => console.error("MongoDB connection error:", err));
 
 let clients = {};
 
 app.use('/api/user', userRoutes);
+
 app.get('/', (req, res) => {
     res.send('WebRTC Signaling Server');
 });
@@ -29,23 +34,26 @@ wss.on('connection', (ws) => {
     console.log('New client connected');
 
     // Listen for incoming messages
-    ws.on('message', (message) => {
+    ws.on('message', async (message) => {
         try {
             const data = JSON.parse(message);
-
-            if (data.type === 'SET_USER_ID') {
-                const userId = data.userId;
-
-                // Set the WebSocket connection in the clients dictionary
-                clients[userId] = ws;
-                console.log(`User ${userId} connected`);
-
-                // Optional: Confirm the user ID is set
-                ws.send(JSON.stringify({ type: 'USER_ID_SET', userId }));
+            switch (data.type) {
+                case 'change_user_status':
+                    await handleChangeUserStatus(data, ws);
+                    break;
+                case 'call_user':
+                    await handleCallUser(data, ws);
+                    break;
+                case 'accept_call':
+                    await handleAcceptCall(data, ws);
+                    break;
+                case 'offer':
+                    await handleOffer(data, ws);
+                    break;
+                case 'answer':
+                    await handleAnswer(data, ws);
+                    break;
             }
-
-            // Additional message handling can go here
-
         } catch (error) {
             console.error('Error handling message:', error);
         }
@@ -63,16 +71,87 @@ wss.on('connection', (ws) => {
     });
 });
 
+async function handleChangeUserStatus(data, ws) {
+    const { userId, status } = data;
+    if (status === 'online') {
+        clients[userId] = ws
+    }
+    console.log("data ", data);
+
+    if (userId === undefined) {
+        console.log("UserId is undefined");
+        return;
+    }
+
+    const result = await UserModel.updateOne({ _id: ObjectId.createFromHexString(userId) }, { $set: { status } });
+
+    if (result.modifiedCount > 0) {
+        console.log(`User ${userId} status updated to ${status}`);
+    } else {
+        console.log(`Failed to update status for user ${userId}`);
+    }
+}
+
+async function handleCallUser(data, ws) {
+    const { callerId, calleeId } = data;
+
+    const callId = new ObjectId();
+
+    if (clients[calleeId]) {
+        await CallHistoryModel.insertOne({
+            _id: callId,
+            callerId: ObjectId.createFromHexString(callerId),
+            calleeId: ObjectId.createFromHexString(calleeId),
+            status: 'ringing',
+        });
+
+        let callerDetails = UserModel.findOne({ _id: ObjectId.createFromHexString(callerId) })
+
+        clients[calleeId].send(JSON.stringify({
+            type: 'incoming_call',
+            success: true,
+            details: {
+                callerId,
+                callerMobile: callerDetails.mobile,
+                calleeId,
+                callId: callId.toString(),
+            }
+        }));
+
+        console.log(`Call initiated from ${callerId} to ${calleeId}`);
+    } else {
+        console.log(`Callee ${calleeId} not found or offline`);
+        ws.send(JSON.stringify({ type: 'call_failed', reason: 'Callee not found or offline' }));
+    }
+}
+
+async function handleAcceptCall(data, ws) {
+    const { callerId, calleeId, callId } = data;
+
+    await CallHistoryModel.findOneAndUpdate({ _id: ObjectId.createFromHexString(callId) }, { $set: { status: 'accepted' } });
+
+    if (clients[callerId]) {
+        clients[callerId].send(JSON.stringify({
+            type: 'call_accepted',
+            callerId,
+            calleeId,
+            callId,
+        }));
+        console.log(`Call accepted by ${calleeId} from ${callerId}`);
+    }
+}
+
 async function handleOffer(data, ws) {
     const { callId, callerId, calleeId, sdp, ice } = data;
+
     if (clients[calleeId]) {
-        await callsSdpIceCollection.insertOne({
+        await CallSdpIceModel.insertOne({
             callId: ObjectId.createFromHexString(callId),
-            userId: ObjectId.createFromHexString(callerId),
+            callerId: ObjectId.createFromHexString(callerId),
+            calleeId: ObjectId.createFromHexString(calleeId),
             sdp,
             ice,
             type: 'offer',
-            timestamp: new Date(),
         });
 
         clients[calleeId].send(JSON.stringify({
@@ -82,6 +161,7 @@ async function handleOffer(data, ws) {
             sdp,
             ice,
         }));
+
         console.log(`Offer sent from ${callerId} to ${calleeId}`);
     } else {
         console.log(`Callee ${calleeId} not found or offline`);
@@ -92,13 +172,13 @@ async function handleAnswer(data, ws) {
     const { callId, callerId, calleeId, sdp, ice } = data;
 
     if (clients[callerId]) {
-        await callsSdpIceCollection.insertOne({
+        await CallSdpIceModel.insertOne({
             callId: ObjectId.createFromHexString(callId),
-            userId: ObjectId.createFromHexString(calleeId),
+            callerId: ObjectId.createFromHexString(callerId),
+            calleeId: ObjectId.createFromHexString(calleeId),
             sdp,
             ice,
             type: 'answer',
-            timestamp: new Date(),
         });
 
         clients[callerId].send(JSON.stringify({

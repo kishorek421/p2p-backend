@@ -54,6 +54,9 @@ wss.on('connection', (ws) => {
                 case 'answer':
                     await handleAnswer(data, ws);
                     break;
+                case 'ice':
+                    await handleICE(data, ws);
+                    break;
             }
         } catch (error) {
             console.error('Error handling message:', error);
@@ -113,7 +116,7 @@ async function handleCallUser(data, ws) {
             success: true,
             details: {
                 callerId,
-                callerMobile: callerDetails.mobile,
+                callerMobile: callerDetails.mobileNo,
                 calleeId,
                 callId: callId.toString(),
             }
@@ -192,6 +195,31 @@ async function handleAnswer(data, ws) {
         console.log(`Answer sent from ${calleeId} to ${callerId}`);
     } else {
         console.log(`Caller ${callerId} not found or offline`);
+    }
+}
+
+async function handleICE(data, ws) {
+    const { callId, callerId, calleeId, ice } = data;
+
+    if (clients[calleeId]) {
+        await CallSdpIceModel.creaete({
+            callId: ObjectId.createFromHexString(callId),
+            callerId: ObjectId.createFromHexString(callerId),
+            calleeId: ObjectId.createFromHexString(calleeId),
+            ice,
+            type: 'ice',
+        });
+
+        clients[calleeId].send(JSON.stringify({
+            type: 'ice',
+            callerId,
+            calleeId,
+            ice,
+        }));
+
+        console.log(`Ice sent from ${callerId} to ${calleeId}`);
+    } else {
+        console.log(`Callee ${calleeId} not found or offline`);
     }
 }
 

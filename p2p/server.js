@@ -149,7 +149,7 @@ async function handleOffer(data, ws) {
     const { callId, callerId, calleeId, sdp, ice } = data;
 
     if (clients[calleeId]) {
-        await CallSdpIceModel.creaete({
+        await CallSdpIceModel.create({
             callId: ObjectId.createFromHexString(callId),
             callerId: ObjectId.createFromHexString(callerId),
             calleeId: ObjectId.createFromHexString(calleeId),

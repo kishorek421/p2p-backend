@@ -5,7 +5,6 @@ const callSdpIceSchema = new mongoose.Schema({
     callerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     calleeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     type: { type: String, required: true },
-    status: { type: String, required: true },
     createdAt: { type: Date, default: Date.now },
 });
 

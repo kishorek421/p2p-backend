@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
     createdAt: { type: Date },
     isActive: { type: Boolean },
     status: { type: String },
+    verifiedToken: { type: String },
 });
 
 userSchema.pre('save', async function (next) {

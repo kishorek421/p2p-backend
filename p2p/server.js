@@ -39,6 +39,12 @@ wss.on('connection', (ws) => {
         try {
             const data = JSON.parse(message);
             switch (data.type) {
+                case 'sendMobileNumber':
+                    await handleSendMobileNumber(data, ws);
+                    break;
+                case 'registerToVerifyMobileNumber':
+                    await handleRegisterToVerifyMobileNumber(data, ws);
+                    break;
                 case 'change_user_status':
                     await handleChangeUserStatus(data, ws);
                     break;
@@ -74,6 +80,44 @@ wss.on('connection', (ws) => {
         }
     });
 });
+
+async function handleSendMobileNumber(data, ws) {
+    const { userId, mobileNo, } = data;
+
+    console.log("data ", data);
+
+    if (userId === undefined) {
+        console.log("UserId is undefined");
+        return;
+    }
+
+    const result = await UserModel.create({
+        verifiedToken: userId,
+        username: "Hello Famy!", mobileNo: mobileNo,
+        isMobileVerified: true, status: 'online',
+    });
+
+    clients[userId].send(JSON.stringify({
+        type: 'receivedMobileNumber',
+        success: true,
+        details: result,
+        
+    }));
+
+    if (result.modifiedCount > 0) {
+        console.log(`User ${userId} created`);
+    } else {
+        console.log(`Failed to update status for user ${userId}`);
+    }
+}
+
+async function handleRegisterToVerifyMobileNumber(data, ws) {
+    const { userId } = data;
+
+    clients[userId] = ws;
+
+    console.log(`User ${userId} registered to verify mobile number`);
+}
 
 async function handleChangeUserStatus(data, ws) {
     const { userId, status } = data;
@@ -146,7 +190,7 @@ async function handleAcceptCall(data, ws) {
 }
 
 async function handleOffer(data, ws) {
-    const { callId, callerId, calleeId, sdp, ice } = data;
+    const { callId, callerId, calleeId, sdp } = data;
 
     if (clients[calleeId]) {
         await CallSdpIceModel.create({
@@ -154,16 +198,15 @@ async function handleOffer(data, ws) {
             callerId: ObjectId.createFromHexString(callerId),
             calleeId: ObjectId.createFromHexString(calleeId),
             sdp,
-            ice,
             type: 'offer',
         });
 
         clients[calleeId].send(JSON.stringify({
             type: 'offer',
+            callId,
             callerId,
             calleeId,
             sdp,
-            ice,
         }));
 
         console.log(`Offer sent from ${callerId} to ${calleeId}`);
@@ -173,7 +216,7 @@ async function handleOffer(data, ws) {
 }
 
 async function handleAnswer(data, ws) {
-    const { callId, callerId, calleeId, sdp, ice } = data;
+    const { callId, callerId, calleeId, sdp } = data;
 
     if (clients[callerId]) {
         await CallSdpIceModel.create({
@@ -181,16 +224,15 @@ async function handleAnswer(data, ws) {
             callerId: ObjectId.createFromHexString(callerId),
             calleeId: ObjectId.createFromHexString(calleeId),
             sdp,
-            ice,
             type: 'answer',
         });
 
         clients[callerId].send(JSON.stringify({
             type: 'answer',
+            callId,
             callerId,
             calleeId,
             sdp,
-            ice,
         }));
         console.log(`Answer sent from ${calleeId} to ${callerId}`);
     } else {

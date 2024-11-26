@@ -63,6 +63,9 @@ wss.on('connection', (ws) => {
                 case 'ice':
                     await handleICE(data, ws);
                     break;
+                default:
+                    console.log('Unknown message type:', data.type);
+                    break;
             }
         } catch (error) {
             console.error('Error handling message:', error);
@@ -84,7 +87,7 @@ wss.on('connection', (ws) => {
 async function handleSendMobileNumber(data, ws) {
     const { userId, mobileNo, } = data;
 
-    console.log("data ", data);
+    console.log("sendMobileNumber: mobileNo ", mobileNo);
 
     if (userId === undefined) {
         console.log("UserId is undefined");
@@ -101,7 +104,6 @@ async function handleSendMobileNumber(data, ws) {
         type: 'receivedMobileNumber',
         success: true,
         details: result,
-        
     }));
 
     if (result.modifiedCount > 0) {

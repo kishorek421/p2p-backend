@@ -5,10 +5,12 @@ const WebSocket = require('ws');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/UserRoutes');
+const authRoutes = require('./routes/AuthRoutes');
 const UserModel = require('./models/UserModel');
 const CallHistoryModel = require('./models/CallHistoryModel');
 const CallSdpIceModel = require('./models/CallSdpIceModel');
 const { ObjectId } = require('mongodb');
+const RefreshToken = require('./models/RefreshToken');
 
 const app = express();
 app.use(express.json());
@@ -25,11 +27,31 @@ mongoose.connect(uri, {}).then((client) => {
 
 let clients = {};
 
+app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
 
 app.get('/', (req, res) => {
     res.send('WebRTC Signaling Server');
 });
+
+const generateToken = (userId) => {
+    return jwt.sign(
+        { id: userId },
+        process.env.JWT_SECRET,
+        { expiresIn: process.env.JWT_EXPIRATION }
+    );
+};
+
+async function generateRefreshToken(userId) {
+    const token = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, { expiresIn: process.env.REFRESH_TOKEN_EXPIRATION });
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7); // Set expiry date to 7 days
+
+    // Save refresh token to the database
+    const refreshToken = new RefreshToken({ userId, token, expiresAt });
+    await refreshToken.save();
+    return token;
+}
 
 wss.on('connection', (ws) => {
     console.log('New client connected');
@@ -101,12 +123,19 @@ async function handleSendMobileNumber(data, ws) {
         isMobileVerified: true, status: 'online',
     });
 
-    console.log("clients", clients);
-    
+    // console.log("clients", clients);
+
+    const token = generateToken(result._id);
+
+    // Generate and save a new refresh token
+    const refreshToken = await generateRefreshToken(result._id);
+
     clients[userId].send(JSON.stringify({
         type: 'receivedMobileNumber',
         success: true,
         details: result,
+        token: token,
+        refreshToken: refreshToken,
     }));
 
     if (result.modifiedCount > 0) {

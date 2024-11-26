@@ -101,6 +101,8 @@ async function handleSendMobileNumber(data, ws) {
         isMobileVerified: true, status: 'online',
     });
 
+    console.log("clients", clients);
+    
     clients[userId].send(JSON.stringify({
         type: 'receivedMobileNumber',
         success: true,

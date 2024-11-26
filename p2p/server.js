@@ -38,6 +38,7 @@ wss.on('connection', (ws) => {
     ws.on('message', async (message) => {
         try {
             const data = JSON.parse(message);
+            console.log("initial data", data);
             switch (data.type) {
                 case 'sendMobileNumber':
                     await handleSendMobileNumber(data, ws);

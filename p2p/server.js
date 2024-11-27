@@ -301,6 +301,8 @@ async function handleICE(data, ws) {
 }
 
 // console.log(generateToken("6736caf3987f91ea19b614b1"));
+// console.log(generateToken("673d6191936faca4b761c671"));
+// console.log(generateToken("6746ca65bbe5082648eee529"));
 
 server.listen(5000, () => {
     console.log('Signaling Server is listening on port 5000');

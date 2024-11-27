@@ -5,7 +5,7 @@ const { ObjectId } = require('mongodb');
 exports.getUserDetails = async (req, res) => {
     try {
         console.log("user", req.user);
-        
+
         const id = req.user._id;
         // const id = "6736caf3987f91ea19b614b1";
         let userDetails = await User.findOne({ _id: id }).lean();
@@ -132,7 +132,13 @@ exports.requestUser = async (req, res) => {
         // const id = "6736caf3987f91ea19b614b1";
         const id = req.user._id;
         const requestedTo = req.body.requestedTo;
-        const requestedDetails = await UserRequest.create({ requestedUser: id, requestedTo: ObjectId.createFromHexString(requestedTo) });
+        const requestedToObjectId = ObjectId.createFromHexString(requestedTo);
+        const isExist = await UserRequest.find({$or: [{$and: [{ requestedUser: id, requestedTo: requestedToObjectId }]}, {$and: [{ requestedUser: requestedToObjectId, requestedTo: id }]}]});
+        if (isExist.length > 0) {
+            res.status(400).json({ msg: "You have already requested this user", status: 400, success: false});
+            return;
+        }
+        const requestedDetails = await UserRequest.create({ requestedUser: id, requestedTo: requestedToObjectId });
         res.status(200).json({ data: requestedDetails, success: true, status: 200 });
     } catch (err) {
         console.error(err);
@@ -160,8 +166,18 @@ exports.changeUserRequestStatus = async (req, res) => {
 exports.getUserRequests = async (req, res) => {
     try {
         const id = req.user._id;
+        const { type } = req.query;
         // const { requestStatus } = req.qeury;
-        const userRequests = await UserRequest.find({ $or: [{ 'requestedTo': id }, { 'requestedUser': id }] });
+        let query;
+        if (type === "Requests") {
+            query = { 'requestedTo': id, 'requestStatus': 'Requested' };
+        } else if (type === "Requested") {
+            query = { 'requestedUser': id, 'requestStatus': 'Requested' };
+        } else {
+            res.status(400).json({ msg: "Invalid type", status: 400, success: false });
+            return;
+        }
+        const userRequests = await UserRequest.find(query);
         res.status(200).json({ data: userRequests, success: true, status: 200 });
     } catch (err) {
         console.error(err);

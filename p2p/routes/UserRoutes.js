@@ -11,5 +11,7 @@ router.put('/updateUserDetails', authenticateToken, userController.updateUserDet
 router.get('/searchUsers', authenticateToken, userController.searchUsers);
 router.post('/requestUser', authenticateToken, userController.requestUser);
 router.put('/changeUserRequestStatus', authenticateToken, userController.changeUserRequestStatus);
+router.get('/getUserRequests', authenticateToken, userController.getUserRequests);
+router.get('/getUserFriends', authenticateToken, userController.getUserFriends);
 
 module.exports = router;

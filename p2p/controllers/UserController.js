@@ -4,9 +4,13 @@ const { ObjectId } = require('mongodb');
 
 exports.getUserDetails = async (req, res) => {
     try {
-        // const { id } = req.query;
-        const id = "6736caf3987f91ea19b614b1";
-        const userDetails = await User.findOne({ _id: ObjectId.createFromHexString(id) });
+        const id = req.user._id;
+        // const id = "6736caf3987f91ea19b614b1";
+        let userDetails = await User.findOne({ _id: id });
+        const userFollowing = await UserRequest.find({ $and: [{ 'requestedUser': id }, { 'requestStatus': 'Accepted' }] }).countDocuments();
+        const userFollowers = await UserRequest.find({ $and: [{ 'requestedTo': id }, { 'requestStatus': 'Accepted' }] }).countDocuments();
+        userDetails["following"] = userFollowing;
+        userDetails["followers"] = userFollowers;
         res.status(200).json({ data: userDetails, success: true, status: 200 });
     } catch (err) {
         console.error(err);
@@ -17,8 +21,9 @@ exports.getUserDetails = async (req, res) => {
 exports.updateUserDetails = async (req, res) => {
     try {
         // const { id } = req.query;
-        const id = "6736caf3987f91ea19b614b1";
-        const userDetails = await User.findOneAndUpdate({ _id: ObjectId.createFromHexString(id) },
+        // const id =  ObjectId.createFromHexString("6736caf3987f91ea19b614b1");
+        const id = req.user._id;
+        const userDetails = await User.findOneAndUpdate({ _id: id },
             { $set: { ...req.body } }, { new: true, runValidators: true });
         res.status(200).json({ data: userDetails, success: true, status: 200 });
     } catch (err) {
@@ -122,9 +127,10 @@ exports.searchUsers = async (req, res) => {
 exports.requestUser = async (req, res) => {
     try {
         // const { id } = req.query;
-        const id = "6736caf3987f91ea19b614b1";
+        // const id = "6736caf3987f91ea19b614b1";
+        const id = req.user._id;
         const requestedTo = req.body.requestedTo;
-        const requestedDetails = await UserRequest.create({ requestedUser: id, requestedTo: requestedTo });
+        const requestedDetails = await UserRequest.create({ requestedUser: id, requestedTo: ObjectId.createFromHexString(requestedTo) });
         res.status(200).json({ data: requestedDetails, success: true, status: 200 });
     } catch (err) {
         console.error(err);
@@ -135,13 +141,37 @@ exports.requestUser = async (req, res) => {
 exports.changeUserRequestStatus = async (req, res) => {
     try {
         // const { id } = req.query;
-        const id = "6736caf3987f91ea19b614b1";
+        // const id = "6736caf3987f91ea19b614b1";
+        const id = req.user._id;
         const userRequestId = req.body.userRequestId;
         const requestStatus = req.body.requestStatus;
         const requestedDetails = await UserRequest.findOneAndUpdate({ _id: userRequestId, requestedUser: id },
             { $set: { requestStatus: requestStatus } },
             { new: true, runValidators: true });
         res.status(200).json({ data: requestedDetails, success: true, status: 200 });
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({ msg: err.message, status: 400, success: false });
+    }
+}
+
+exports.getUserRequests = async (req, res) => {
+    try {
+        const id = req.user._id;
+        // const { requestStatus } = req.qeury;
+        const userRequests = await UserRequest.find({ $or: [{ 'requestedTo': id }, { 'requestedUser': id }] });
+        res.status(200).json({ data: userRequests, success: true, status: 200 });
+    } catch (err) {
+        console.error(err);
+        res.status(400).json({ msg: err.message, status: 400, success: false });
+    }
+}
+
+exports.getUserFriends = async (req, res) => {
+    try {
+        const id = req.user._id;
+        const userFriends = await UserRequest.find({ $and: [{ 'requestStatus': 'Accepted' }, { $or: [{ 'requestedTo': id }, { 'requestedUser': id }] }] });
+        res.status(200).json({ data: userFriends, success: true, status: 200 });
     } catch (err) {
         console.error(err);
         res.status(400).json({ msg: err.message, status: 400, success: false });

@@ -15,4 +15,6 @@ userRequestSchema.pre('save', async function (next) {
     next();
 });
 
+// requestStatus - Requested, Accepted
+
 module.exports = mongoose.model('UserRequest', userRequestSchema);

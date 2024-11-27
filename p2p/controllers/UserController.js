@@ -358,7 +358,7 @@ exports.getUserFriends = async (req, res) => {
                 }
             );
         }
-        const userFriends = await UserRequest.aggregate(userFriends);
+        const userFriends = await UserRequest.aggregate(userFriendsQuery);
         res.status(200).json({ data: userFriends, success: true, status: 200 });
     } catch (err) {
         console.error(err);

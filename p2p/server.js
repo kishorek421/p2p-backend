@@ -11,6 +11,7 @@ const CallHistoryModel = require('./models/CallHistoryModel');
 const CallSdpIceModel = require('./models/CallSdpIceModel');
 const { ObjectId } = require('mongodb');
 const RefreshToken = require('./models/RefreshToken');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 app.use(express.json());
@@ -298,6 +299,8 @@ async function handleICE(data, ws) {
         console.log(`Callee ${calleeId} not found or offline`);
     }
 }
+
+// console.log(generateToken("6736caf3987f91ea19b614b1"));
 
 server.listen(5000, () => {
     console.log('Signaling Server is listening on port 5000');

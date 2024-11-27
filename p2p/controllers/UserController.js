@@ -4,13 +4,15 @@ const { ObjectId } = require('mongodb');
 
 exports.getUserDetails = async (req, res) => {
     try {
+        console.log("user", req.user);
+        
         const id = req.user._id;
         // const id = "6736caf3987f91ea19b614b1";
-        let userDetails = await User.findOne({ _id: id });
-        const userFollowing = await UserRequest.find({ $and: [{ 'requestedUser': id }, { 'requestStatus': 'Accepted' }] }).countDocuments();
-        const userFollowers = await UserRequest.find({ $and: [{ 'requestedTo': id }, { 'requestStatus': 'Accepted' }] }).countDocuments();
-        userDetails["following"] = userFollowing;
-        userDetails["followers"] = userFollowers;
+        let userDetails = await User.findOne({ _id: id }).lean();
+        const userFollowing = await UserRequest.countDocuments({ $and: [{ 'requestedUser': id }, { 'requestStatus': 'Accepted' }] });
+        const userFollowers = await UserRequest.countDocuments({ $and: [{ 'requestedTo': id }, { 'requestStatus': 'Accepted' }] });
+        userDetails['following'] = userFollowing;
+        userDetails['followers'] = userFollowers;
         res.status(200).json({ data: userDetails, success: true, status: 200 });
     } catch (err) {
         console.error(err);

@@ -231,7 +231,7 @@ exports.changeUserRequestStatus = async (req, res) => {
         const id = req.user._id;
         const userRequestId = req.body.userRequestId;
         const requestStatus = req.body.requestStatus;
-        const requestedDetails = await UserRequest.findOneAndUpdate({ _id: userRequestId, requestedUser: id },
+        const requestedDetails = await UserRequest.findOneAndUpdate({ _id: ObjectId.createFromHexString(userRequestId), requestedUser: id },
             { $set: { requestStatus: requestStatus } },
             { new: true, runValidators: true });
         res.status(200).json({ data: requestedDetails, success: true, status: 200 });
@@ -255,7 +255,7 @@ exports.getUserRequests = async (req, res) => {
             res.status(400).json({ msg: "Invalid type", status: 400, success: false });
             return;
         }
-        const userRequests = await UserRequest.find(query).populate('requestedTo').populate('requestedUser');
+        const userRequests = await UserRequest.find(query).sort({createdAt: -1}).populate('requestedTo').populate('requestedUser');
         res.status(200).json({ data: userRequests, success: true, status: 200 });
     } catch (err) {
         console.error(err);

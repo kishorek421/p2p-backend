@@ -228,7 +228,7 @@ exports.changeUserRequestStatus = async (req, res) => {
     try {
         // const { id } = req.query;
         // const id = "6736caf3987f91ea19b614b1";
-        console.log("req.body", req.body);        
+        console.log("req.body", req.body);
         const id = req.user._id;
         console.log("id", id);
         const userRequestId = req.body.userRequestId;
@@ -257,7 +257,7 @@ exports.getUserRequests = async (req, res) => {
             res.status(400).json({ msg: "Invalid type", status: 400, success: false });
             return;
         }
-        const userRequests = await UserRequest.find(query).sort({createdAt: -1}).populate('requestedTo').populate('requestedUser');
+        const userRequests = await UserRequest.find(query).sort({ createdAt: -1 }).populate('requestedTo').populate('requestedUser');
         res.status(200).json({ data: userRequests, success: true, status: 200 });
     } catch (err) {
         console.error(err);
@@ -268,11 +268,83 @@ exports.getUserRequests = async (req, res) => {
 exports.getUserFriends = async (req, res) => {
     try {
         const id = req.user._id;
-        const userFriends = await UserRequest.find({
-            $and: [{ 'requestStatus': 'Accepted' },
-            { $or: [{ 'requestedTo': id }, { 'requestedUser': id }] }]
-        })
-            .populate('requestedTo').populate('requestedUser');
+        const userFriends = await UserRequest.aggregate([
+            {
+                $match: {
+                    $expr: {
+                        $and: [
+                            {
+                                $eq: ["$requestStatus", "Accepted"]
+                            },
+                            {
+                                $or: [
+                                    {
+                                        $eq: [
+                                            "$requestedTo",
+                                            id
+                                        ]
+                                    },
+                                    {
+                                        $eq: [
+                                            "$requestedUser",
+                                            id
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                $project: {
+                    requestUserId: {
+                        $switch: {
+                            branches: [
+                                {
+                                    case: {
+                                        $eq: [
+                                            "$requestedTo",
+                                            id
+                                        ]
+                                    },
+                                    then: "$requestedTo"
+                                },
+                                {
+                                    case: {
+                                        $eq: [
+                                            "$requestedUser",
+                                            id
+                                        ]
+                                    },
+                                    then: "$requestedUser"
+                                }
+                            ],
+                            default: null
+                        }
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "requestUserId",
+                    foreignField: "_id",
+                    as: "requestUserDetails"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$requestUserDetails",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $replaceRoot: {
+                    newRoot: "$requestUserDetails"
+                }
+            }
+        ]);
         res.status(200).json({ data: userFriends, success: true, status: 200 });
     } catch (err) {
         console.error(err);

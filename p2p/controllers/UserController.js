@@ -230,9 +230,10 @@ exports.changeUserRequestStatus = async (req, res) => {
         // const id = "6736caf3987f91ea19b614b1";
         console.log("req.body", req.body);        
         const id = req.user._id;
+        console.log("id", id);
         const userRequestId = req.body.userRequestId;
         const requestStatus = req.body.requestStatus;
-        const requestedDetails = await UserRequest.findOneAndUpdate({ _id: ObjectId.createFromHexString(userRequestId), requestedUser: id },
+        const requestedDetails = await UserRequest.findOneAndUpdate({ _id: ObjectId.createFromHexString(userRequestId), requestedTo: id },
             { $set: { requestStatus: requestStatus } },
             { new: true, runValidators: true });
         res.status(200).json({ data: requestedDetails, success: true, status: 200 });

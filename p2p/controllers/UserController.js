@@ -228,6 +228,7 @@ exports.changeUserRequestStatus = async (req, res) => {
     try {
         // const { id } = req.query;
         // const id = "6736caf3987f91ea19b614b1";
+        console.log("req.body", req.body);        
         const id = req.user._id;
         const userRequestId = req.body.userRequestId;
         const requestStatus = req.body.requestStatus;

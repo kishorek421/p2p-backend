@@ -133,9 +133,9 @@ exports.requestUser = async (req, res) => {
         const id = req.user._id;
         const requestedTo = req.body.requestedTo;
         const requestedToObjectId = ObjectId.createFromHexString(requestedTo);
-        const isExist = await UserRequest.find({$or: [{$and: [{ requestedUser: id, requestedTo: requestedToObjectId }]}, {$and: [{ requestedUser: requestedToObjectId, requestedTo: id }]}]});
+        const isExist = await UserRequest.find({ $or: [{ $and: [{ requestedUser: id, requestedTo: requestedToObjectId }] }, { $and: [{ requestedUser: requestedToObjectId, requestedTo: id }] }] });
         if (isExist.length > 0) {
-            res.status(400).json({ msg: "You have already requested this user", status: 400, success: false});
+            res.status(400).json({ msg: "You have already requested this user", status: 400, success: false });
             return;
         }
         const requestedDetails = await UserRequest.create({ requestedUser: id, requestedTo: requestedToObjectId });
@@ -177,7 +177,7 @@ exports.getUserRequests = async (req, res) => {
             res.status(400).json({ msg: "Invalid type", status: 400, success: false });
             return;
         }
-        const userRequests = await UserRequest.find(query);
+        const userRequests = await UserRequest.find(query).populate('requestedTo').populate('requestedUser');
         res.status(200).json({ data: userRequests, success: true, status: 200 });
     } catch (err) {
         console.error(err);
@@ -188,7 +188,11 @@ exports.getUserRequests = async (req, res) => {
 exports.getUserFriends = async (req, res) => {
     try {
         const id = req.user._id;
-        const userFriends = await UserRequest.find({ $and: [{ 'requestStatus': 'Accepted' }, { $or: [{ 'requestedTo': id }, { 'requestedUser': id }] }] });
+        const userFriends = await UserRequest.find({
+            $and: [{ 'requestStatus': 'Accepted' },
+            { $or: [{ 'requestedTo': id }, { 'requestedUser': id }] }]
+        })
+            .populate('requestedTo').populate('requestedUser');
         res.status(200).json({ data: userFriends, success: true, status: 200 });
     } catch (err) {
         console.error(err);

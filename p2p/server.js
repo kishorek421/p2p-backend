@@ -78,6 +78,9 @@ wss.on('connection', (ws) => {
                 case 'accept_call':
                     await handleAcceptCall(data, ws);
                     break;
+                case 'call_rejected':
+                    await handleCallRejected(data, ws);
+                    break;
                 case 'offer':
                     await handleOffer(data, ws);
                     break;
@@ -221,6 +224,22 @@ async function handleAcceptCall(data, ws) {
             callId,
         }));
         console.log(`Call accepted by ${calleeId} from ${callerId}`);
+    }
+}
+
+async function handleCallRejected(data, ws) {
+    const { callerId, calleeId, callId } = data;
+
+    await CallHistoryModel.findOneAndUpdate({ _id: ObjectId.createFromHexString(callId) }, { $set: { status: 'rejected' } });
+
+    if (clients[callerId]) {
+        clients[callerId].send(JSON.stringify({
+            type: 'call_rejected',
+            callerId,
+            calleeId,
+            callId,
+        }));
+        console.log(`Call rejected by ${calleeId} from ${callerId}`);
     }
 }
 

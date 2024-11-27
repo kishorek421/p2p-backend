@@ -308,7 +308,7 @@ exports.getUserFriends = async (req, res) => {
                                             id
                                         ]
                                     },
-                                    then: "$requestedTo"
+                                    then: "$requestedUser"
                                 },
                                 {
                                     case: {
@@ -317,7 +317,7 @@ exports.getUserFriends = async (req, res) => {
                                             id
                                         ]
                                     },
-                                    then: "$requestedUser"
+                                    then: "$requestedTo"
                                 }
                             ],
                             default: null

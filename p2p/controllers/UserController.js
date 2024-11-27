@@ -203,7 +203,6 @@ exports.searchUsers = async (req, res) => {
         res.status(400).json({ msg: err.message, status: 400, success: false });
     }
 }
-
 exports.requestUser = async (req, res) => {
     try {
         // const { id } = req.query;
@@ -268,7 +267,8 @@ exports.getUserRequests = async (req, res) => {
 exports.getUserFriends = async (req, res) => {
     try {
         const id = req.user._id;
-        const userFriends = await UserRequest.aggregate([
+        const { pageNo = 1, pageSize = 10, q = "" } = req.query;
+        let userFriendsQuery = [
             {
                 $match: {
                     $expr: {
@@ -343,8 +343,22 @@ exports.getUserFriends = async (req, res) => {
                 $replaceRoot: {
                     newRoot: "$requestUserDetails"
                 }
-            }
-        ]);
+            },
+            
+        ];
+        if (q && q.length > 0) {
+            userFriendsQuery.push(
+                {
+                    $match: {
+                        username: {
+                            $regex: q,
+                            $options: "i"
+                        },
+                    }
+                }
+            );
+        }
+        const userFriends = await UserRequest.aggregate(userFriends);
         res.status(200).json({ data: userFriends, success: true, status: 200 });
     } catch (err) {
         console.error(err);

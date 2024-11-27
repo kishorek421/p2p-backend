@@ -39,7 +39,7 @@ exports.searchUsers = async (req, res) => {
         const { pageNo = 1, pageSize = 10, q = "" } = req.query;
         const pageInt = parseInt(pageNo);
         const limitInt = parseInt(pageSize);
-
+        const { id } = req.user._id;
         if (q && q.length > 0) {
             const skip = (pageInt - 1) * limitInt;
 
@@ -60,6 +60,78 @@ exports.searchUsers = async (req, res) => {
                             },
                             {
                                 $limit: limitInt
+                            },
+                            {
+                                $lookup: {
+                                    from: "userrequests",
+                                    let: {
+                                        pId: "$_id",
+                                        userId: id
+                                    },
+                                    pipeline: [
+                                        {
+                                            $match: {
+                                                $expr: {
+                                                    $or: [
+                                                        {
+                                                            $and: [
+                                                                {
+                                                                    $eq: [
+                                                                        "$requestedTo",
+                                                                        "$$userId"
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    $eq: [
+                                                                        "$requestedUser",
+                                                                        "$$pId"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            $and: [
+                                                                {
+                                                                    $eq: [
+                                                                        "$requestedUser",
+                                                                        "$$userId"
+                                                                    ]
+                                                                },
+                                                                {
+                                                                    $eq: [
+                                                                        "$requestedTo",
+                                                                        "$$pId"
+                                                                    ]
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            }
+                                        },
+                                        {
+                                            $project: {
+                                                requestStatus: 1
+                                            }
+                                        }
+                                    ],
+                                    as: "userRequestDetails"
+                                }
+                            },
+                            {
+                                $unwind: {
+                                    path: "$userRequestDetails",
+                                    preserveNullAndEmptyArrays: true
+                                }
+                            },
+                            {
+                                $project: {
+                                    requestStatus:
+                                        "$userRequestDetails.requestStatus",
+                                    username: 1,
+                                    mobileNo: 1,
+                                    status: 1
+                                }
                             }
                         ],
                         count: [

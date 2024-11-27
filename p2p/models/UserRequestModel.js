@@ -4,7 +4,7 @@ const userRequestSchema = new mongoose.Schema({
     requestedUser: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     requestedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     requestStatus: { type: String },
-    createdAt: { type: Date },
+    createdAt: { type: Date, default: Date.now },
     isActive: { type: Boolean },
 });
 

@@ -39,7 +39,11 @@ exports.searchUsers = async (req, res) => {
         const { pageNo = 1, pageSize = 10, q = "" } = req.query;
         const pageInt = parseInt(pageNo);
         const limitInt = parseInt(pageSize);
-        const { id } = req.user._id;
+
+        console.log("user", req.user);
+
+        const id = req.user._id;
+
         if (q && q.length > 0) {
             const skip = (pageInt - 1) * limitInt;
 
@@ -138,6 +142,7 @@ exports.searchUsers = async (req, res) => {
                         count: [
                             {
                                 $match: {
+                                    _id: { $ne: id },
                                     username: {
                                         $regex: q,
                                         $options: "i"

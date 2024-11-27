@@ -49,10 +49,11 @@ exports.searchUsers = async (req, res) => {
                         content: [
                             {
                                 $match: {
+                                    _id: { $ne: id },
                                     username: {
                                         $regex: q,
                                         $options: "i"
-                                    }
+                                    },
                                 }
                             },
                             {

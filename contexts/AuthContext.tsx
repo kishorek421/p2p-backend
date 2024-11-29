@@ -110,6 +110,24 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     <AuthContext.Provider value={{ user, loading, logout }}>
       <ThemeProvider
         value={{
+          fonts: {
+            regular: {
+              fontFamily: "open-sans",
+              fontWeight: "bold",
+            },
+            medium: {
+              fontFamily: "open-sans",
+              fontWeight: "bold",
+            },
+            bold: {
+              fontFamily: "open-sans",
+              fontWeight: "bold",
+            },
+            heavy: {
+              fontFamily: "open-sans",
+              fontWeight: "bold",
+            },
+          },
           dark: false,
           colors: {
             primary: "#009c68",

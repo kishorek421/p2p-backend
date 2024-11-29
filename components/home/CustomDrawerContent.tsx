@@ -1,19 +1,14 @@
-import {
-  AUTH_TOKEN_KEY,
-  CUSTOMER_LEAD_ID,
-  IS_LEAD,
-  IS_WELCOMED,
-  REFRESH_TOKEN_KEY,
-} from "@/constants/storage_keys";
-import { clearStorage, removeItem } from "@/utils/secure_store";
+import { clearStorage } from "@/utils/secure_store";
 import {
   DrawerContentScrollView,
   DrawerItemList,
 } from "@react-navigation/drawer";
 import { router } from "expo-router";
+import React from "react";
 import { View, Text, Image } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
-import Icon from "react-native-vector-icons/AntDesign";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import { NavigationContainer } from "@react-navigation/native";
 
 const CustomDrawerContent = (props: any) => {
   // useEffect(() => {
@@ -22,16 +17,18 @@ const CustomDrawerContent = (props: any) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <DrawerContentScrollView {...props} scrollEnabled={false}>
-        <View className="px-3 py-1">
-          <Image
-            source={require("../../assets/images/splash.png")}
-            className="w-full h-32"
-          />
-        </View>
-        <DrawerItemList {...props} />
-        {/* <DrawerItem label={"Logout"} onPress={() => {}} /> */}
-      </DrawerContentScrollView>
+      <NavigationContainer>
+        <DrawerContentScrollView {...props} scrollEnabled={false}>
+          <View className="px-3 py-1">
+            <Image
+              source={require("../../assets/images/splash.png")}
+              className="w-full h-32"
+            />
+          </View>
+          <DrawerItemList {...props} />
+          {/* <DrawerItem label={"Logout"} onPress={() => {}} /> */}
+        </DrawerContentScrollView>
+      </NavigationContainer>
       <View className="mb-2">
         <View className="p-6 bg-slate-50">
           <TouchableOpacity
@@ -49,7 +46,12 @@ const CustomDrawerContent = (props: any) => {
               <Text className="text-primary-950 font-bold text-md ">
                 Logout
               </Text>
-              <Icon name="logout" size={16} color="#009c68" className="ms-2" />
+              <AntDesign
+                name="logout"
+                size={16}
+                color="#009c68"
+                className="ms-2"
+              />
             </View>
           </TouchableOpacity>
         </View>

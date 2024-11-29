@@ -1,4 +1,5 @@
 {
     "cmake.sourceDirectory": "/Users/fci-1988/Desktop/React_Native/go_desk_workplace/node_modules/expo-modules-core/android",
-    "java.compile.nullAnalysis.mode": "automatic"
+    "java.compile.nullAnalysis.mode": "automatic",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

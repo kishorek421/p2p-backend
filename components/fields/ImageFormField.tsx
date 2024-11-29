@@ -1,10 +1,7 @@
 import { View, Image, TouchableOpacity, Text } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import Icon from "react-native-vector-icons/AntDesign";
 import { isFormFieldInValid, setErrorValue } from "@/utils/helper";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import ImagePickerComponent from "../ImagePickerComponent";
-import { Button, ButtonText } from "../ui/button";
 import {
   FormControl,
   FormControlLabel,
@@ -14,7 +11,7 @@ import {
   FormControlErrorText,
 } from "../ui/form-control";
 import { ErrorModel } from "@/models/common";
-import { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 interface ImageFormFieldProps {
   errors: ErrorModel[];
@@ -126,7 +123,7 @@ const ImageFormField = ({
               <View
                 className={`${isFormFieldInValid(fieldName, errors).length === 0 ? "bg-primary-300" : "bg-red-300"} rounded-md p-2 bg-primary-300 w-auto`}
               >
-                <Icon
+                <AntDesign
                   name="upload"
                   color={`${isFormFieldInValid(fieldName, errors).length === 0 ? "#009c68" : "#b91c1c"}`}
                   size={18}

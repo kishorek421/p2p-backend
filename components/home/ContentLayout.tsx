@@ -4,23 +4,19 @@ import {
   Pressable,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { VStack } from "@/components/ui/vstack";
-import { Card } from "@/components/ui/card";
 import { HStack } from "@/components/ui/hstack";
 import React, { useEffect, useState } from "react";
 import { Button, ButtonText } from "@/components/ui/button";
-import Icon from "react-native-vector-icons/AntDesign";
 import RecentTicketHistoryLayout from "@/components/common/RecentTicketHistoryLayout";
-import { CustomerDetailsModel } from "@/models/customers";
 import { router } from "expo-router";
 import { ServiceItemModel } from "@/models/ui/service_item_model";
-import AntDesign from "react-native-vector-icons/AntDesign";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { RoleModel, RoleModulePermissionsModel } from "@/models/rbac";
 import { UserDetailsModel } from "@/models/users";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 const ContentLayout = ({
   customerDetails,
@@ -122,7 +118,7 @@ const ContentLayout = ({
                 }
               >
                 <ButtonText>Raise Ticket</ButtonText>
-                <Icon
+                <AntDesign
                   name="arrowright"
                   className="ms-3"
                   color="white"

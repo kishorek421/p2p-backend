@@ -11,10 +11,10 @@ import {
   AutocompleteDropdownItem,
   IAutocompleteDropdownRef,
 } from "react-native-autocomplete-dropdown";
-import Feather from "react-native-vector-icons/Feather";
 import { DropdownItemModel } from "@/models/ui/dropdown_item_model";
 import { isFormFieldInValid } from "@/utils/helper";
 import { ErrorModel } from "@/models/common";
+import Feather from "@expo/vector-icons/Feather";
 
 interface PrimaryTypeheadFieldProps {
   type: any;

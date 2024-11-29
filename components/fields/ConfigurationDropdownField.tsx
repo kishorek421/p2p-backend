@@ -15,6 +15,7 @@ import { ConfigurationModel } from "@/models/configurations";
 import { useEffect, useState } from "react";
 import { GET_CONFIGURATIONS_BY_CATEGORY } from "@/constants/api_endpoints";
 import api from "@/services/api";
+import React from "react";
 
 interface ConfigurationDropdownFieldProps {
   configurationCategory: string;

@@ -13,6 +13,8 @@
       "backgroundColor": "#ffffff"
     },
     "android": {
+      "minSdkVersion": 24,
+      "compileSdkVersion": 35,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"

@@ -33,11 +33,11 @@
     "@react-native-async-storage/async-storage": "^2.1.0",
     "@react-native-community/cli": "^15.1.2",
     "@react-navigation/drawer": "^6.7.2",
-    "@sentry/react-native": "^6.1.0",
+    "@sentry/react-native": "^6.3.0",
     "autoprefixer": "^10.4.20",
     "axios": "^1.7.4",
     "babel-plugin-module-resolver": "^5.0.2",
-    "expo": "52.0.10",
+    "expo": "52.0.11",
     "expo-asset": "~11.0.1",
     "expo-constants": "~17.0.3",
     "expo-font": "~13.0.1",
@@ -55,7 +55,7 @@
     "postcss": "^8.4.47",
     "react": "18.3.1",
     "react-dom": "18.3.1",
-    "react-native": "0.76.2",
+    "react-native": "0.76.3",
     "react-native-autocomplete-dropdown": "^4.0.0-rc.5",
     "react-native-axios": "^0.17.1",
     "react-native-date-picker": "^5.0.7",
@@ -72,7 +72,8 @@
     "react-native-svg": "15.8.0",
     "react-native-swiper": "^1.6.0",
     "react-native-toast-message": "^2.2.0",
-    "react-native-web": "~0.19.10"
+    "react-native-web": "~0.19.10",
+    "expo-dev-client": "~5.0.4"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

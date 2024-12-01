@@ -23,6 +23,7 @@ import { CustomerLeadDetailsModel } from "@/models/customers";
 import Toast from "react-native-toast-message";
 import PrimaryTextFormField from "@/components/fields/PrimaryTextFormField";
 import { UserDetailsModel } from "@/models/users";
+import React from "react";
 
 const LoginScreen = () => {
   const [email, setEmail] = useState<string>("");
@@ -128,7 +129,7 @@ const LoginScreen = () => {
                   await setItem(CUSTOMER_LEAD_ID, customerData.id ?? "");
                   if (customerLeadStatus === CUSTOMER_LEAD_ACTIVE) {
                     await setItem(IS_LEAD, "false");
-                    router.replace({ pathname: "/home" });
+                    router.replace({ pathname: "/(home)/home" });
                   } else {
                     await setItem(IS_LEAD, "true");
                     Toast.show({
@@ -151,7 +152,7 @@ const LoginScreen = () => {
                 setIsLoading(false);
               }
             } catch (e) {
-              console.error();
+              console.error(e);
               const customerLeadResponse = await api.get<
                 ApiResponseModel<CustomerLeadDetailsModel>
               >(GET_CUSTOMER_LEAD_DETAILS);
@@ -189,8 +190,8 @@ const LoginScreen = () => {
           }
         })
         .catch(async (e) => {
-          console.error(e);
-          // console.error(e.response?.data);
+          // console.error(e);
+          console.error(e.response);
           let errors = e.response?.data?.errors;
           if (errors) {
             console.error("errors -> ", errors);

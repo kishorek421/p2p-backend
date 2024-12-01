@@ -8,7 +8,6 @@ import React from "react";
 import { View, Text, Image } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import { NavigationContainer } from "@react-navigation/native";
 
 const CustomDrawerContent = (props: any) => {
   // useEffect(() => {
@@ -17,18 +16,16 @@ const CustomDrawerContent = (props: any) => {
 
   return (
     <View style={{ flex: 1 }}>
-      <NavigationContainer>
-        <DrawerContentScrollView {...props} scrollEnabled={false}>
-          <View className="px-3 py-1">
-            <Image
-              source={require("../../assets/images/splash.png")}
-              className="w-full h-32"
-            />
-          </View>
-          <DrawerItemList {...props} />
-          {/* <DrawerItem label={"Logout"} onPress={() => {}} /> */}
-        </DrawerContentScrollView>
-      </NavigationContainer>
+      <DrawerContentScrollView {...props} scrollEnabled={false}>
+        <View className="px-3 py-1">
+          <Image
+            source={require("../../assets/images/splash.png")}
+            className="w-full h-32"
+          />
+        </View>
+        <DrawerItemList {...props} />
+        {/* <DrawerItem label={"Logout"} onPress={() => {}} /> */}
+      </DrawerContentScrollView>
       <View className="mb-2">
         <View className="p-6 bg-slate-50">
           <TouchableOpacity

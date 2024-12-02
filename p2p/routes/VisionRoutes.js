@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const visionController = require('../controllers/visionController');
+const visionController = require('../controllers/VisionController');
 const authenticateToken = require('../middleware/authMiddleware');
 const multer = require('multer');
 

@@ -2,7 +2,7 @@ const vision = require('@google-cloud/vision');
 const path = require('path');
 
 const client = new vision.ImageAnnotatorClient({
-    keyFilename: path.join(__dirname, '../godeskmap-cd553715665f.json'), // Replace with your key file path
+    keyFilename: path.join(__dirname , '../godeskmap-0297e7c9e91f.json'), // Replace with your key file path
 });
 
 exports.findFace = async (req, res) => {

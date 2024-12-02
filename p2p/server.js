@@ -6,7 +6,6 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const userRoutes = require('./routes/UserRoutes');
 const authRoutes = require('./routes/AuthRoutes');
-const visionRoutes = require('./routes/VisionRoutes');
 const UserModel = require('./models/UserModel');
 const CallHistoryModel = require('./models/CallHistoryModel');
 const CallSdpIceModel = require('./models/CallSdpIceModel');
@@ -31,7 +30,6 @@ let clients = {};
 
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
-app.use('/api/vision', visionRoutes);
 
 app.get('/', (req, res) => {
     res.send('WebRTC Signaling Server');

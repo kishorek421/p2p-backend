@@ -203,9 +203,9 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
   const { token, publicKey, signature } = data;
 
   try {
-    const verify = crypto.createVerify("RSA-SHA256");
+    const verify = crypto.createVerify("SHA256");
     verify.update(token);
-    const isValid = verify.verify(publicKey, Buffer.from(signature, "base64"));
+    const isValid = verify.verify(publicKey, signature, 'base64');
 
     if (isValid) {
       clients[token] = ws;
@@ -222,7 +222,7 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
     console.error(e);
   }
 
-  console.log(`User ${userId} registered to verify mobile number`);
+  console.log(`User ${token} registered to verify mobile number`);
 }
 
 async function handleChangeUserStatus(data, ws) {

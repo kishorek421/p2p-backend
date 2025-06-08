@@ -13,7 +13,7 @@ const CallSdpIceModel = require("./models/CallSdpIceModel");
 const { ObjectId } = require("mongodb");
 const RefreshToken = require("./models/RefreshToken");
 const jwt = require("jsonwebtoken");
-
+const crypto = require("crypto");
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -45,6 +45,8 @@ const generateToken = (userId) => {
     expiresIn: process.env.JWT_EXPIRATION,
   });
 };
+
+const tokenStore = new Map(); // This stores the original token data
 
 async function generateRefreshToken(userId) {
   const token = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
@@ -117,16 +119,9 @@ wss.on("connection", (ws) => {
 });
 
 async function handleSendMobileNumber(data, ws) {
-  const { messageBody, mobileNo } = data;
+  const { token, mobileNo } = data;
 
   console.log("sendMobileNumber: mobileNo ", mobileNo);
-
-  if (messageBody === undefined) {
-    console.log("UserId is undefined");
-    return;
-  }
-
-  const { token, publicKey, signature } = messageBody;
 
   // Lookup the token
   const entry = tokenStore.get(token);
@@ -135,40 +130,39 @@ async function handleSendMobileNumber(data, ws) {
     return res.status(404).json({ error: "Token not found" });
   }
 
-  // Check public key match
-  if (entry.public_key !== publicKey) {
-    return res.status(403).json({ error: "Public key mismatch" });
-  }
+  //   // Check public key match
+  //   if (entry.publicKey !== publicKey) {
+  //     return res.status(403).json({ error: "Public key mismatch" });
+  //   }
 
-  // Verify the signature using the public key
-  const isValid = crypto
-    .createVerify("SHA256")
-    .update(token)
-    .verify(publicKey, Buffer.from(signature, "base64"));
+  //   // Verify the signature using the public key
+  //   const verify = crypto.createVerify("SHA256");
+  //   verify.update(token);
+  //   verify.end();
+  //   const isValid = verify.verify(
+  //     publicKey,
+  //     Buffer.from(signatureBase64, "base64")
+  //   );
 
-  if (isValid) {
-    const result = await UserModel.create({
-      verifiedToken: token,
-      publicKey,
-      signature,
-      username: "Hello Famy!",
-      mobileNo: mobileNo,
-      isMobileVerified: true,
-      status: "online",
-    });
+  //   if (isValid) {
+  const result = await UserModel.create({
+    verifiedToken: token,
+    username: "Hello Famy!",
+    mobileNo: mobileNo,
+    isMobileVerified: true,
+    status: "online",
+  });
 
-    clients[token + publicKey + signature].send(
-      JSON.stringify({
-        type: "receivedMobileNumber",
-        success: true,
-        details: result,
-        token: token,
-        publicKey,
-        signature,
-      })
-    );
-    // return res.status(401).json({ error: "Invalid signature" });
-  }
+  entry.wsClient.send(
+    JSON.stringify({
+      type: "receivedMobileNumber",
+      success: true,
+      details: result,
+      token: token,
+    })
+  );
+  // return res.status(401).json({ error: "Invalid signature" });
+  //   }
 
   // All good! Return the associated mobile number
   //   return res.json({ mobile_number: entry.mobile_number });
@@ -208,7 +202,22 @@ async function handleSendMobileNumber(data, ws) {
 async function handleRegisterToVerifyMobileNumber(data, ws) {
   const { token, publicKey, signature } = data;
 
-  clients[token + publicKey + signature] = ws;
+  const verify = crypto.createVerify("SHA256");
+  verify.update(token);
+  verify.end();
+  const isValid = verify.verify(publicKey, Buffer.from(signature, "base64"));
+
+  if (isValid) {
+    clients[token] = ws;
+
+    tokenStore.set(token, {
+      token,
+      publicKey,
+      signature,
+      wsClient: ws,
+      timestamp: Date.now(),
+    });
+  }
 
   console.log(`User ${userId} registered to verify mobile number`);
 }

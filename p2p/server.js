@@ -14,6 +14,8 @@ const { ObjectId } = require("mongodb");
 const RefreshToken = require("./models/RefreshToken");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const forge = require("node-forge");
+
 const app = express();
 app.use(express.json());
 app.use(cors());
@@ -203,9 +205,14 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
   const { token, publicKey, signature } = data;
 
   try {
-    const verify = crypto.createVerify("SHA256");
-    verify.update(token);
-    const isValid = verify.verify(publicKey, signature, 'base64');
+    // const verify = crypto.createVerify("SHA256");
+    // verify.update(token);
+    // const isValid = verify.verify(publicKey, signature, 'base64');
+    const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
+    const md = forge.md.sha256.create();
+    md.update(token, "utf8");
+    const signatureBytes = forge.util.decode64(signature);
+    const isValid = publicKeyObj.verify(md.digest().bytes(), signatureBytes);
 
     if (isValid) {
       clients[token] = ws;

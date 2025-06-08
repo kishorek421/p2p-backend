@@ -202,21 +202,24 @@ async function handleSendMobileNumber(data, ws) {
 async function handleRegisterToVerifyMobileNumber(data, ws) {
   const { token, publicKey, signature } = data;
 
-  const verify = crypto.createVerify("SHA256");
-  verify.update(token);
-  verify.end();
-  const isValid = verify.verify(publicKey, Buffer.from(signature, "base64"));
+  try {
+    const verify = crypto.createVerify("RSA-SHA256");
+    verify.update(token);
+    const isValid = verify.verify(publicKey, Buffer.from(signature, "base64"));
 
-  if (isValid) {
-    clients[token] = ws;
+    if (isValid) {
+      clients[token] = ws;
 
-    tokenStore.set(token, {
-      token,
-      publicKey,
-      signature,
-      wsClient: ws,
-      timestamp: Date.now(),
-    });
+      tokenStore.set(token, {
+        token,
+        publicKey,
+        signature,
+        wsClient: ws,
+        timestamp: Date.now(),
+      });
+    }
+  } catch (e) {
+    console.error(e);
   }
 
   console.log(`User ${userId} registered to verify mobile number`);

@@ -15,6 +15,7 @@ const RefreshToken = require("./models/RefreshToken");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const forge = require("node-forge");
+const { verify } = require("@noble/secp256k1");
 
 const app = express();
 app.use(express.json());
@@ -24,6 +25,10 @@ const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/p2p";
+
+const pending = new Map(); // token -> { publicKey, signature, wsClient }
+const usedSignatures = new Set();
+const TOKEN_EXPIRY = 30; // seconds
 
 mongoose
   .connect(uri, {})
@@ -120,115 +125,242 @@ wss.on("connection", (ws) => {
   });
 });
 
+function isFreshToken(token) {
+  const [code, tsStr] = token.split("|");
+  const ts = parseInt(tsStr, 10);
+  return Math.abs(Math.floor(Date.now() / 1000) - ts) <= TOKEN_EXPIRY;
+}
+// async function handleSendMobileNumber(data, ws) {
+//   const { token, mobileNo } = data;
+
+//   console.log("sendMobileNumber: mobileNo ", mobileNo);
+
+//   // Lookup the token
+//   const entry = tokenStore.get(token);
+
+//   if (!entry) {
+//     return res.status(404).json({ error: "Token not found" });
+//   }
+
+//   //   // Check public key match
+//   //   if (entry.publicKey !== publicKey) {
+//   //     return res.status(403).json({ error: "Public key mismatch" });
+//   //   }
+
+//   //   // Verify the signature using the public key
+//   //   const verify = crypto.createVerify("SHA256");
+//   //   verify.update(token);
+//   //   verify.end();
+//   //   const isValid = verify.verify(
+//   //     publicKey,
+//   //     Buffer.from(signatureBase64, "base64")
+//   //   );
+
+//   //   if (isValid) {
+//   const result = await UserModel.create({
+//     verifiedToken: token,
+//     username: "Hello Famy!",
+//     mobileNo: mobileNo,
+//     isMobileVerified: true,
+//     status: "online",
+//   });
+
+//   entry.wsClient.send(
+//     JSON.stringify({
+//       type: "receivedMobileNumber",
+//       success: true,
+//       details: result,
+//       token: token,
+//     })
+//   );
+//   // return res.status(401).json({ error: "Invalid signature" });
+//   //   }
+
+//   // All good! Return the associated mobile number
+//   //   return res.json({ mobile_number: entry.mobile_number });
+
+//   //   const result = await UserModel.create({
+//   //     verifiedToken: userId,
+//   //     username: "Hello Famy!",
+//   //     mobileNo: mobileNo,
+//   //     isMobileVerified: true,
+//   //     status: "online",
+//   //   });
+
+//   //   // console.log("clients", clients);
+
+//   //   const token = generateToken(result._id);
+
+//   //   // Generate and save a new refresh token
+//   //   const refreshToken = await generateRefreshToken(result._id);
+
+//   //   clients[userId].send(
+//   //     JSON.stringify({
+//   //       type: "receivedMobileNumber",
+//   //       success: true,
+//   //       details: result,
+//   //       token: token,
+//   //       refreshToken: refreshToken,
+//   //     })
+//   //   );
+
+//   //   if (result.modifiedCount > 0) {
+//   //     console.log(`User ${userId} created`);
+//   //   } else {
+//   //     console.log(`Failed to update status for user ${userId}`);
+//   //   }
+// }
+
+// async function handleRegisterToVerifyMobileNumber(data, ws) {
+//   const { token, publicKey, signature } = data;
+
+//   try {
+//     // const verify = crypto.createVerify("SHA256");
+//     // verify.update(token);
+//     // const isValid = verify.verify(publicKey, signature, 'base64');
+//     const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
+//     const md = forge.md.sha256.create();
+//     md.update(token, "utf8");
+//     const signatureBytes = forge.util.decode64(signature);
+//     const isValid = publicKeyObj.verify(md.digest().bytes(), signatureBytes);
+
+//     if (isValid) {
+//       clients[token] = ws;
+
+//       tokenStore.set(token, {
+//         token,
+//         publicKey,
+//         signature,
+//         wsClient: ws,
+//         timestamp: Date.now(),
+//       });
+//     }
+//   } catch (e) {
+//     console.error(e);
+//   }
+
+//   console.log(`User ${token} registered to verify mobile number`);
+// }
 async function handleSendMobileNumber(data, ws) {
-  const { token, mobileNo } = data;
-
-  console.log("sendMobileNumber: mobileNo ", mobileNo);
-
-  // Lookup the token
-  const entry = tokenStore.get(token);
+  const { token, mobileNumber, signature } = data;
+  const entry = pending.get(token);
 
   if (!entry) {
-    return res.status(404).json({ error: "Token not found" });
+    return ws.send(
+      JSON.stringify({
+        type: "verification_result",
+        success: false,
+        error: "Not found",
+      })
+    );
+  }
+  if (!isFreshToken(token)) {
+    return ws.send(
+      JSON.stringify({
+        type: "verification_result",
+        success: false,
+        error: "Expired",
+      })
+    );
   }
 
-  //   // Check public key match
-  //   if (entry.publicKey !== publicKey) {
-  //     return res.status(403).json({ error: "Public key mismatch" });
-  //   }
+  const fp = crypto
+    .createHash("sha256")
+    .update(token + entry.signature)
+    .digest("hex");
+  if (usedSignatures.has(fp)) {
+    return ws.send(
+      JSON.stringify({
+        type: "verification_result",
+        success: false,
+        error: "Replay",
+      })
+    );
+  }
+  // Verify Device A's signature
+  const ok =  verify(
+    Buffer.from(entry.signature, "base64"),
+    new TextEncoder().encode(token),
+    Buffer.from(entry.publicKey, "hex")
+  );
+  if (!ok) {
+    return ws.send(
+      JSON.stringify({
+        type: "verification_result",
+        success: false,
+        error: "Invalid sig",
+      })
+    );
+  }
+  usedSignatures.add(fp);
+  setTimeout(() => usedSignatures.delete(fp), TOKEN_EXPIRY * 1000);
 
-  //   // Verify the signature using the public key
-  //   const verify = crypto.createVerify("SHA256");
-  //   verify.update(token);
-  //   verify.end();
-  //   const isValid = verify.verify(
-  //     publicKey,
-  //     Buffer.from(signatureBase64, "base64")
-  //   );
+   const result = await UserModel.create({
+     username: "Hello Famy!",
+     mobileNo: mobileNo,
+     isMobileVerified: true,
+     status: "online",
+     publicKey: entry.publicKey,
+   });
 
-  //   if (isValid) {
-  const result = await UserModel.create({
-    verifiedToken: token,
-    username: "Hello Famy!",
-    mobileNo: mobileNo,
-    isMobileVerified: true,
-    status: "online",
-  });
-
+  // Send result back to Device A
   entry.wsClient.send(
     JSON.stringify({
       type: "receivedMobileNumber",
       success: true,
       details: result,
-      token: token,
     })
   );
-  // return res.status(401).json({ error: "Invalid signature" });
-  //   }
-
-  // All good! Return the associated mobile number
-  //   return res.json({ mobile_number: entry.mobile_number });
-
-  //   const result = await UserModel.create({
-  //     verifiedToken: userId,
-  //     username: "Hello Famy!",
-  //     mobileNo: mobileNo,
-  //     isMobileVerified: true,
-  //     status: "online",
-  //   });
-
-  //   // console.log("clients", clients);
-
-  //   const token = generateToken(result._id);
-
-  //   // Generate and save a new refresh token
-  //   const refreshToken = await generateRefreshToken(result._id);
-
-  //   clients[userId].send(
-  //     JSON.stringify({
-  //       type: "receivedMobileNumber",
-  //       success: true,
-  //       details: result,
-  //       token: token,
-  //       refreshToken: refreshToken,
-  //     })
-  //   );
-
-  //   if (result.modifiedCount > 0) {
-  //     console.log(`User ${userId} created`);
-  //   } else {
-  //     console.log(`Failed to update status for user ${userId}`);
-  //   }
+  // Acknowledge SS Mobile
+  ws.send(JSON.stringify({ type: "verification_result", success: true }));
+  pending.delete(token);
 }
+
+// async function handleRegisterToVerifyMobileNumber(data, ws) {
+//   const { token, publicKey, signature } = data;
+
+//   try {
+//     // const verify = crypto.createVerify("SHA256");
+//     // verify.update(token);
+//     // const isValid = verify.verify(publicKey, signature, 'base64');
+//     const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
+//     const md = forge.md.sha256.create();
+//     md.update(token, "utf8");
+//     const signatureBytes = forge.util.decode64(signature);
+//     const isValid = publicKeyObj.verify(md.digest().bytes(), signatureBytes);
+
+//     if (isValid) {
+//       clients[token] = ws;
+
+//       tokenStore.set(token, {
+//         token,
+//         publicKey,
+//         signature,
+//         wsClient: ws,
+//         timestamp: Date.now(),
+//       });
+//     }
+//   } catch (e) {
+//     console.error(e);
+//   }
+
+//   console.log(`User ${token} registered to verify mobile number`);
+// }
 
 async function handleRegisterToVerifyMobileNumber(data, ws) {
   const { token, publicKey, signature } = data;
 
-  try {
-    // const verify = crypto.createVerify("SHA256");
-    // verify.update(token);
-    // const isValid = verify.verify(publicKey, signature, 'base64');
-    const publicKeyObj = forge.pki.publicKeyFromPem(publicKey);
-    const md = forge.md.sha256.create();
-    md.update(token, "utf8");
-    const signatureBytes = forge.util.decode64(signature);
-    const isValid = publicKeyObj.verify(md.digest().bytes(), signatureBytes);
-
-    if (isValid) {
-      clients[token] = ws;
-
-      tokenStore.set(token, {
-        token,
-        publicKey,
-        signature,
-        wsClient: ws,
-        timestamp: Date.now(),
-      });
-    }
-  } catch (e) {
-    console.error(e);
+  if (!isFreshToken(token)) {
+    return ws.send(
+      JSON.stringify({
+        type: "register_ack",
+        success: false,
+        error: "Token expired",
+      })
+    );
   }
-
+  pending.set(token, { publicKey, signature, wsClient: ws });
+  ws.send(JSON.stringify({ type: "register_ack", success: true }));
   console.log(`User ${token} registered to verify mobile number`);
 }
 

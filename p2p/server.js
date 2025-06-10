@@ -16,6 +16,8 @@ import pkg from "jsonwebtoken";
 import { createHash } from "crypto";
 import forge from "node-forge";
 // const { verify } = require("@noble/secp256k1");
+import { hmac } from "@noble/hashes/hmac";
+import { sha256 } from "@noble/hashes/sha2";
 import * as secp from "@noble/secp256k1";
 // import "react-native-url-polyfill/auto";
 import { webcrypto } from "node:crypto";
@@ -24,6 +26,11 @@ import { webcrypto } from "node:crypto";
 if (!globalThis.crypto) {
   globalThis.crypto = webcrypto;
 }
+
+secp.etc.hmacSha256Async = async (key, ...msgs) => {
+  const msg = secp.etc.concatBytes(...msgs);
+  return hmac(sha256, key, msg);
+};
 
 const { sign } = pkg;
 
@@ -464,14 +471,26 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
   const privKey = secp.utils.randomPrivateKey(); // Secure random private key
   const pubKey = secp.getPublicKey(privKey);
 
-  const msgHash =
-    "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";
+  // const msgHash =
+  //   "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";
 
-  const signature2 = await secp.signAsync(msgHash, privKey);
+  const token1 = generateToken();
 
-  const ok1 = secp.verify(signature2, msgHash, pubKey);
+  const tokenHash = sha256(token1);
 
-  console.log("ok1 ->", ok1);
+  const signature2 = await secp.signAsync(tokenHash, privKey);
+
+  const ok1 = secp.verify(signature2, tokenHash, pubKey);
+
+  console.log(
+    "ok1 ->",
+    ok1,
+    " - for ->",
+    token1,
+    tokenHash,
+    signature2,
+    pubKey
+  );
 
   const parsedSignature = JSON.parse(signature);
   const newSignature = {

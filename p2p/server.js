@@ -384,7 +384,12 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
 
   const publicKeyParsed = JSON.parse(publicKey);
 
-  console.log("publicKeyParsed", publicKeyParsed, " - typeof ->", typeof publicKeyParsed);
+  console.log(
+    "publicKeyParsed",
+    publicKeyParsed.publicKey,
+    " - typeof ->",
+    typeof publicKeyParsed.publicKey
+  );
 
   pending.set(token, {
     publicKey: publicKeyParsed.publicKey,

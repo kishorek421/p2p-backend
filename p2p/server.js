@@ -393,7 +393,7 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
       s: 15365573932801442355428975740149001425321289140962182066538269204559119424382n,
     },
     [
-      (98,
+      98,
       28,
       225,
       132,
@@ -424,10 +424,10 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
       12,
       214,
       0,
-      179),
+      179
     ],
     [
-      (3,
+      3,
       65,
       222,
       174,
@@ -459,7 +459,7 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
       101,
       42,
       35,
-      94),
+      94,
     ]
   );
   console.log("ok -> ", ok);

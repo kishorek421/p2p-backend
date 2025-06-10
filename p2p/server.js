@@ -1,33 +1,34 @@
 require("dotenv").config();
-const express = require("express");
-const http = require("http");
-const WebSocket = require("ws");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const userRoutes = require("./routes/UserRoutes");
-const authRoutes = require("./routes/AuthRoutes");
-const UserModel = require("./models/UserModel");
-const visionRoutes = require("./routes/VisionRoutes");
-const CallHistoryModel = require("./models/CallHistoryModel");
-const CallSdpIceModel = require("./models/CallSdpIceModel");
-const { ObjectId } = require("mongodb");
-const RefreshToken = require("./models/RefreshToken");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const forge = require("node-forge");
+import express, { json } from "express";
+import { createServer } from "http";
+import { Server } from "ws";
+import cors from "cors";
+import { connect } from "mongoose";
+import userRoutes from "./routes/UserRoutes";
+import authRoutes from "./routes/AuthRoutes";
+import { create, updateOne, findOne } from "./models/UserModel";
+import visionRoutes from "./routes/VisionRoutes";
+import { create as _create, findOneAndUpdate } from "./models/CallHistoryModel";
+import { create as __create } from "./models/CallSdpIceModel";
+import { ObjectId } from "mongodb";
+import RefreshToken from "./models/RefreshToken";
+import { sign } from "jsonwebtoken";
+import { createHash } from "crypto";
+import forge from "node-forge";
+import { verify } from "@noble/secp256k1";
 // const { verify } = require("@noble/secp256k1");
-let verify;
-(async () => {
-  const secp = await import("@noble/secp256k1");
-  verify = secp.verify;
-})();
+// let verify;
+// (async () => {
+//   const secp = await import("@noble/secp256k1");
+//   verify = secp.verify;
+// })();
 
 const app = express();
-app.use(express.json());
+app.use(json());
 app.use(cors());
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const server = createServer(app);
+const wss = new Server({ server });
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/p2p";
 
@@ -35,8 +36,7 @@ const pending = new Map(); // token -> { publicKey, signature, wsClient }
 const usedSignatures = new Set();
 const TOKEN_EXPIRY = 30; // seconds
 
-mongoose
-  .connect(uri, {})
+connect(uri, {})
   .then((client) => {
     console.log("Connected to MongoDB");
   })
@@ -53,7 +53,7 @@ app.get("/", (req, res) => {
 });
 
 const generateToken = (userId) => {
-  return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
+  return sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRATION,
   });
 };
@@ -61,7 +61,7 @@ const generateToken = (userId) => {
 const tokenStore = new Map(); // This stores the original token data
 
 async function generateRefreshToken(userId) {
-  const token = jwt.sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
+  const token = sign({ userId }, process.env.REFRESH_TOKEN_SECRET, {
     expiresIn: process.env.REFRESH_TOKEN_EXPIRATION,
   });
   const expiresAt = new Date();
@@ -269,8 +269,7 @@ async function handleSendMobileNumber(data, ws) {
     );
   }
 
-  const fp = crypto
-    .createHash("sha256")
+  const fp = createHash("sha256")
     .update(token + entry.signature)
     .digest("hex");
   if (usedSignatures.has(fp)) {
@@ -300,7 +299,7 @@ async function handleSendMobileNumber(data, ws) {
   usedSignatures.add(fp);
   setTimeout(() => usedSignatures.delete(fp), TOKEN_EXPIRY * 1000);
 
-   const result = await UserModel.create({
+   const result = await create({
      username: "Hello Famy!",
      mobileNo: mobileNo,
      isMobileVerified: true,
@@ -381,7 +380,7 @@ async function handleChangeUserStatus(data, ws) {
     return;
   }
 
-  const result = await UserModel.updateOne(
+  const result = await updateOne(
     { _id: ObjectId.createFromHexString(userId) },
     { $set: { status } }
   );
@@ -399,14 +398,14 @@ async function handleCallUser(data, ws) {
   const callId = new ObjectId();
 
   if (clients[calleeId]) {
-    await CallHistoryModel.create({
+    await _create({
       _id: callId,
       callerId: ObjectId.createFromHexString(callerId),
       calleeId: ObjectId.createFromHexString(calleeId),
       status: "ringing",
     });
 
-    let callerDetails = UserModel.findOne({
+    let callerDetails = findOne({
       _id: ObjectId.createFromHexString(callerId),
     });
 
@@ -438,7 +437,7 @@ async function handleCallUser(data, ws) {
 async function handleAcceptCall(data, ws) {
   const { callerId, calleeId, callId } = data;
 
-  await CallHistoryModel.findOneAndUpdate(
+  await findOneAndUpdate(
     { _id: ObjectId.createFromHexString(callId) },
     { $set: { status: "accepted" } }
   );
@@ -459,7 +458,7 @@ async function handleAcceptCall(data, ws) {
 async function handleCallRejected(data, ws) {
   const { callerId, calleeId, callId } = data;
 
-  await CallHistoryModel.findOneAndUpdate(
+  await findOneAndUpdate(
     { _id: ObjectId.createFromHexString(callId) },
     { $set: { status: "rejected" } }
   );
@@ -481,7 +480,7 @@ async function handleOffer(data, ws) {
   const { callId, callerId, calleeId, sdp } = data;
 
   if (clients[calleeId]) {
-    await CallSdpIceModel.create({
+    await __create({
       callId: ObjectId.createFromHexString(callId),
       callerId: ObjectId.createFromHexString(callerId),
       calleeId: ObjectId.createFromHexString(calleeId),
@@ -509,7 +508,7 @@ async function handleAnswer(data, ws) {
   const { callId, callerId, calleeId, sdp } = data;
 
   if (clients[callerId]) {
-    await CallSdpIceModel.create({
+    await __create({
       callId: ObjectId.createFromHexString(callId),
       callerId: ObjectId.createFromHexString(callerId),
       calleeId: ObjectId.createFromHexString(calleeId),
@@ -536,7 +535,7 @@ async function handleICE(data, ws) {
   const { callId, callerId, calleeId, ice } = data;
 
   if (clients[calleeId]) {
-    await CallSdpIceModel.create({
+    await __create({
       callId: ObjectId.createFromHexString(callId),
       callerId: ObjectId.createFromHexString(callerId),
       calleeId: ObjectId.createFromHexString(calleeId),

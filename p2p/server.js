@@ -17,6 +17,13 @@ import { createHash } from "crypto";
 import forge from "node-forge";
 // const { verify } = require("@noble/secp256k1");
 import * as secp from "@noble/secp256k1";
+// import "react-native-url-polyfill/auto";
+import { webcrypto } from "node:crypto";
+
+// Ensure globalThis.crypto is defined
+if (!globalThis.crypto) {
+  globalThis.crypto = webcrypto;
+}
 
 const { sign } = pkg;
 

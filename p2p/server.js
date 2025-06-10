@@ -382,8 +382,12 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
     recovery: Number.parseInt(parsedSignature.recovery),
   };
 
+  const publicKeyParsed = JSON.parse(publicKey);
+
+  console.log("publicKeyParsed", publicKeyParsed, " - typeof ->", typeof publicKeyParsed);
+
   pending.set(token, {
-    publicKey,
+    publicKey: publicKeyParsed.publicKey,
     signature: newSignature,
     wsClient: ws,
   });

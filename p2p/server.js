@@ -15,7 +15,12 @@ const RefreshToken = require("./models/RefreshToken");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const forge = require("node-forge");
-const { verify } = require("@noble/secp256k1");
+// const { verify } = require("@noble/secp256k1");
+let verify;
+(async () => {
+  const secp = await import("@noble/secp256k1");
+  verify = secp.verify;
+})();
 
 const app = express();
 app.use(express.json());

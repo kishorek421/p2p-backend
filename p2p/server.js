@@ -375,9 +375,16 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
   console.log("signature ->", signature);
   console.log("publicKey ->", publicKey);
 
+  const parsedSignature = JSON.parse(signature);
+  const newSignature = {
+    s: parsedSignature.s,
+    r: parsedSignature.r,
+    recovery: parsedSignature.recovery,
+  };
+
   pending.set(token, {
     publicKey,
-    signature: JSON.parse(signature),
+    signature: newSignature,
     wsClient: ws,
   });
   ws.send(JSON.stringify({ type: "register_ack", success: true }));

@@ -381,15 +381,15 @@ async function handleSendMobileNumber(data, ws) {
 async function handleRegisterToVerifyMobileNumber(data, ws) {
   const { token, publicKey, signature } = data;
 
-  if (!isFreshToken(token)) {
-    return ws.send(
-      JSON.stringify({
-        type: "register_ack",
-        success: false,
-        error: "Token expired",
-      })
-    );
-  }
+  // if (!isFreshToken(token)) {
+  //   return ws.send(
+  //     JSON.stringify({
+  //       type: "register_ack",
+  //       success: false,
+  //       error: "Token expired",
+  //     })
+  //   );
+  // }
 
   // const ok = secp.verify(
   //   {

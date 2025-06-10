@@ -16,21 +16,21 @@ import pkg from "jsonwebtoken";
 import { createHash } from "crypto";
 import forge from "node-forge";
 // const { verify } = require("@noble/secp256k1");
-import { hmac } from "@noble/hashes/hmac";
-import { sha256 } from "@noble/hashes/sha2";
+// import { hmac } from "@noble/hashes/hmac";
+// import { sha256 } from "@noble/hashes/sha2";
 import * as secp from "@noble/secp256k1";
 // import "react-native-url-polyfill/auto";
 import { webcrypto } from "node:crypto";
 
 // Ensure globalThis.crypto is defined
-if (!globalThis.crypto) {
-  globalThis.crypto = webcrypto;
-}
+// if (!globalThis.crypto) {
+//   globalThis.crypto = webcrypto;
+// }
 
-secp.etc.hmacSha256Async = async (key, ...msgs) => {
-  const msg = secp.etc.concatBytes(...msgs);
-  return hmac(sha256, key, msg);
-};
+// secp.etc.hmacSha256Async = async (key, ...msgs) => {
+//   const msg = secp.etc.concatBytes(...msgs);
+//   return hmac(sha256, key, msg);
+// };
 
 const { sign } = pkg;
 
@@ -307,8 +307,10 @@ async function handleSendMobileNumber(data, ws) {
   console.log("entry.publicKey", entry.publicKey);
   console.log("entry.token", entry.token);
 
+  const tokenBytes = Uint8Array.from(Buffer.from(token, 'base64'));
+
   // Verify Device A's signature
-  const ok = secp.verify(entry.signature, token, entry.publicKey);
+  const ok = secp.verify(entry.signature, tokenBytes, entry.publicKey);
   if (!ok) {
     return ws.send(
       JSON.stringify({
@@ -462,50 +464,52 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
   //     94,
   //   ]
   // );
-  const ok = secp.verify(
-    {
-      r: 26751519702859226784069203236984960487690655657984330345115431548593952014660n,
-      s: 52796008785933822018992683042444734842112851489818036570373089184292157809697n,
-      recovery: 1,
-    },
-    new Uint8Array([
-      170, 143, 107, 60, 19, 34, 72, 18, 87, 74, 158, 92, 221, 17, 175, 225, 60,
-      143, 47, 241, 12, 40, 54, 233, 97, 31, 80, 0, 88, 164, 233, 181,
-    ]),
-    new Uint8Array([
-      2, 42, 193, 199, 31, 71, 34, 158, 252, 24, 7, 22, 146, 180, 69, 194, 238,
-      238, 126, 9, 133, 242, 90, 109, 51, 50, 88, 130, 89, 248, 152, 177, 187,
-    ])
-  );
-  console.log("ok -> ", ok);
 
-  console.log("token ->", token);
-  console.log("signature ->", signature);
-  console.log("publicKey ->", publicKey);
+  /// working solution
+  // const ok = secp.verify(
+  //   {
+  //     r: 26751519702859226784069203236984960487690655657984330345115431548593952014660n,
+  //     s: 52796008785933822018992683042444734842112851489818036570373089184292157809697n,
+  //     recovery: 1,
+  //   },
+  //   new Uint8Array([
+  //     170, 143, 107, 60, 19, 34, 72, 18, 87, 74, 158, 92, 221, 17, 175, 225, 60,
+  //     143, 47, 241, 12, 40, 54, 233, 97, 31, 80, 0, 88, 164, 233, 181,
+  //   ]),
+  //   new Uint8Array([
+  //     2, 42, 193, 199, 31, 71, 34, 158, 252, 24, 7, 22, 146, 180, 69, 194, 238,
+  //     238, 126, 9, 133, 242, 90, 109, 51, 50, 88, 130, 89, 248, 152, 177, 187,
+  //   ])
+  // );
+  // console.log("ok -> ", ok);
 
-  const privKey = secp.utils.randomPrivateKey(); // Secure random private key
-  const pubKey = secp.getPublicKey(privKey);
+  // console.log("token ->", token);
+  // console.log("signature ->", signature);
+  // console.log("publicKey ->", publicKey);
 
-  // const msgHash =
-  //   "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";
+  // const privKey = secp.utils.randomPrivateKey(); // Secure random private key
+  // const pubKey = secp.getPublicKey(privKey);
 
-  const token1 = generateToken();
+  // // const msgHash =
+  // //  "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";
 
-  const tokenHash = sha256(token1);
+  // const token1 = generateToken();
 
-  const signature2 = await secp.signAsync(tokenHash, privKey);
+  // const tokenHash = sha256(token1);
 
-  const ok1 = secp.verify(signature2, tokenHash, pubKey);
+  // const signature2 = await secp.signAsync(tokenHash, privKey);
 
-  console.log(
-    "ok1 ->",
-    ok1,
-    " - for ->",
-    token1,
-    tokenHash,
-    signature2,
-    pubKey
-  );
+  // const ok1 = secp.verify(signature2, tokenHash, pubKey);
+
+  // console.log(
+  //   "ok1 ->",
+  //   ok1,
+  //   " - for ->",
+  //   token1,
+  //   tokenHash,
+  //   signature2,
+  //   pubKey
+  // );
 
   const parsedSignature = JSON.parse(signature);
   const newSignature = {
@@ -523,11 +527,11 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
     typeof publicKeyParsed.publicKey
   );
 
-  // pending.set(token, {
-  //   publicKey: Object.values(publicKeyParsed.publicKey),
-  //   signature: newSignature,
-  //   wsClient: ws,
-  // });
+  pending.set(token, {
+    publicKey: new Uint8Array(Object.values(publicKeyParsed.publicKey)),
+    signature: newSignature,
+    wsClient: ws,
+  });
 
   ws.send(JSON.stringify({ type: "register_ack", success: true }));
   console.log(`User ${token} registered to verify mobile number`);

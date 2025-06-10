@@ -371,6 +371,21 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
     );
   }
 
+  const ok = verify(
+    {
+      r: 38582430437120436302528119430558638681207048380787012054195174850914841441591n,
+      recovery: 0,
+      s: 11493703559187309388101495979603693488143464958870293795239603984250023536117n,
+    },
+    "260|1749559494",
+    [
+      3, 15, 207, 246, 212, 98, 130, 32, 210, 110, 2, 150, 163, 166, 197, 26,
+      188, 117, 222, 250, 129, 176, 71, 56, 79, 87, 26, 87, 172, 35, 44, 244,
+      44,
+    ]
+  );
+  console.log("ok -> ", ok);
+
   console.log("token ->", token);
   console.log("signature ->", signature);
   console.log("publicKey ->", publicKey);
@@ -396,6 +411,7 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
     signature: newSignature,
     wsClient: ws,
   });
+
   ws.send(JSON.stringify({ type: "register_ack", success: true }));
   console.log(`User ${token} registered to verify mobile number`);
 }

@@ -268,6 +268,9 @@ function isFreshToken(token) {
 async function handleSendMobileNumber(data, ws) {
   const { token, mobileNo, signature } = data;
 
+  console.log("handleSendMobileNumber: -token ->", token);
+  
+
   const entry = pending.get(token);
 
   if (!entry) {

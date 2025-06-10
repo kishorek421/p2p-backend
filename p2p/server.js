@@ -16,7 +16,7 @@ import pkg from "jsonwebtoken";
 import { createHash } from "crypto";
 import forge from "node-forge";
 // const { verify } = require("@noble/secp256k1");
-import * as spec from "@noble/secp256k1";
+import * as secp from "@noble/secp256k1";
 
 const { sign } = pkg;
 
@@ -294,7 +294,7 @@ async function handleSendMobileNumber(data, ws) {
   console.log("entry.token", entry.token);
 
   // Verify Device A's signature
-  const ok = spec.verify(entry.signature, token, entry.publicKey);
+  const ok = secp.verify(entry.signature, token, entry.publicKey);
   if (!ok) {
     return ws.send(
       JSON.stringify({
@@ -372,7 +372,7 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
   //   );
   // }
 
-  const ok = spec.verify(
+  const ok = secp.verify(
     {
       r: 54158588005786814369179397582912312167281258687414347717116130830094484601717n,
       recovery: 1,
@@ -462,7 +462,7 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
 
   const signature2 = await secp.signAsync(msgHash, privKey);
 
-  const ok1 = spec.verify(signature2, msgHash, pubKey);
+  const ok1 = secp.verify(signature2, msgHash, pubKey);
 
   console.log("ok1 ->", ok1);
 

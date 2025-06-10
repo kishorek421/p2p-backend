@@ -242,7 +242,7 @@ function isFreshToken(token) {
 //   console.log(`User ${token} registered to verify mobile number`);
 // }
 async function handleSendMobileNumber(data, ws) {
-  const { token, mobileNumber, signature } = data;
+  const { token, mobileNo, signature } = data;
   const entry = pending.get(token);
 
   if (!entry) {

@@ -1,17 +1,17 @@
-const express = require('express');
-const router = express.Router();
-const userController = require('../controllers/UserController');
-const authenticateToken = require('../middleware/authMiddleware');
+import { Router } from 'express';
+const router = Router();
+import { getUserDetails, updateUserDetails, searchUsers, requestUser, changeUserRequestStatus, getUserRequests, getUserFriends } from '../controllers/UserController.js';
+import authenticateToken from '../middleware/authMiddleware.js';
 // const authorize = require('../middleware/permissionMiddleware');
 
 // router.get('/getUserDetails', authenticateToken, authorize('USERS', 'VIEW_USER_DETAILS'), userController.getUserDetails);
 
-router.get('/getUserDetails', authenticateToken, userController.getUserDetails);
-router.put('/updateUserDetails', authenticateToken, userController.updateUserDetails);
-router.get('/searchUsers', authenticateToken, userController.searchUsers);
-router.post('/requestUser', authenticateToken, userController.requestUser);
-router.put('/changeUserRequestStatus', authenticateToken, userController.changeUserRequestStatus);
-router.get('/getUserRequests', authenticateToken, userController.getUserRequests);
-router.get('/getUserFriends', authenticateToken, userController.getUserFriends);
+router.get('/getUserDetails', authenticateToken, getUserDetails);
+router.put('/updateUserDetails', authenticateToken, updateUserDetails);
+router.get('/searchUsers', authenticateToken, searchUsers);
+router.post('/requestUser', authenticateToken, requestUser);
+router.put('/changeUserRequestStatus', authenticateToken, changeUserRequestStatus);
+router.get('/getUserRequests', authenticateToken, getUserRequests);
+router.get('/getUserFriends', authenticateToken, getUserFriends);
 
-module.exports = router;
+export default router;

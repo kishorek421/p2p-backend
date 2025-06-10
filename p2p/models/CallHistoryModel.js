@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
+import { Schema, model } from 'mongoose';
 
-const callHistorySchema = new mongoose.Schema({
-    callerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-    calleeId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+const callHistorySchema = new Schema({
+    callerId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    calleeId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
     status: { type: String, required: true},
     createdAt: { type: Date, default: Date.now },
 });
@@ -12,4 +12,4 @@ callHistorySchema.pre('save', async function (next) {
     next();
 });
 
-module.exports = mongoose.model('CallHistory', callHistorySchema);
+export default model('CallHistory', callHistorySchema);

@@ -1,34 +1,36 @@
 require("dotenv").config();
 import express, { json } from "express";
 import { createServer } from "http";
-import { Server } from "ws";
+import { WebSocketServer } from "ws";
 import cors from "cors";
 import { connect } from "mongoose";
-import userRoutes from "./routes/UserRoutes";
-import authRoutes from "./routes/AuthRoutes";
-import { create, updateOne, findOne } from "./models/UserModel";
-import visionRoutes from "./routes/VisionRoutes";
-import { create as _create, findOneAndUpdate } from "./models/CallHistoryModel";
-import { create as __create } from "./models/CallSdpIceModel";
+import userRoutes from "./routes/UserRoutes.js";
+import authRoutes from "./routes/AuthRoutes.js";
+import User from "./models/UserModel.js";
+import visionRoutes from "./routes/VisionRoutes.js";
+import CallHistory from "./models/CallHistoryModel.js";
+import CallSdpIce from "./models/CallSdpIceModel.js";
 import { ObjectId } from "mongodb";
-import RefreshToken from "./models/RefreshToken";
-import { sign } from "jsonwebtoken";
+import RefreshToken from "./models/RefreshToken.js";
+import pkg from "jsonwebtoken";
 import { createHash } from "crypto";
 import forge from "node-forge";
-import { verify } from "@noble/secp256k1";
 // const { verify } = require("@noble/secp256k1");
-// let verify;
-// (async () => {
-//   const secp = await import("@noble/secp256k1");
-//   verify = secp.verify;
-// })();
+
+const { sign } = pkg;
+
+let verify;
+(async () => {
+  const secp = await import("@noble/secp256k1");
+  verify = secp.verify;
+})();
 
 const app = express();
 app.use(json());
 app.use(cors());
 
 const server = createServer(app);
-const wss = new Server({ server });
+const wss = new WebSocketServer({ server });
 
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017/p2p";
 
@@ -282,7 +284,7 @@ async function handleSendMobileNumber(data, ws) {
     );
   }
   // Verify Device A's signature
-  const ok =  verify(
+  const ok = verify(
     Buffer.from(entry.signature, "base64"),
     new TextEncoder().encode(token),
     Buffer.from(entry.publicKey, "hex")
@@ -299,13 +301,13 @@ async function handleSendMobileNumber(data, ws) {
   usedSignatures.add(fp);
   setTimeout(() => usedSignatures.delete(fp), TOKEN_EXPIRY * 1000);
 
-   const result = await create({
-     username: "Hello Famy!",
-     mobileNo: mobileNo,
-     isMobileVerified: true,
-     status: "online",
-     publicKey: entry.publicKey,
-   });
+  const result = await User.create({
+    username: "Hello Famy!",
+    mobileNo: mobileNo,
+    isMobileVerified: true,
+    status: "online",
+    publicKey: entry.publicKey,
+  });
 
   // Send result back to Device A
   entry.wsClient.send(
@@ -398,7 +400,7 @@ async function handleCallUser(data, ws) {
   const callId = new ObjectId();
 
   if (clients[calleeId]) {
-    await _create({
+    await CallHistory.create({
       _id: callId,
       callerId: ObjectId.createFromHexString(callerId),
       calleeId: ObjectId.createFromHexString(calleeId),
@@ -437,7 +439,7 @@ async function handleCallUser(data, ws) {
 async function handleAcceptCall(data, ws) {
   const { callerId, calleeId, callId } = data;
 
-  await findOneAndUpdate(
+  await CallHistory.findOneAndUpdate(
     { _id: ObjectId.createFromHexString(callId) },
     { $set: { status: "accepted" } }
   );
@@ -458,7 +460,7 @@ async function handleAcceptCall(data, ws) {
 async function handleCallRejected(data, ws) {
   const { callerId, calleeId, callId } = data;
 
-  await findOneAndUpdate(
+  await CallHistory.findOneAndUpdate(
     { _id: ObjectId.createFromHexString(callId) },
     { $set: { status: "rejected" } }
   );
@@ -480,7 +482,7 @@ async function handleOffer(data, ws) {
   const { callId, callerId, calleeId, sdp } = data;
 
   if (clients[calleeId]) {
-    await __create({
+    await CallSdpIce.create({
       callId: ObjectId.createFromHexString(callId),
       callerId: ObjectId.createFromHexString(callerId),
       calleeId: ObjectId.createFromHexString(calleeId),

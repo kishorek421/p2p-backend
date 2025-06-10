@@ -1,21 +1,21 @@
-const mongoose = require('mongoose');
+import { Schema, model } from "mongoose";
 
-const refreshTokenSchema = new mongoose.Schema({
-    userId: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true,
-    },
-    token: {
-        type: String,
-        required: true,
-    },
-    expiresAt: {
-        type: Date,
-        required: true,
-    },
+const refreshTokenSchema = new Schema({
+  userId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+  },
+  token: {
+    type: String,
+    required: true,
+  },
+  expiresAt: {
+    type: Date,
+    required: true,
+  },
 });
 
 refreshTokenSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 }); // Automatically delete expired tokens
 
-const RefreshToken = mongoose.model('RefreshToken', refreshTokenSchema);
-module.exports = RefreshToken;
+const RefreshToken = model("RefreshToken", refreshTokenSchema);
+export default RefreshToken;

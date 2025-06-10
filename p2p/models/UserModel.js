@@ -1,19 +1,19 @@
-const mongoose = require('mongoose');
+import { Schema, model } from "mongoose";
 
-const userSchema = new mongoose.Schema({
-    username: { type: String },
-    mobileNo: { type: String, required: true, unique: true },
-    isMobileVerified: { type: Boolean },
-    createdAt: { type: Date, default: Date.now },
-    isActive: { type: Boolean },
-    status: { type: String },
-    verifiedToken: { type: String },
+const userSchema = new Schema({
+  username: { type: String },
+  mobileNo: { type: String, required: true, unique: true },
+  isMobileVerified: { type: Boolean },
+  createdAt: { type: Date, default: Date.now },
+  isActive: { type: Boolean },
+  status: { type: String },
+  verifiedToken: { type: String },
 });
 
-userSchema.pre('save', async function (next) {
-    this.createdAt = Date.now;
-    this.isActive = true;
-    next();
+userSchema.pre("save", async function (next) {
+  this.createdAt = Date.now;
+  this.isActive = true;
+  next();
 });
 
-module.exports = mongoose.model('User', userSchema);
+export default model("User", userSchema);

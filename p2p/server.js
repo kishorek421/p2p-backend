@@ -252,6 +252,7 @@ function isFreshToken(token) {
 // }
 async function handleSendMobileNumber(data, ws) {
   const { token, mobileNo, signature } = data;
+  
   const entry = pending.get(token);
 
   if (!entry) {
@@ -276,6 +277,7 @@ async function handleSendMobileNumber(data, ws) {
   const fp = createHash("sha256")
     .update(token + entry.signature)
     .digest("hex");
+
   if (usedSignatures.has(fp)) {
     return ws.send(
       JSON.stringify({
@@ -285,6 +287,11 @@ async function handleSendMobileNumber(data, ws) {
       })
     );
   }
+
+  console.log("entry.signature", entry.signature);
+  console.log("entry.publicKey", entry.publicKey);
+  console.log("entry.token", entry.token);
+  
   // Verify Device A's signature
   const ok = verify(
     Buffer.from(entry.signature, "base64"),

@@ -1,4 +1,4 @@
-require("dotenv").config();
+import dotenv from "dotenv";
 import express, { json } from "express";
 import { createServer } from "http";
 import { WebSocketServer } from "ws";
@@ -18,6 +18,8 @@ import forge from "node-forge";
 // const { verify } = require("@noble/secp256k1");
 
 const { sign } = pkg;
+
+dotenv.config();
 
 let verify;
 (async () => {

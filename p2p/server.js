@@ -361,15 +361,15 @@ async function handleSendMobileNumber(data, ws) {
 async function handleRegisterToVerifyMobileNumber(data, ws) {
   const { token, publicKey, signature } = data;
 
-  if (!isFreshToken(token)) {
-    return ws.send(
-      JSON.stringify({
-        type: "register_ack",
-        success: false,
-        error: "Token expired",
-      })
-    );
-  }
+  // if (!isFreshToken(token)) {
+  //   return ws.send(
+  //     JSON.stringify({
+  //       type: "register_ack",
+  //       success: false,
+  //       error: "Token expired",
+  //     })
+  //   );
+  // }
 
   const ok = verify(
     {
@@ -409,11 +409,11 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
     typeof publicKeyParsed.publicKey
   );
 
-  pending.set(token, {
-    publicKey: Object.values(publicKeyParsed.publicKey),
-    signature: newSignature,
-    wsClient: ws,
-  });
+  // pending.set(token, {
+  //   publicKey: Object.values(publicKeyParsed.publicKey),
+  //   signature: newSignature,
+  //   wsClient: ws,
+  // });
 
   ws.send(JSON.stringify({ type: "register_ack", success: true }));
   console.log(`User ${token} registered to verify mobile number`);

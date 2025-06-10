@@ -377,9 +377,9 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
 
   const parsedSignature = JSON.parse(signature);
   const newSignature = {
-    s: parsedSignature.s,
-    r: parsedSignature.r,
-    recovery: parsedSignature.recovery,
+    s: BigInt(parsedSignature.s),
+    r: BigInt(parsedSignature.r),
+    recovery: Number.parseInt(parsedSignature.recovery),
   };
 
   pending.set(token, {

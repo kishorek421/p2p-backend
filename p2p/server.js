@@ -372,7 +372,7 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
   //   );
   // }
 
-  const ok = verify(
+  const ok = spec.verify(
     {
       r: 54158588005786814369179397582912312167281258687414347717116130830094484601717n,
       recovery: 1,

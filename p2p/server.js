@@ -252,7 +252,7 @@ function isFreshToken(token) {
 // }
 async function handleSendMobileNumber(data, ws) {
   const { token, mobileNo, signature } = data;
-  
+
   const entry = pending.get(token);
 
   if (!entry) {
@@ -291,13 +291,9 @@ async function handleSendMobileNumber(data, ws) {
   console.log("entry.signature", entry.signature);
   console.log("entry.publicKey", entry.publicKey);
   console.log("entry.token", entry.token);
-  
+
   // Verify Device A's signature
-  const ok = verify(
-    entry.signature,
-    token,
-    entry.publicKey
-  );
+  const ok = verify(entry.signature, token, entry.publicKey);
   if (!ok) {
     return ws.send(
       JSON.stringify({
@@ -374,7 +370,16 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
       })
     );
   }
-  pending.set(token, { publicKey, signature, wsClient: ws });
+
+  console.log("token ->", token);
+  console.log("signature ->", signature);
+  console.log("publicKey ->", publicKey);
+
+  pending.set(token, {
+    publicKey,
+    signature: JSON.parse(signature),
+    wsClient: ws,
+  });
   ws.send(JSON.stringify({ type: "register_ack", success: true }));
   console.log(`User ${token} registered to verify mobile number`);
 }

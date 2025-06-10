@@ -279,15 +279,15 @@ async function handleSendMobileNumber(data, ws) {
       })
     );
   }
-  if (!isFreshToken(token)) {
-    return ws.send(
-      JSON.stringify({
-        type: "verification_result",
-        success: false,
-        error: "Expired",
-      })
-    );
-  }
+  // if (!isFreshToken(token)) {
+  //   return ws.send(
+  //     JSON.stringify({
+  //       type: "verification_result",
+  //       success: false,
+  //       error: "Expired",
+  //     })
+  //   );
+  // }
 
   const fp = createHash("sha256")
     .update(token + entry.signature)
@@ -307,7 +307,7 @@ async function handleSendMobileNumber(data, ws) {
   console.log("entry.publicKey", entry.publicKey);
   console.log("entry.token", entry.token);
 
-  const tokenBytes = Uint8Array.from(Buffer.from(token, 'base64'));
+  const tokenBytes = Uint8Array.from(Buffer.from(token, "base64"));
 
   // Verify Device A's signature
   const ok = secp.verify(entry.signature, tokenBytes, entry.publicKey);
@@ -378,15 +378,15 @@ async function handleSendMobileNumber(data, ws) {
 async function handleRegisterToVerifyMobileNumber(data, ws) {
   const { token, publicKey, signature } = data;
 
-  // if (!isFreshToken(token)) {
-  //   return ws.send(
-  //     JSON.stringify({
-  //       type: "register_ack",
-  //       success: false,
-  //       error: "Token expired",
-  //     })
-  //   );
-  // }
+  if (!isFreshToken(token)) {
+    return ws.send(
+      JSON.stringify({
+        type: "register_ack",
+        success: false,
+        error: "Token expired",
+      })
+    );
+  }
 
   // const ok = secp.verify(
   //   {

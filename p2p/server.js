@@ -16,16 +16,17 @@ import pkg from "jsonwebtoken";
 import { createHash } from "crypto";
 import forge from "node-forge";
 // const { verify } = require("@noble/secp256k1");
+import * as spec from "@noble/secp256k1";
 
 const { sign } = pkg;
 
 dotenv.config();
 
-let verify;
-(async () => {
-  const secp = await import("@noble/secp256k1");
-  verify = secp.verify;
-})();
+// let verify;
+// (async () => {
+//   const secp = await import("@noble/secp256k1");
+//   verify = secp.verify;
+// })();
 
 const app = express();
 app.use(json());
@@ -293,7 +294,7 @@ async function handleSendMobileNumber(data, ws) {
   console.log("entry.token", entry.token);
 
   // Verify Device A's signature
-  const ok = verify(entry.signature, token, entry.publicKey);
+  const ok = spec.verify(entry.signature, token, entry.publicKey);
   if (!ok) {
     return ws.send(
       JSON.stringify({
@@ -452,6 +453,18 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
   console.log("token ->", token);
   console.log("signature ->", signature);
   console.log("publicKey ->", publicKey);
+
+  const privKey = secp.utils.randomPrivateKey(); // Secure random private key
+  const pubKey = secp.getPublicKey(privKey);
+
+  const msgHash =
+    "b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9";
+
+  const signature2 = await secp.signAsync(msgHash, privKey);
+
+  const ok1 = spec.verify(signature2, msgHash, pubKey);
+
+  console.log("ok1 ->", ok1);
 
   const parsedSignature = JSON.parse(signature);
   const newSignature = {

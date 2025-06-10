@@ -294,9 +294,9 @@ async function handleSendMobileNumber(data, ws) {
   
   // Verify Device A's signature
   const ok = verify(
-    Buffer.from(entry.signature, "base64"),
-    new TextEncoder().encode(token),
-    Buffer.from(entry.publicKey, "hex")
+    entry.signature,
+    token,
+    entry.publicKey
   );
   if (!ok) {
     return ws.send(

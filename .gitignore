@@ -1,5 +1,5 @@
 .idea
-p2p/node_modules
 p2p/.env
 p2p/godeskmap-0297e7c9e91f.json
 p2p/checkinout_images
+p2p/node_modules

@@ -392,7 +392,7 @@ async function handleRegisterToVerifyMobileNumber(data, ws) {
   );
 
   pending.set(token, {
-    publicKey: publicKeyParsed.publicKey,
+    publicKey: Object.values(publicKeyParsed.publicKey),
     signature: newSignature,
     wsClient: ws,
   });
